@@ -71,6 +71,6 @@ jobs:
               | .change.actions
               | select(index("delete"))]
             | length == 0
-          ' infra/stacks/postgres/postgres-plan.json
+          ' postgres-plan.json
       - name: Apply PostgreSQL
         run: terraform -chdir=infra/stacks/postgres apply -auto-approve tfplan
