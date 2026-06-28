@@ -9,6 +9,9 @@ locals {
       "ec2:*Vpc*", "ec2:*Subnet*", "ec2:*Route*", "ec2:*InternetGateway*",
       "ec2:*NatGateway*", "ec2:*Address*", "ec2:*SecurityGroup*",
       "ec2:CreateTags", "ec2:Describe*", "ecr:*", "servicediscovery:*", "logs:*",
+      "route53:CreateHostedZone", "route53:DeleteHostedZone", "route53:GetChange",
+      "route53:GetHostedZone", "route53:ListHostedZonesByName",
+      "route53:ListResourceRecordSets",
     ]
     postgres = [
       "rds:*", "ec2:Describe*", "ec2:*SecurityGroup*", "cloudwatch:*",
