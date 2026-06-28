@@ -25,6 +25,7 @@ locals {
       "ec2:DetachNetworkInterface", "ec2:ModifyInstanceAttribute",
       "iam:CreateRole", "iam:DeleteRole", "iam:GetRole", "iam:PassRole",
       "iam:TagRole", "iam:CreateInstanceProfile", "iam:DeleteInstanceProfile",
+      "iam:GetInstanceProfile", "iam:TagInstanceProfile", "iam:UntagInstanceProfile",
       "iam:AddRoleToInstanceProfile", "iam:RemoveRoleFromInstanceProfile",
       "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:List*",
       "logs:*", "cloudwatch:*", "ssm:GetParameter", "ssm:SendCommand",
@@ -126,6 +127,23 @@ data "aws_iam_policy_document" "deploy" {
     effect    = "Allow"
     actions   = each.value
     resources = ["*"]
+  }
+
+  dynamic "statement" {
+    for_each = each.key == "postgres" ? [1] : []
+
+    content {
+      sid       = "RdsServiceLinkedRole"
+      effect    = "Allow"
+      actions   = ["iam:CreateServiceLinkedRole"]
+      resources = ["*"]
+
+      condition {
+        test     = "StringEquals"
+        variable = "iam:AWSServiceName"
+        values   = ["rds.amazonaws.com"]
+      }
+    }
   }
 
   statement {
