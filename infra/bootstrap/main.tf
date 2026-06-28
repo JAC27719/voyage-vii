@@ -16,6 +16,7 @@ locals {
     postgres = [
       "rds:*", "ec2:Describe*", "ec2:*SecurityGroup*", "cloudwatch:*",
       "kms:DescribeKey",
+      "secretsmanager:CreateSecret", "secretsmanager:TagResource",
       "secretsmanager:DescribeSecret", "secretsmanager:ListSecrets",
     ]
     tigerbeetle = [
