@@ -1,0 +1,99 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install --assumeyes unzip xfsprogs amazon-cloudwatch-agent
+
+volume_id="${data_volume_id}"
+volume_serial="$${volume_id//-/}"
+device_link="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_$volume_serial"
+
+for attempt in $(seq 1 60); do
+  if [ -e "$device_link" ]; then
+    break
+  fi
+  sleep 5
+done
+
+if [ ! -e "$device_link" ]; then
+  echo "hydra-service-failure: EBS data volume was not attached" >/var/log/tigerbeetle.log
+  exit 1
+fi
+
+device="$(readlink -f "$device_link")"
+if ! blkid "$device" >/dev/null 2>&1; then
+  mkfs.xfs "$device"
+fi
+
+mkdir -p /var/lib/tigerbeetle
+uuid="$(blkid -s UUID -o value "$device")"
+if ! grep -q "$uuid" /etc/fstab; then
+  echo "UUID=$uuid /var/lib/tigerbeetle xfs defaults,nofail 0 2" >>/etc/fstab
+fi
+mount /var/lib/tigerbeetle
+
+curl --fail --location --silent --show-error \
+  "https://github.com/tigerbeetle/tigerbeetle/releases/download/${tigerbeetle_version}/tigerbeetle-x86_64-linux.zip" \
+  --output /tmp/tigerbeetle.zip
+unzip -o /tmp/tigerbeetle.zip -d /usr/local/bin
+chmod 0755 /usr/local/bin/tigerbeetle
+/usr/local/bin/tigerbeetle version | grep -F "${tigerbeetle_version}"
+
+data_file="/var/lib/tigerbeetle/${cluster_id}_0.tigerbeetle"
+if [ ! -f "$data_file" ]; then
+  /usr/local/bin/tigerbeetle format \
+    --cluster="${cluster_id}" \
+    --replica=0 \
+    --replica-count=1 \
+    --development \
+    "$data_file"
+fi
+
+cat >/etc/systemd/system/tigerbeetle.service <<'UNIT'
+[Unit]
+Description=Hydra TigerBeetle development replica
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/tigerbeetle start --addresses=0.0.0.0:3000 --development --cache-grid=1GiB /var/lib/tigerbeetle/${cluster_id}_0.tigerbeetle
+Restart=always
+RestartSec=5
+LimitMEMLOCK=infinity
+StandardOutput=append:/var/log/tigerbeetle.log
+StandardError=append:/var/log/tigerbeetle.log
+ExecStopPost=/bin/sh -c 'if [ "$${SERVICE_RESULT}" != "success" ]; then echo "hydra-service-failure: $${SERVICE_RESULT}" >>/var/log/tigerbeetle.log; fi'
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat >/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'JSON'
+{
+  "agent": {
+    "region": "${region}"
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/tigerbeetle.log",
+            "log_group_name": "${log_group_name}",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 14
+          }
+        ]
+      }
+    }
+  }
+}
+JSON
+
+systemctl daemon-reload
+systemctl enable --now tigerbeetle
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -s \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json

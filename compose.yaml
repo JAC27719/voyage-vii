@@ -1,0 +1,87 @@
+name: hydra
+
+x-app-environment: &app-environment
+  ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-hydra};Username=${POSTGRES_USER:-hydra};Password=${POSTGRES_PASSWORD:-local-development-only}
+  TigerBeetle__ClusterId: ${TIGERBEETLE_CLUSTER_ID:-0}
+  TigerBeetle__Addresses: tigerbeetle:3000
+
+services:
+  postgres:
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hydra}
+      POSTGRES_USER: ${POSTGRES_USER:-hydra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-development-only}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  tigerbeetle:
+    build:
+      context: .
+      dockerfile: docker/tigerbeetle/Dockerfile
+    command: ["start"]
+    environment:
+      TIGERBEETLE_CLUSTER_ID: ${TIGERBEETLE_CLUSTER_ID:-0}
+    security_opt:
+      - seccomp=unconfined
+    ports:
+      - "${TIGERBEETLE_PORT:-3000}:3000"
+    volumes:
+      - tigerbeetle-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "test -f /data/$${TIGERBEETLE_CLUSTER_ID}_0.tigerbeetle && kill -0 1"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      target: api
+    environment:
+      <<: *app-environment
+      ASPNETCORE_HTTP_PORTS: 8080
+    ports:
+      - "${API_PORT:-8080}:8080"
+    security_opt:
+      - seccomp=unconfined
+    depends_on:
+      postgres:
+        condition: service_healthy
+      tigerbeetle:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  seeder:
+    build:
+      context: .
+      target: seeder
+    profiles: ["tools"]
+    environment:
+      <<: *app-environment
+    security_opt:
+      - seccomp=unconfined
+    depends_on:
+      postgres:
+        condition: service_healthy
+      tigerbeetle:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  tigerbeetle-data:

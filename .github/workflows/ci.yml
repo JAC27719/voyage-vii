@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: Directory.Packages.props
+
+      - name: Restore
+        run: dotnet restore Hydra.slnx
+
+      - name: Build
+        run: dotnet build Hydra.slnx --configuration Release --no-restore
+
+      - name: Unit tests
+        run: dotnet test Hydra.slnx --configuration Release --no-build
+
+      - name: Build containers
+        run: |
+          docker build --target api --tag hydra-api:ci .
+          docker build --target seeder --tag hydra-seeder:ci .
+
+      - name: Enable io_uring for TigerBeetle clients
+        run: sudo sysctl -w kernel.io_uring_disabled=0
+
+      - name: Start integration environment
+        run: docker compose up --detach --build
+
+      - name: Verify dependency status
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/status; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - name: Verify idempotent seeding
+        run: |
+          docker compose --profile tools run --rm seeder
+          docker compose --profile tools run --rm seeder
+
+      - name: Verify dependency failure response
+        run: |
+          docker compose stop postgres
+          code=$(curl --silent --output status.json --write-out "%{http_code}" http://127.0.0.1:8080/status)
+          test "$code" = "503"
+          jq -e '.checks.postgres.status == "Unhealthy" and .checks.tigerbeetle.status == "Healthy"' status.json
+
+      - name: Collect integration logs
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop integration environment
+        if: always()
+        run: docker compose down --volumes
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive infra
+
+      - name: Validate stacks
+        shell: bash
+        run: |
+          for directory in infra/bootstrap infra/stacks/foundation infra/stacks/postgres infra/stacks/tigerbeetle infra/stacks/api; do
+            terraform -chdir="$directory" init -backend=false
+            terraform -chdir="$directory" validate
+          done
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

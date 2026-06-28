@@ -1,0 +1,40 @@
+# Local configuration and secrets
+.env
+*.local
+secrets/
+
+# .NET
+**/bin/
+**/obj/
+TestResults/
+coverage/
+
+# Local database state and exports
+data/
+*.tigerbeetle
+*.sql
+*.dump
+*.backup
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+.terraform.tfstate.lock.info
+.terraform.lock.hcl[0-9]*
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# IDE and OS
+.tools/
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
