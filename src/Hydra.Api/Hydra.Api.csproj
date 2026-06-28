@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Npgsql" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="tigerbeetle" />
   </ItemGroup>
 </Project>

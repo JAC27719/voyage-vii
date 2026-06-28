@@ -10,8 +10,13 @@ builder.Services.Configure<TigerBeetleOptions>(
 builder.Services.AddSingleton<IDependencyProbe, PostgresProbe>();
 builder.Services.AddSingleton<IDependencyProbe, TigerBeetleProbe>();
 builder.Services.AddSingleton<DependencyStatusService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/health/live", () => Results.Ok(new { status = "Healthy" }));
 
