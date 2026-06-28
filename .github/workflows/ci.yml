@@ -38,6 +38,9 @@ jobs:
           docker build --target api --tag hydra-api:ci .
           docker build --target seeder --tag hydra-seeder:ci .
 
+      - name: Enable io_uring for TigerBeetle clients
+        run: sudo sysctl -w kernel.io_uring_disabled=0
+
       - name: Start integration environment
         run: docker compose up --detach --build
 
