@@ -2,7 +2,7 @@ name: Deploy PostgreSQL
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [Deploy foundation]
     types: [completed]
   workflow_dispatch:
 

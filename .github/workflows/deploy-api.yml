@@ -2,7 +2,7 @@ name: Deploy API
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [Deploy TigerBeetle]
     types: [completed]
   workflow_dispatch:
 
@@ -62,11 +62,35 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12.2
+      - name: Wait for dependency state
+        shell: bash
+        run: |
+          for attempt in $(seq 1 30); do
+            if aws s3api head-object \
+              --bucket "$TF_VAR_state_bucket" \
+              --key dev/postgres.tfstate >/dev/null 2>&1 &&
+               aws s3api head-object \
+              --bucket "$TF_VAR_state_bucket" \
+              --key dev/tigerbeetle.tfstate >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::PostgreSQL or TigerBeetle Terraform state was not available after five minutes."
+          exit 1
       - name: Read registry locations
         run: |
           terraform -chdir=infra/stacks/foundation init -backend-config="bucket=${TF_VAR_state_bucket}"
-          echo "API_REPOSITORY=$(terraform -chdir=infra/stacks/foundation output -raw api_repository_url)" >> "$GITHUB_ENV"
-          echo "SEEDER_REPOSITORY=$(terraform -chdir=infra/stacks/foundation output -raw seeder_repository_url)" >> "$GITHUB_ENV"
+          api_repository=$(terraform -chdir=infra/stacks/foundation output -no-color -raw api_repository_url)
+          seeder_repository=$(terraform -chdir=infra/stacks/foundation output -no-color -raw seeder_repository_url)
+          if [ -z "$api_repository" ] || [ -z "$seeder_repository" ]; then
+            echo "::error::Foundation state does not contain the required ECR repository outputs."
+            exit 1
+          fi
+          {
+            echo "API_REPOSITORY=$api_repository"
+            echo "SEEDER_REPOSITORY=$seeder_repository"
+          } >> "$GITHUB_ENV"
       - uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push immutable images
         run: |

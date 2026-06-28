@@ -8,7 +8,7 @@ locals {
     foundation = [
       "ec2:*Vpc*", "ec2:*Subnet*", "ec2:*Route*", "ec2:*InternetGateway*",
       "ec2:*NatGateway*", "ec2:*Address*", "ec2:*SecurityGroup*",
-      "ec2:Describe*", "ecr:*", "servicediscovery:*", "logs:*",
+      "ec2:CreateTags", "ec2:Describe*", "ecr:*", "servicediscovery:*", "logs:*",
     ]
     postgres = [
       "rds:*", "ec2:Describe*", "ec2:*SecurityGroup*", "cloudwatch:*",
@@ -24,8 +24,8 @@ locals {
       "iam:TagRole", "iam:CreateInstanceProfile", "iam:DeleteInstanceProfile",
       "iam:AddRoleToInstanceProfile", "iam:RemoveRoleFromInstanceProfile",
       "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:List*",
-      "logs:*", "cloudwatch:*", "ssm:SendCommand", "ssm:GetCommandInvocation",
-      "ssm:DescribeInstanceInformation",
+      "logs:*", "cloudwatch:*", "ssm:GetParameter", "ssm:SendCommand",
+      "ssm:GetCommandInvocation", "ssm:DescribeInstanceInformation",
     ]
     api = [
       "ecs:*", "ecr:*", "iam:CreateRole", "iam:DeleteRole", "iam:GetRole",
