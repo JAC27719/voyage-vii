@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   id-token: write
 
@@ -20,29 +21,26 @@ jobs:
     outputs:
       deploy: ${{ steps.filter.outputs.deploy }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 2
       - id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] ||
-             ! git diff --quiet HEAD^ HEAD -- \
-               src/Hydra.Api src/Hydra.Seeder Dockerfile Directory.Build.props \
-               Directory.Packages.props infra/stacks/api .github/workflows/deploy-api.yml; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.workflow_run.conclusion }}" = "success" ] &&
+               [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
+            deployed=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.event.workflow_run.id }}/jobs" \
+              --jq '[.jobs[] | select(.name == "deploy" and .conclusion == "success")] | length > 0')
+            echo "deploy=$deployed" >> "$GITHUB_OUTPUT"
           else
             echo "deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
   deploy:
     needs: changes
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       needs.changes.outputs.deploy == 'true')
+    if: needs.changes.outputs.deploy == 'true'
     environment: dev
     runs-on: ubuntu-latest
     env:
