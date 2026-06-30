@@ -670,10 +670,10 @@
       "id": "API-002",
       "title": "Implement PostgreSQL adapter and migrations",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "api_002_impl",
+      "reviewer": "api_002_review",
       "dependsOn": ["API-001", "SEAM-001"],
       "ownedPaths": ["services/api/src/postgres/**", "services/api/migrations/**", "services/api/tests/postgres/**", "docs/database/postgresql.dbml", "docs/database/README.md"],
       "excludedPaths": ["HTTP routes", "runtime process supervision"],
@@ -681,8 +681,51 @@
         "API-002 DBML validation uses a std-only implemented-schema compatibility check in the task-owned tests; no frozen external DBML parser or CLI is approved in DEPENDENCY-PINS.md."
       ],
       "guide": "docs/delivery/tasks/API-002.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "f96c319e8e7c5840671e6f8a005cd351c633a144",
+        "revision": "f96c319e8e7c5840671e6f8a005cd351c633a144:f9c13d070c950c3d654613e48041dc9d40fff3c73c17622d43982141a3e5d85f",
+        "changedPaths": [
+          "docs/database/README.md",
+          "docs/database/postgresql.dbml",
+          "services/api/migrations/.gitkeep",
+          "services/api/migrations/001_schema_migrations.sql",
+          "services/api/src/postgres/root.zig"
+        ],
+        "summary": "Implement the PostgreSQL pg.zig adapter boundary, migration ledger, advisory-lock migration flow, health probe, SQL-backed schema DBML, and API-002 acceptance tests.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Pinned Zig build, aggregate tests, and self-test",
+            "command": "C:\\Users\\jcane\\projects\\hydra\\spikes\\api-pg\\toolchain\\zig-x86_64-windows-0.15.2\\zig.exe build; zig build test from services/api; voyage-vii-api.exe self-test from repository root and services/api",
+            "result": "PASS: executable build, aggregate tests, migration planner/DBML compatibility tests, and runtime self-tests passed with pinned Zig 0.15.2"
+          },
+          {
+            "criterion": "Live PostgreSQL adapter acceptance",
+            "command": "Disposable Docker postgres:18.4 with VOYAGE_API_POSTGRES_LIVE=1; opt-in VOYAGE_API_POSTGRES_NONRESPONSIVE_HOST=203.0.113.1 timeout run",
+            "result": "PASS: fresh, retained, concurrent, checksum-drift, newer-schema, pool exhaustion, unavailable-loopback, and nonresponsive-destination timeout tests passed; version-gap coverage is asserted in planner tests"
+          },
+          {
+            "criterion": "DBML synchronization and dependency freeze",
+            "command": "std-only implemented-schema compatibility parser/comparator in services/api/src/postgres/root.zig; Huygens parser audit",
+            "result": "PASS: DBML includes table, columns, types, primary key, unique constraint/index, SHA-256 CHECK constraint note, default, and no relations; no unapproved external DBML parser dependency was introduced"
+          },
+          {
+            "criterion": "Review, ownership, and hygiene",
+            "command": "git diff --cached --check; independent API-002 staged revision reviews",
+            "result": "PASS: staged paths matched API-002 ownership, canonical revision hash was reproduced, prior review findings were fixed, and Dalton approved the focused re-review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "api_002_review",
+        "reviewedRevision": "f96c319e8e7c5840671e6f8a005cd351c633a144:f9c13d070c950c3d654613e48041dc9d40fff3c73c17622d43982141a3e5d85f",
+        "integrationCommit": "96591c2265898fe532bf7ee9d595bdd4ba7922b2",
+        "findings": [],
+        "residualRisks": [
+          "Live PostgreSQL acceptance is opt-in and requires a local PostgreSQL-compatible service or disposable container; normal aggregate tests compile the live harness but skip it unless VOYAGE_API_POSTGRES_LIVE is set.",
+          "DBML compatibility validation is std-only for API-002 because no frozen external DBML parser is approved in DEPENDENCY-PINS.md."
+        ]
+      }
     },
     {
       "id": "API-003",
@@ -784,7 +827,7 @@
       "id": "RUNTIME-002",
       "title": "Implement managed PostgreSQL lifecycle",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
