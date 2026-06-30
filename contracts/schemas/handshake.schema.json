@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyage-vii.local/contracts/handshake.schema.json",
+  "type": "object",
+  "required": ["protocolVersion", "apiUrl", "appToken", "supervisorToken"],
+  "additionalProperties": false,
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "apiUrl": {
+      "type": "string",
+      "pattern": "^http://(127\\.0\\.0\\.1|localhost):[0-9]+$"
+    },
+    "appToken": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "supervisorToken": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    }
+  }
+}

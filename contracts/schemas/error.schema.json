@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyage-vii.local/contracts/error.schema.json",
+  "type": "object",
+  "required": ["error"],
+  "additionalProperties": false,
+  "properties": {
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "requestId"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_request",
+            "body_too_large",
+            "unauthorized",
+            "forbidden",
+            "origin_not_allowed",
+            "method_not_allowed",
+            "not_found",
+            "component_not_found",
+            "retry_not_allowed",
+            "service_unavailable",
+            "shutting_down",
+            "internal_error",
+            "postgres_unavailable",
+            "postgres_authentication_failed",
+            "postgres_timeout",
+            "tigerbeetle_unavailable",
+            "tigerbeetle_timeout",
+            "native_shutdown_timeout",
+            "runtime_asset_missing",
+            "runtime_asset_invalid",
+            "data_root_locked"
+          ]
+        },
+        "message": { "type": "string", "minLength": 1 },
+        "requestId": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

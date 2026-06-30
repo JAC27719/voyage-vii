@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "requestId": "req-1",
+  "overallState": "starting",
+  "components": [
+    {
+      "id": "postgresql",
+      "displayName": "PostgreSQL",
+      "version": "18.4",
+      "state": "starting",
+      "lastCheckedAt": null,
+      "attemptCount": 0,
+      "error": null
+    },
+    {
+      "id": "tigerbeetle",
+      "displayName": "TigerBeetle",
+      "version": "0.17.7",
+      "state": "starting",
+      "lastCheckedAt": null,
+      "attemptCount": 0,
+      "error": null
+    }
+  ]
+}

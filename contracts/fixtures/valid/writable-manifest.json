@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "productVersion": "0.1.0",
+  "target": "x86_64-pc-windows-msvc",
+  "createdAt": "2026-06-30T00:00:00Z",
+  "components": {
+    "postgresql": "18.4",
+    "tigerbeetle": "0.17.7"
+  }
+}

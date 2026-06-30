@@ -1,0 +1,8 @@
+{
+  "generation": 1,
+  "state": "connected",
+  "connection": {
+    "apiUrl": "http://127.0.0.1:7800",
+    "appToken": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  }
+}
