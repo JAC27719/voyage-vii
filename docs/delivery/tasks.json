@@ -380,7 +380,7 @@
       "id": "FEAS-002",
       "title": "Prove TigerBeetle static C ABI compatibility",
       "wave": 1,
-      "status": "changes_requested",
+      "status": "integrated",
       "inference": "low",
       "worker": "feas_002_impl",
       "reviewer": "feas_002_review",
@@ -388,8 +388,46 @@
       "ownedPaths": ["spikes/tigerbeetle-c/**", "docs/feasibility/tigerbeetle-c.md"],
       "excludedPaths": ["production API", "desktop application"],
       "guide": "docs/delivery/tasks/FEAS-002.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "ce345bb22d270566892ca8a41428bd925ec3f1b0",
+        "revision": "ce345bb22d270566892ca8a41428bd925ec3f1b0:9139d25d5b228f7a718def8f2e7e499902ae2402631df9c99b8bcf2082479b39",
+        "changedPaths": [
+          "docs/feasibility/tigerbeetle-c.md",
+          "spikes/tigerbeetle-c/README.md",
+          "spikes/tigerbeetle-c/build.zig",
+          "spikes/tigerbeetle-c/src/main.zig"
+        ],
+        "summary": "Prove the official unmodified TigerBeetle 0.17.7 static C client can be consumed from Zig 0.15.2 on Windows 11 x64 with bounded shutdown containment.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Native Windows build and link",
+            "command": "Pinned Zig 0.15.2 ReleaseSafe consumer build plus PE import/archive inspection",
+            "result": "PASS: rebuilt executable hash matched the report, archive contained tb_client_init/tb_client_submit/tb_client_deinit, and no tb_client.dll import or string was present"
+          },
+          {
+            "criterion": "Native Windows runtime paths",
+            "command": "Run lookup, unavailable-server timeout, and explicit shutdown against TigerBeetle 0.17.7 on 127.0.0.1",
+            "result": "PASS: lookup returned one callback and result_size=0; unavailable and shutdown paths returned callback status 5 with one callback and successful cleanup"
+          },
+          {
+            "criterion": "Shutdown containment",
+            "command": "Run injected stalled-deinit parent/child fixture",
+            "result": "PASS: child exited with code 7 after watchdog timeout, parent observed wall_ms=10050 under 12 seconds, and no surviving process remained"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "feas_002_review",
+        "reviewedRevision": "ce345bb22d270566892ca8a41428bd925ec3f1b0:9139d25d5b228f7a718def8f2e7e499902ae2402631df9c99b8bcf2082479b39",
+        "integrationCommit": "7e188934f9826c30305b9ee7cd62c89d03558627",
+        "findings": [],
+        "residualRisks": [
+          "macOS Intel, macOS ARM, and Linux native support remain deferred by ADR-0011 and are not approved by this review.",
+          "The fake stalled-deinit case proves the required process-boundary behavior for an injected stall; production still depends on later API/supervisor tasks implementing ADR-0011 exit-7 handling exactly.",
+          "Existing unrelated untracked FEAS-001 files and spikes/tigerbeetle-c/.zig-cache/ are outside this reviewed staged revision and were not evaluated for approval."
+        ]
+      }
     },
     {
       "id": "FEAS-003",
