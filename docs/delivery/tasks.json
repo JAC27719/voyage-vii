@@ -7,7 +7,7 @@
       "id": "GUIDES-001",
       "title": "Validate and activate delegation controls",
       "wave": 0,
-      "status": "submitted",
+      "status": "integrated",
       "inference": "low",
       "worker": "guides_001_impl",
       "reviewer": "guides_001_review",
@@ -17,7 +17,7 @@
       "guide": "docs/delivery/tasks/GUIDES-001.md",
       "submission": {
         "base": "a037de8d524e4ccb60c8f7256f4798bf956fa9f9",
-        "revision": "pending-coordinator-staged-hash",
+        "revision": "a037de8d524e4ccb60c8f7256f4798bf956fa9f9:ac6601dc46fcf7813d58b36e698a2edc59c7e2512ac2cc036562993124ed7e54",
         "changedPaths": [
           "docs/delivery/WORKFLOW.md",
           "docs/delivery/task-registry.schema.json",
@@ -83,13 +83,22 @@
           }
         ]
       },
-      "review": null
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "guides_001_review",
+        "reviewedRevision": "a037de8d524e4ccb60c8f7256f4798bf956fa9f9:ac6601dc46fcf7813d58b36e698a2edc59c7e2512ac2cc036562993124ed7e54",
+        "integrationCommit": "e211e54710b136ee51b581882312a3205b36fb05",
+        "findings": [],
+        "residualRisks": [
+          "Native dependency compatibility and four-target provenance remain gated by FEAS-001 through FEAS-003."
+        ]
+      }
     },
     {
       "id": "RESET-001",
       "title": "Remove the active v1 implementation",
       "wave": 0,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
