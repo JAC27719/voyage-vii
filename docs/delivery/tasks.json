@@ -203,16 +203,60 @@
       "id": "DOC-001",
       "title": "Create ADRs and repository governance",
       "wave": 0,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "doc_001_impl",
+      "reviewer": "doc_001_review",
       "dependsOn": ["RESET-001"],
       "ownedPaths": ["docs/adr/**", "docs/governance/**", "AGENTS.md", "PRIVACY.md"],
       "excludedPaths": ["application code", "workflow files"],
       "guide": "docs/delivery/tasks/DOC-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "41556db416be791eaac9de42b1858b59f1feaf89",
+        "revision": "41556db416be791eaac9de42b1858b59f1feaf89:0000c2401d7f749ad81a1e73eec3e4459e8024caaaa5cca4f732da420f04ca34",
+        "changedPaths": [
+          "AGENTS.md",
+          "PRIVACY.md",
+          "docs/adr/0001-local-first-process-boundaries.md",
+          "docs/adr/0002-postgresql-and-tigerbeetle-ownership.md",
+          "docs/adr/0003-zig-rest-and-native-database-clients.md",
+          "docs/adr/0004-managed-and-external-runtime-modes.md",
+          "docs/adr/0005-authentication-handshake-and-http-boundaries.md",
+          "docs/adr/0006-writable-roots-locking-and-local-lifecycle.md",
+          "docs/adr/0007-dependency-pins-and-native-provenance.md",
+          "docs/adr/0008-portable-native-distribution.md",
+          "docs/adr/0009-static-ui-modules-and-desktop-bridge.md",
+          "docs/adr/0010-repository-delivery-and-first-slice-scope.md",
+          "docs/adr/README.md",
+          "docs/governance/README.md"
+        ],
+        "summary": "Add durable ADRs, repository governance, privacy policy, and agent guidance that exactly translate the frozen v2 decisions.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "ADR and link coverage",
+            "command": "Validate required ADR sections, decision mappings, architecture mappings, and local Markdown links",
+            "result": "PASS: ten ADRs cover all 31 accepted decisions and ten architecture sections; all 96 local links resolve"
+          },
+          {
+            "criterion": "Governance consistency",
+            "command": "Compare governance, conflict handling, supersession, and tradeoff ordering with the frozen planning baseline",
+            "result": "PASS: sources are jointly normative, conflicts stop and escalate, and the exact five-level priority order is preserved"
+          },
+          {
+            "criterion": "Scope and hygiene",
+            "command": "Search deferred-finance claims and run git diff --check on all DOC-001 paths",
+            "result": "PASS: finance remains explicitly deferred and the approved diff is clean"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "doc_001_review",
+        "reviewedRevision": "41556db416be791eaac9de42b1858b59f1feaf89:0000c2401d7f749ad81a1e73eec3e4459e8024caaaa5cca4f732da420f04ca34",
+        "integrationCommit": "a688d749979f3bdcbe16e2e9ecd173ba908e4a6d",
+        "findings": [],
+        "residualRisks": []
+      }
     },
     {
       "id": "FEAS-001",
