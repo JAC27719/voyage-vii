@@ -677,16 +677,52 @@
       "id": "RUNTIME-001",
       "title": "Implement portable runtime substrate",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "runtime_001_impl",
+      "reviewer": "runtime_001_review",
       "dependsOn": ["API-001"],
       "ownedPaths": ["services/api/src/runtime/platform/**", "services/api/src/runtime/manifest/**", "services/api/src/runtime/logging/**"],
       "excludedPaths": ["component-specific lifecycle", "desktop application"],
       "guide": "docs/delivery/tasks/RUNTIME-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "be824f3a36e705869db6b4e1391faa2536615aaa",
+        "revision": "be824f3a36e705869db6b4e1391faa2536615aaa:527026292324f0a6c5cc56b98d46013d41518444",
+        "changedPaths": [
+          "services/api/src/runtime/logging/root.zig",
+          "services/api/src/runtime/manifest/root.zig",
+          "services/api/src/runtime/platform/root.zig"
+        ],
+        "summary": "Implement the portable runtime substrate for Windows x64: canonical root-contained paths, exclusive root locks, loopback port reservation, opaque Job Object containment, runtime manifest validation, pinned provenance checks, and structured log rotation/redaction.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Pinned Zig build and aggregate tests",
+            "command": "C:\\Users\\jcane\\projects\\hydra\\spikes\\api-pg\\toolchain\\zig-x86_64-windows-0.15.2\\zig.exe build; zig build test from services/api",
+            "result": "PASS: executable build and aggregate API tests passed with pinned Zig 0.15.2"
+          },
+          {
+            "criterion": "Runtime self-tests and Windows containment",
+            "command": "voyage-vii-api.exe self-test from repository root and services/api",
+            "result": "PASS: path traversal, symlink escape, root lock contention, loopback reservation, manifest parsing, log escaping/rotation, and Windows Job Object kill-on-close self-tests passed"
+          },
+          {
+            "criterion": "Review, ownership, and hygiene",
+            "command": "git diff --cached --check; independent re-review of staged RUNTIME-001 candidate",
+            "result": "PASS: staged paths were exactly the three owned runtime modules; reviewer approved opaque containment APIs, VERSION-backed product version validation, pinned PostgreSQL/TigerBeetle provenance, writable manifest version and createdAt validation, and JSON-escaped structured logs"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "runtime_001_review",
+        "reviewedRevision": "be824f3a36e705869db6b4e1391faa2536615aaa:527026292324f0a6c5cc56b98d46013d41518444",
+        "integrationCommit": "e78e561f8f8e39760c84e5c60f6014e5e4eaeed0",
+        "findings": [],
+        "residualRisks": [
+          "RUNTIME-001 exposes portable substrate primitives only; component-specific PostgreSQL and TigerBeetle lifecycle wiring remains blocked on API-002/API-003 and later runtime tasks.",
+          "The default PATH Zig is not the pinned compiler in this workspace; verification used the pinned Zig 0.15.2 executable under spikes/api-pg/toolchain."
+        ]
+      }
     },
     {
       "id": "RUNTIME-002",
