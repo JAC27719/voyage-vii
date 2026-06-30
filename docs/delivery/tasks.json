@@ -541,22 +541,83 @@
       "id": "API-001",
       "title": "Build API CLI, handshake, configuration, and contracts",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "api_001_impl",
+      "reviewer": "api_001_review",
       "dependsOn": ["FEAS-003"],
       "ownedPaths": ["VERSION", "services/api/build.zig*", "services/api/src/main.zig", "services/api/src/config/**", "services/api/src/postgres/root.zig", "services/api/src/tigerbeetle/root.zig", "services/api/src/http/root.zig", "services/api/src/status/root.zig", "services/api/src/runtime/platform/root.zig", "services/api/src/runtime/manifest/root.zig", "services/api/src/runtime/logging/root.zig", "services/api/src/runtime/postgresql/root.zig", "services/api/src/runtime/tigerbeetle/root.zig", "services/api/src/runtime/supervisor/root.zig", "services/api/tests/all.zig", "contracts/**"],
       "excludedPaths": ["database adapters", "desktop application"],
       "guide": "docs/delivery/tasks/API-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "822711dfa120527f7aa1ffd0d375a6adc60c27a4",
+        "revision": "822711dfa120527f7aa1ffd0d375a6adc60c27a4:2865fdd60efed3e4bbfc4c92d63bb1f45ba1962ea3c2834a0998aa9c64431d7a",
+        "changedPaths": [
+          "VERSION",
+          "contracts/fixtures/invalid/handshake-with-supervisor-in-desktop-snapshot.json",
+          "contracts/fixtures/invalid/runtime-manifest-secret-path.json",
+          "contracts/fixtures/valid/desktop-snapshot.json",
+          "contracts/fixtures/valid/handshake.json",
+          "contracts/fixtures/valid/native-shutdown-timeout-error.json",
+          "contracts/fixtures/valid/runtime-manifest.json",
+          "contracts/fixtures/valid/status.json",
+          "contracts/fixtures/valid/writable-manifest.json",
+          "contracts/schemas/desktop-snapshot.schema.json",
+          "contracts/schemas/error.schema.json",
+          "contracts/schemas/handshake.schema.json",
+          "contracts/schemas/runtime-manifest.schema.json",
+          "contracts/schemas/status.schema.json",
+          "contracts/schemas/writable-manifest.schema.json",
+          "services/api/build.zig",
+          "services/api/build.zig.zon",
+          "services/api/src/http/root.zig",
+          "services/api/src/main.zig",
+          "services/api/src/postgres/root.zig",
+          "services/api/src/runtime/logging/root.zig",
+          "services/api/src/runtime/manifest/root.zig",
+          "services/api/src/runtime/platform/root.zig",
+          "services/api/src/runtime/postgresql/root.zig",
+          "services/api/src/runtime/supervisor/root.zig",
+          "services/api/src/runtime/tigerbeetle/root.zig",
+          "services/api/src/status/root.zig",
+          "services/api/src/tigerbeetle/root.zig",
+          "services/api/tests/all.zig"
+        ],
+        "summary": "Create the production Zig API shell, exact VERSION file, pinned dependency build spine, CLI-only configuration validation, stdout handshake with CSPRNG tokens, shared schemas and fixtures, pg.zig patch verification, and static seams for later Wave 2 API/runtime tasks.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Pinned Zig build and aggregate tests",
+            "command": "zig version; zig build --fetch; zig build; zig build test from services/api",
+            "result": "PASS: Zig 0.15.2 was used; dependency fetch, build, and aggregate static seam tests passed"
+          },
+          {
+            "criterion": "CLI, handshake, tokens, and exit-code behavior",
+            "command": "voyage-vii-api.exe version; self-test; malformed serve probes; bounded serve handshake probe",
+            "result": "PASS: version printed 0.1.0; self-test exited 0; malformed configuration exited 2; serve emitted one VOYAGE_VII_HANDSHAKE stdout line with distinct 43-character base64url tokens and logged launch state only to stderr"
+          },
+          {
+            "criterion": "Contract fixtures, pg.zig patching, and hygiene",
+            "command": "PowerShell Test-Json fixture/schema validation; ConvertFrom-Json parse sweep; build-time pg.zig upstream/patch SHA checks; git diff --cached --check",
+            "result": "PASS: all valid fixtures validate, the invalid runtime manifest path fixture is rejected, all JSON parses, pg.zig exact upstream and approved patch hashes are enforced, and diff hygiene is clean"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "api_001_review",
+        "reviewedRevision": "822711dfa120527f7aa1ffd0d375a6adc60c27a4:2865fdd60efed3e4bbfc4c92d63bb1f45ba1962ea3c2834a0998aa9c64431d7a",
+        "integrationCommit": "fdb8608443f710b29706530a9f4181eeb8050dc8",
+        "findings": [],
+        "residualRisks": [
+          "Generated Zig caches and binaries remain untracked; later packaging must rebuild from pinned provenance rather than consume local outputs."
+        ]
+      }
     },
     {
       "id": "API-002",
       "title": "Implement PostgreSQL adapter and migrations",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -571,7 +632,7 @@
       "id": "API-003",
       "title": "Implement TigerBeetle C client adapter",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -616,7 +677,7 @@
       "id": "RUNTIME-001",
       "title": "Implement portable runtime substrate",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
