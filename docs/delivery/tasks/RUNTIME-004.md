@@ -19,15 +19,20 @@ Coordinate both managed databases and publish truthful API lifecycle state.
 4. Preserve the already emitted post-bind handshake and reach full database readiness within 60 seconds without conflating the two deadlines.
 5. Maintain independent component states and attempts.
 6. Retry only the requested failed component and suppress concurrent duplicate retry.
-7. Coordinate API shutdown, component graceful stops, process escalation, and handle reaping.
-8. Measure idle memory and record any breach of the approximate 500 MiB target.
+7. Coordinate API shutdown by quiescing requests, stopping/protecting both
+   databases, logs, and owned resources, then exiting the API process. The
+   api.zig accept loop need not return.
+8. Treat exit `7` as terminal/restart-budget behavior during normal operation;
+   expose `native_shutdown_timeout` only if observable before exit.
+9. Measure idle memory and record any breach of the approximate 500 MiB target.
 
 ## Acceptance evidence
 
 - Fresh and retained startup timing.
 - One-component and two-component failure/recovery matrices.
 - Shutdown during initialization, probe, retry, and healthy operation.
-- Process-tree-empty and memory measurements on every native platform.
+- Windows process-tree-empty and memory measurements, including exit-7
+  containment.
 - `zig build test` through the static aggregate registration and `git diff --check`.
 
 ## Reviewer focus

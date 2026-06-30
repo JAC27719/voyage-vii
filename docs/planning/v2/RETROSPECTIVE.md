@@ -23,5 +23,8 @@ The result was a system with too many uncertain layers changing at once. Local-f
 
 ## V2 response
 
-V2 begins with compatibility gates, runtime ownership, safe local lifecycle, desktop packaging, and cross-platform smoke tests. Financial features remain documented but deferred until the runtime foundation is demonstrably reliable.
-
+V2 begins with compatibility gates, runtime ownership, safe local lifecycle,
+portable architecture boundaries, and native Windows 11 x64 desktop/package
+smoke tests. Native macOS/Linux execution is a future wave. Financial features
+remain documented but deferred until the runtime foundation is demonstrably
+reliable.

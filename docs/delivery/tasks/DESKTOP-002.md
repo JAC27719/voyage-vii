@@ -16,23 +16,30 @@ Supervise the packaged Zig API, protect both tokens, and contain the complete ch
 1. Implement one `RuntimeSupervisor` state machine; UI commands read snapshots and never manipulate children directly.
 2. Resolve packaged runtime resources internally. Allow override only in development/smoke mode.
 3. Remove inherited `VOYAGE_VII_*` variables and pass explicit approved CLI arguments.
-4. Spawn with piped stdout/stderr and no interactive stdin in a Windows Job Object or Unix process group.
+4. Spawn with piped stdout/stderr and no interactive stdin in a Windows Job
+   Object. Keep containment behind a platform interface without exposing
+   Windows-native types to the supervisor state machine.
 5. Parse only the prefixed handshake within 15 seconds and 16 KiB and suppress it from logs.
 6. Validate every handshake field before publishing the connection.
 7. Keep both tokens in Rust memory and expose only the app token.
 8. Increment generation for every replacement connection and emit credential-free change events.
 9. Enforce three restarts in a rolling five minutes.
 10. Implement the exact 20-second graceful, five-second terminate, force-kill, and reap shutdown sequence.
-11. Use a fake API fixture for valid, delayed, malformed, duplicate, missing, crash, grandchild, and shutdown scenarios.
+11. During intentional shutdown, do not restart API exit `7`; continue final
+    Job Object containment, reap, and verify no descendants. During normal
+    operation, apply terminal/restart-budget behavior.
+12. Use a fake API fixture for valid, delayed, malformed, duplicate, missing,
+    crash, grandchild, exit-7, and shutdown scenarios.
 
 ## Acceptance evidence
 
 - State-transition table and deterministic restart tests.
 - Token scan over logs, events, panic output, and files.
-- Graceful and forced process-tree cleanup on every native platform.
+- Graceful, forced, and exit-7 process-tree cleanup on native Windows 11 x64.
 - Concurrent close/restart race tests.
 - `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-targets`, and `git diff --check` pass without manifest or shared-entrypoint changes.
 
 ## Reviewer focus
 
-Audit token custody, bounded parsing, single launch path, restart budget, reader/handle cleanup, and native process containment.
+Audit token custody, bounded parsing, single launch path, exit-7 restart
+semantics, reader/handle cleanup, and Windows Job Object containment.

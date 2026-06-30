@@ -1,4 +1,4 @@
-# PACKAGE-004 — Native Distributable Smoke Harness
+# PACKAGE-004 — Windows Distributable Smoke Harness
 
 **Implementer inference:** Low  
 **Prerequisites:** `DESKTOP-002`, `DESKTOP-003`, `DESKTOP-004`, and `HARDEN-001` approved.
@@ -9,7 +9,9 @@ Use the DESKTOP-001 predeclared smoke seam, product/manifest contracts in `CONTR
 
 ## Objective
 
-Implement and verify the reusable native smoke harness that each later platform package task uses against its actual distributable.
+Implement and verify the Windows native smoke harness used by `PACKAGE-001`
+against its actual ZIP, with an explicit launcher interface for future
+platform adapters.
 
 ## Procedure
 
@@ -19,15 +21,20 @@ Implement and verify the reusable native smoke harness that each later platform 
 4. Start managed mode, enforce the 15-second handshake and 60-second readiness deadlines separately, and verify component versions/states.
 5. Shut down, confirm the process group is empty, and repeat using the same data root.
 6. Emit one credential-free `VOYAGE_VII_SMOKE` JSON line.
-7. Support launch adapters for Windows extracted ZIP, macOS bundle executable, and Linux AppImage/extraction fallback using the exact layouts in `PACKAGING.md`.
+7. Implement the Windows extracted-ZIP launch adapter using the exact layout in
+   `PACKAGING.md`. Keep an adapter/interface seam for future launchers, but do
+   not implement or claim macOS/Linux support.
 8. Require canonical temp parent and sentinel before cleanup; preserve failures.
 
 ## Acceptance evidence
 
 - Rust/frontend frozen checks from DESKTOP-001 plus smoke-harness unit/integration tests using controlled artifact fixtures.
-- Tests for every target launch adapter, manifest/hash rejection, 15/60-second deadline separation, fresh/retained run, empty process group, redaction, and cleanup safety.
+- Tests for the Windows launch adapter and generic adapter seam, manifest/hash
+  rejection, 15/60-second deadline separation, fresh/retained run, empty Job
+  Object/process tree, redaction, and cleanup safety.
 - Preserved sanitized failure example and `git diff --check`.
-- No claim that final native artifacts passed; PACKAGE-001/002/003 supply those exact artifact hashes and native executions.
+- No claim that the final native artifact passed; `PACKAGE-001` supplies the
+  exact ZIP hash and native execution.
 
 ## Reviewer focus
 

@@ -20,6 +20,12 @@ When tradeoffs conflict, prefer:
 - Use one staged pull request with logical commits and a merge commit.
 - Rename the repository only after the v2 pull request merges.
 - Use Zig/api.zig for REST, pg.zig for PostgreSQL, and the TigerBeetle C ABI.
+- Keep the exact api.zig pin and define graceful API shutdown at the process
+  boundary because its accept loop has no stop API.
+- Keep the exact pg.zig upstream commit as the baseline and permit only the
+  reviewer-approved repository patch described in ADR-0011.
+- Call official `tb_client_deinit` on a dedicated shutdown thread with the
+  frozen watchdog and exit-7 containment behavior in ADR-0011.
 - Make the Zig API the database supervisor; make Tauri the API supervisor.
 - Support explicit API `managed` and `external` modes.
 - Keep app and supervisor bearer tokens separate, API-generated, and ephemeral in every mode.
@@ -37,7 +43,11 @@ When tradeoffs conflict, prefer:
 - Keep the first UI window at `1100×720`, resizable, with remembered geometry.
 - Provide component retry, retry-all, open logs, and copy sanitized diagnostics.
 - Use project-local bootstrap tooling; never silently perform privileged installations.
-- Build and smoke-test every distributable on its native platform.
+- Make Windows 11 x64 the sole current native build, runtime, package, smoke,
+  CI, documentation, and completion target.
+- Preserve cross-platform architecture through explicit platform interfaces and
+  extensible target-bearing manifests; non-Windows stubs/cross-builds are
+  informational only.
 - Pin GitHub Actions by full SHA with read-only permissions and no secrets.
 - Use Dependabot without automerge.
 - Keep documentation versioned in Markdown; ADRs are superseded rather than rewritten.
@@ -53,17 +63,22 @@ When tradeoffs conflict, prefer:
 - Imports, reconciliation, recurring transactions, splits, attachments, and export
 - Cloud infrastructure or deployment
 - Telemetry and metrics
-- Installers, Developer ID signing, notarization, auto-update, or production publishing; macOS ad-hoc `-` sealing for runnable smoke artifacts remains permitted and required
+- Native macOS Intel, macOS Apple Silicon, and Linux builds, runs, and packages
+- Installers, signing, notarization, auto-update, or production publishing
 - Database upgrade, reset, repair, or automated backup tooling
 
 ## Completion definition
 
 The slice is complete when a developer can:
 
-1. Bootstrap the project on every supported platform.
+1. Bootstrap the project on Windows 11 x64.
 2. Run PostgreSQL, TigerBeetle, and the API through Compose.
 3. Run the desktop app with managed local databases.
 4. See accurate component state and perform bounded retries.
 5. Open logs and copy sanitized diagnostics.
 6. Stop the app without secrets, data loss, or orphan processes.
-7. Smoke-test all four portable native artifacts.
+7. Smoke-test the Windows x64 portable ZIP natively.
+
+Native macOS/Linux work returns only through a future ADR/task wave. Existing
+non-Windows feasibility observations remain historical evidence and do not
+confer current support.

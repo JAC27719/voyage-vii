@@ -21,4 +21,12 @@ Copy the text below into the new implementation chat:
 >
 > Assign implementation workers with low inference. They must execute only their approved task guides and escalate ambiguity rather than improvising. Assign a different high-scrutiny reviewer to every task. Send findings back to the original worker and use the same reviewer for rechecks. Integrate only approved revisions.
 >
-> Begin with `GUIDES-001`. Follow task dependencies and path ownership. Do not implement financial features or cloud deployment.
+> The sole current support and completion target is Windows 11 x64
+> (`x86_64-pc-windows-msvc`). Keep platform boundaries extensible, but treat
+> non-Windows stubs and cross-builds as informational only. Do not claim them as
+> native execution or support.
+>
+> Confirm `PLAN-001` is approved and integrated, then resume `FEAS-001` and
+> `FEAS-002` with their original worker/reviewer pairs. Follow task dependencies
+> and path ownership. Do not implement financial features, cloud deployment, or
+> deferred native macOS/Linux packaging.

@@ -31,6 +31,8 @@ Implement the accessible status-only desktop interface using the shared contract
 - Screenshots for primary states and both themes.
 - Production bundle token/database-access scan.
 - DESKTOP-001's frozen frontend typecheck/lint/format-check/test/build commands and `git diff --check` pass with no manifest, lockfile, shared-config, or base-entrypoint diff.
+- Current desktop acceptance is Windows 11 x64; portable frontend contracts
+  remain platform-neutral.
 
 ## Reviewer focus
 

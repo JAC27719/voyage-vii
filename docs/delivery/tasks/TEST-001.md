@@ -9,7 +9,8 @@ Use exact response/manifests/origins from `CONTRACTS.md`, 120-second step and 20
 
 ## Objective
 
-Expose consistent commands for unit, Compose, managed, failure, and package verification.
+Expose consistent Windows 11 x64 commands for unit, Compose, managed, failure,
+and package verification.
 
 ## Procedure
 
@@ -28,6 +29,8 @@ Expose consistent commands for unit, Compose, managed, failure, and package veri
 - Intentional timeout, interruption, stale lock, occupied resource, unwritable root, corrupt asset, and malformed handshake runs.
 - Cleanup escape-prevention tests.
 - Orphan-process checks.
+- Windows-native execution for all current gates; any non-Windows compile
+  experiment is labeled informational/non-support.
 - Exact invocations for all six commands, measured timeout output, preserved failure-root locations, and `git diff --check`.
 
 ## Reviewer focus

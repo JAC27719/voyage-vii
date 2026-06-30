@@ -25,6 +25,8 @@ Format only pristine storage and safely supervise the packaged single-replica Ti
 ## Acceptance evidence
 
 - First-run, retained-run, non-pristine, corrupt root, wrong binary, occupied port, retry, and shutdown tests.
+- All native runtime evidence is Windows 11 x64. Optional non-Windows
+  compilation is informational only.
 - Proof that damaged data remains untouched.
 - `zig build test` through the static aggregate registration and `git diff --check`.
 

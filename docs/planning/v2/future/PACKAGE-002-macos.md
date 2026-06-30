@@ -1,15 +1,29 @@
-# PACKAGE-002 — macOS Intel and Apple Silicon Bundles
+# Deferred PACKAGE-002 Intent — macOS Intel and Apple Silicon Bundles
 
-**Implementer inference:** Low  
-**Prerequisites:** `PACKAGE-004` approved.
+This is preserved design intent, not a current delivery task. It has been
+removed from `docs/delivery/tasks.json`; none of its prerequisites, procedure,
+or evidence gates the Windows 11 x64 slice. A future ADR/task wave must
+revalidate every value before activation.
 
-## Frozen inputs
+**Implementer inference:** Low
+**Former prerequisites:** `PACKAGE-004` approved.
 
-Use exact pins from `DEPENDENCY-PINS.md`, manifest/version contracts from `CONTRACTS.md`, package deadlines from `TIMEOUTS.md`, and macOS names/layout/provenance/ad-hoc policy from `PACKAGING.md`. Do not select another signing identity, supplier, name, or layout.
+## Inputs preserved at deferral
+
+The former guide used the then-current exact pins, manifest/version contracts,
+deadlines, macOS names/layout/provenance, and ad-hoc sealing policy. A future
+ADR must freeze their replacements; this document is not a current normative
+source.
+
+The former artifact names are preserved only as non-normative historical
+examples:
+
+- `voyage-vii_0.1.0_macos-x86_64.app.zip`
+- `voyage-vii_0.1.0_macos-aarch64.app.zip`
 
 ## Objective
 
-Produce separate native Intel and Apple Silicon `.app` ZIPs.
+Future objective: produce separate native Intel and Apple Silicon `.app` ZIPs.
 
 ## Procedure
 
@@ -20,7 +34,8 @@ Produce separate native Intel and Apple Silicon `.app` ZIPs.
 5. Ad-hoc seal nested Mach-O files leaf-first with identity `-`, then ad-hoc seal the app.
 6. Run `codesign --verify --deep --strict` before zipping and after extraction.
 7. Zip each app with metadata-preserving tooling and create SHA-256 files.
-8. Read root `VERSION`, use the two exact `0.1.0` artifact names in `PACKAGING.md`, and label artifacts ad-hoc sealed, unnotarized, and intended for testing.
+8. Read root `VERSION`, use the names frozen by the future ADR, and label
+   artifacts according to that ADR's sealing and distribution policy.
 
 ## Acceptance evidence
 

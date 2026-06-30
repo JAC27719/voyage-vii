@@ -18,6 +18,7 @@ accepted record is not rewritten to conceal its former decision.
 | [ADR-0008](0008-portable-native-distribution.md) | Portable native distribution |
 | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) | Static UI modules and the desktop bridge |
 | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) | Repository delivery and first-slice scope |
+| [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) | Windows scope and bounded native lifecycle recovery |
 
 ## Architecture coverage
 
@@ -27,14 +28,14 @@ Every decision area in
 | Architecture area | ADR |
 | --- | --- |
 | Product boundary | [ADR-0001](0001-local-first-process-boundaries.md) |
-| Identity and targets | [ADR-0008](0008-portable-native-distribution.md) |
-| Pinned foundations | [ADR-0003](0003-zig-rest-and-native-database-clients.md), [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
-| API process contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md) |
+| Identity and targets | [ADR-0008](0008-portable-native-distribution.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
+| Pinned foundations | [ADR-0003](0003-zig-rest-and-native-database-clients.md), [ADR-0007](0007-dependency-pins-and-native-provenance.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
+| API process contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 | REST contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
-| Desktop contract | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
+| Desktop contract | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 | Managed data | [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md) |
 | Database schema documentation | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md) |
-| Packaged runtime | [ADR-0008](0008-portable-native-distribution.md) |
+| Packaged runtime | [ADR-0008](0008-portable-native-distribution.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 | Development-container network exception | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
 
 ## Frozen-decision mapping
@@ -68,7 +69,7 @@ The tradeoff priorities and every accepted decision in
 | Use a resizable `1100×720` first window with remembered geometry | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Provide retry, retry-all, logs, and sanitized diagnostics | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use project-local bootstrap tooling without silent privilege elevation | [ADR-0008](0008-portable-native-distribution.md) |
-| Build and smoke-test each distributable on its native platform | [ADR-0008](0008-portable-native-distribution.md) |
+| Build and smoke-test the current Windows distributable natively; defer macOS/Linux | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 | Pin Actions by full SHA with read-only permissions and no secrets | [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
 | Use Dependabot without automerge | [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
 | Version Markdown documentation and supersede ADRs rather than rewrite them | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) |
@@ -76,6 +77,8 @@ The tradeoff priorities and every accepted decision in
 | Track implemented PostgreSQL schema and relations in DBML | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md) |
 | Keep SQL authoritative and update DBML in the same reviewed task | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md) |
 | Separate proposed schemas and document TigerBeetle as non-relational | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md) |
+| Keep portable interfaces while Windows 11 x64 is the sole current target | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
+| Use process-boundary api.zig shutdown, one bounded pg.zig patch, and exit-7 TigerBeetle containment | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 
 The [v1 retrospective](../planning/v2/RETROSPECTIVE.md) remains the historical
 record. Financial behavior is deferred and is linked, not adopted, in the

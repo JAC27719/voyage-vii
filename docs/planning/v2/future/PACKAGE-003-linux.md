@@ -1,15 +1,26 @@
-# PACKAGE-003 — Linux x64 AppImage
+# Deferred PACKAGE-003 Intent — Linux x64 AppImage
 
-**Implementer inference:** Low  
-**Prerequisites:** `PACKAGE-004` approved.
+This is preserved design intent, not a current delivery task. It has been
+removed from `docs/delivery/tasks.json`; none of its prerequisites, procedure,
+or evidence gates the Windows 11 x64 slice. A future ADR/task wave must
+revalidate every value before activation.
 
-## Frozen inputs
+**Implementer inference:** Low
+**Former prerequisites:** `PACKAGE-004` approved.
 
-Use exact pins from `DEPENDENCY-PINS.md`, manifest/version contracts from `CONTRACTS.md`, package deadlines from `TIMEOUTS.md`, and Linux naming/layout/provenance from `PACKAGING.md`. Do not choose another build base, supplier, name, or layout.
+## Inputs preserved at deferral
+
+The former guide used the then-current exact pins, manifest/version contracts,
+deadlines, Linux names/layout/provenance, and Ubuntu baseline. A future ADR must
+freeze their replacements; this document is not a current normative source.
+
+The former artifact name
+`voyage-vii_0.1.0_linux-x86_64.AppImage` is preserved only as a non-normative
+historical example.
 
 ## Objective
 
-Produce and validate the Linux x64 AppImage.
+Future objective: produce and validate the Linux x64 AppImage.
 
 ## Procedure
 
@@ -18,7 +29,8 @@ Produce and validate the Linux x64 AppImage.
 3. Stage runtime under AppDir `usr/lib/voyage-vii/resources/runtime`, fill the final API source commit/output hash, emit final manifest v1, and include only necessary Tauri/WebKitGTK/AppImage dependencies.
 4. Inspect ELF architecture, interpreter, dynamic dependencies, and required glibc versions.
 5. Scope PostgreSQL library-path changes to its child process.
-6. Read root `VERSION` and create `voyage-vii_0.1.0_linux-x86_64.AppImage` and SHA-256.
+6. Read root `VERSION`, create the artifact name frozen by the future ADR, and
+   record its SHA-256.
 7. Support direct execution and `APPIMAGE_EXTRACT_AND_RUN=1` where FUSE is unavailable.
 
 ## Acceptance evidence

@@ -25,6 +25,8 @@ Create the complete locked-down Tauri 2/SolidJS foundation, manifests, configura
 10. Deny JavaScript shell, filesystem, process, and arbitrary opener privileges.
 11. Apply local-only CSP with Tauri IPC and the exact packaged/development origins from `CONTRACTS.md`.
 12. Add a simple VII icon master and generated platform sizes.
+13. Make Windows 11 x64 the only current build/runtime acceptance target while
+    keeping target-bearing configuration and platform seams extensible.
 
 Later desktop packets replace only their owned stub/module paths. If a later task would need a manifest, lockfile, shared configuration, shared entrypoint, or static-registration change, it must stop for coordinator reassignment.
 
@@ -38,6 +40,8 @@ Later desktop packets replace only their owned stub/module paths. If a later tas
 - Capability and CSP inventory.
 - Single-instance and geometry-restoration notes.
 - Light/dark screenshots.
+- Native evidence is Windows 11 x64 only; any non-Windows cross-build is
+  explicitly informational/non-support.
 
 ## Reviewer focus
 

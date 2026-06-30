@@ -29,6 +29,8 @@ Produce and validate the Windows 11 x64 portable artifact.
 - No-console-flash, readiness, retained-run, graceful-shutdown, and no-orphan results.
 - File-write check proving user data is not stored beside the app.
 - Execute the approved PACKAGE-004 harness against the exact ZIP for fresh and retained runs; record artifact/runtime hashes, elapsed times, and empty process tree.
+- This ZIP is the sole current package/completion artifact. Do not infer
+  macOS/Linux support from portable seams or cross-builds.
 - Package-script command transcript and `git diff --check`.
 
 ## Reviewer focus

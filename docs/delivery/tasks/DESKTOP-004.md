@@ -5,11 +5,16 @@
 
 ## Frozen inputs
 
-Use exact pins from `DEPENDENCY-PINS.md`, manifest v1 from `CONTRACTS.md`, limits from `TIMEOUTS.md`, and the approved URLs/hashes/toolchains and layouts required by `PACKAGING.md` and FEAS-003. Do not choose another supplier, archive, version, target, or layout.
+Use exact pins from `DEPENDENCY-PINS.md`, manifest v1 from `CONTRACTS.md`,
+limits from `TIMEOUTS.md`, and the approved Windows URLs/hashes/toolchains and
+layout required by `PACKAGING.md` and FEAS-003. Do not choose another supplier,
+archive, version, target, or layout.
 
 ## Objective
 
-Acquire and stage exact runtime binaries safely and reproducibly without tracking generated binaries.
+Acquire and stage exact Windows x64 runtime binaries safely and reproducibly
+without tracking generated binaries while keeping the source-manifest schema
+target-extensible.
 
 ## Procedure
 
@@ -23,6 +28,8 @@ Acquire and stage exact runtime binaries safely and reproducibly without trackin
 8. Generate combined notices and license copies.
 9. Provide offline mode that succeeds only with verified cached inputs.
 10. Ensure staging leaves the checked-in source manifest unchanged and all generated content ignored.
+11. Reject any claim that non-Windows cross-build or staged stub output is a
+    supported/native runtime.
 
 ## Acceptance evidence
 
@@ -31,6 +38,7 @@ Acquire and stage exact runtime binaries safely and reproducibly without trackin
 - Staged tree, size totals, hash validation, and license inventory.
 - Clean Git status for generated assets.
 - Exact source-manifest validation command, staging test command, final staged-tree/hash/license report locations, and `git diff --check`.
+- Native staging evidence is Windows 11 x64 only.
 
 ## Reviewer focus
 

@@ -21,6 +21,11 @@ precedence over the others. On a conflict, a worker stops and escalates to the
 coordinator. Only a later accepted ADR that explicitly names and supersedes a
 prior decision changes that decision.
 
+[ADR-0011](../adr/0011-windows-scope-and-native-lifecycle-recovery.md)
+currently makes Windows 11 x64 the sole support gate and defines the only
+authorized native-lifecycle exceptions. Native macOS/Linux observations or
+cross-builds never imply current support.
+
 An implementer stops and escalates instead of choosing an architecture,
 dependency, interface, fallback, or expanded scope. Verification evidence must
 include the complete changed-path set and the prescribed commands and results.

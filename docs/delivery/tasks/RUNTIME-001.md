@@ -1,4 +1,4 @@
-# RUNTIME-001 — Cross-Platform Runtime Substrate
+# RUNTIME-001 — Portable Runtime Substrate
 
 **Implementer inference:** Low  
 **Prerequisites:** `API-001` approved.
@@ -9,7 +9,8 @@ Use writable and packaged manifest v1 from `CONTRACTS.md`, limits from `TIMEOUTS
 
 ## Objective
 
-Provide safe platform primitives for manifests, paths, locking, ports, child processes, and rotating logs.
+Provide safe Windows 11 x64 platform primitives for manifests, paths, locking,
+ports, child processes, and rotating logs behind portable interfaces.
 
 ## Procedure
 
@@ -18,14 +19,17 @@ Provide safe platform primitives for manifests, paths, locking, ports, child pro
 3. Acquire one exclusive OS lock before component mutation.
 4. Allocate loopback ports and handle bind races without using public interfaces.
 5. Implement Windows Job Object containment with kill-on-close.
-6. Implement Unix process-group containment and reaping.
+6. Keep process, filesystem, path, locking, and containment operations behind
+   explicit interfaces; core contracts and orchestration cannot expose Windows
+   native types. Non-Windows stubs are optional and non-support.
 7. Rotate structured logs under the approximately 50 MiB aggregate budget.
 8. Validate target identity, packaged manifest v1, file hashes, executable flags, source metadata, and exact schema version.
 
 ## Acceptance evidence
 
 - Path traversal, symlink, malformed manifest, wrong-target, hash mismatch, lock contention, port race, rotation, and forced-child cleanup tests.
-- Native Windows and Unix containment evidence.
+- Native Windows Job Object containment and no-descendant evidence.
+- Interface audit proving Windows-native types do not escape platform modules.
 - `zig build test` through API-001's aggregate registration and `git diff --check`.
 
 ## Reviewer focus

@@ -31,6 +31,8 @@ Provide one local command that runs PostgreSQL, TigerBeetle, and the Zig API in 
 - Authenticated status/retry checks using only the in-memory captured app token.
 - Docker-log scan proving no handshake/token/API log persistence.
 - `docker compose down` normal teardown and separately authorized `docker compose down --volumes` verification.
+- Current host acceptance is Windows 11 x64 with the approved local container
+  runtime; container execution does not confer native Linux desktop support.
 - `git diff --check`.
 
 ## Reviewer focus

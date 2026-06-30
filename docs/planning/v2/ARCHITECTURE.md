@@ -2,7 +2,9 @@
 
 ## Product boundary
 
-Voyage VII is a local-first desktop application. The first v2 slice proves that the complete runtime can be developed, packaged, launched, observed, retried, and shut down safely on supported desktop platforms.
+Voyage VII is a local-first desktop application. The first v2 slice proves that
+the complete runtime can be developed, packaged, launched, observed, retried,
+and shut down safely on Windows 11 x64.
 
 TigerBeetle is not the REST server. The REST server is a Zig executable using api.zig. That executable connects to PostgreSQL through pg.zig and to TigerBeetle through TigerBeetle's C ABI.
 
@@ -32,11 +34,18 @@ Tauri contains no database access or financial business logic. The Zig API owns 
 - API executable: `voyage-vii-api`
 - Bundle ID: `io.github.jac27719.voyage-vii`
 - Windows 11 x64: `x86_64-pc-windows-msvc`
-- macOS Intel: `x86_64-apple-darwin`
-- macOS Apple Silicon: `aarch64-apple-darwin`
-- Ubuntu 24.04 x64: `x86_64-unknown-linux-gnu`
 
-All four targets gate completion.
+Windows 11 x64 is the sole current build, runtime, package, smoke, and
+completion gate. macOS Intel (`x86_64-apple-darwin`), macOS Apple Silicon
+(`aarch64-apple-darwin`), and Linux x64 (`x86_64-unknown-linux-gnu`) are
+deferred future targets. Cross-builds and stubs for them are informational only
+and do not confer native evidence or support.
+
+Portability remains an architectural constraint: core contracts, business
+logic, and runtime orchestration cannot expose Windows-native types.
+Platform/process/filesystem paths stay behind explicit interfaces,
+target-bearing manifests remain extensible, and current implementation avoids
+needless Windows coupling.
 
 ## Pinned foundations
 
@@ -63,7 +72,13 @@ Requirements:
 - All logs go to stderr.
 - Initial database readiness target is 60 seconds.
 - Exit codes `0`, `2`, `3`, `4`, `5`, and `6` have the mandatory meanings in `CONTRACTS.md`.
+- Exit code `7` means `native shutdown timeout`.
 - Runtime and protocol deadlines use `TIMEOUTS.md`.
+
+The pinned api.zig accept loop has no public stop API. Graceful API shutdown
+therefore accepts the supervisor route, quiesces requests, protects and stops
+PostgreSQL, TigerBeetle, logs, and owned resources, and exits the API process.
+The accept loop need not return; Windows closes the listener at process exit.
 
 ## REST contract
 
@@ -95,7 +110,12 @@ type RuntimeSnapshot = {
 
 Tauri emits `voyage-vii://runtime-changed` containing only `generation` and `state`. The UI then calls `get_runtime_snapshot`. The supervisor token never enters JavaScript.
 
-Unexpected API exits use a rolling budget of three restarts in five minutes. A fourth exit is terminal. Desktop shutdown sends the supervisor-authenticated shutdown request, waits 20 seconds, terminates the process group, waits five seconds, then force-kills and reaps it.
+Unexpected API exits use a rolling budget of three restarts in five minutes. A
+fourth exit is terminal. Exit `7` is terminal/restart-budget behavior during
+normal operation. During intentional desktop shutdown Tauri must not restart
+exit `7`; it remains the final process-containment owner, verifies no
+descendants, and uses the 20-second graceful, five-second terminate,
+force-kill-and-reap sequence.
 
 All other desktop and adapter deadlines use `TIMEOUTS.md`.
 
@@ -138,15 +158,17 @@ Track the implemented PostgreSQL schema in `docs/database/postgresql.dbml` using
 
 ## Packaged runtime
 
-Artifact names, per-platform runtime locations, native source policy, provenance, and the macOS ad-hoc sealing exception are frozen in `PACKAGING.md`. The packaged manifest is exactly version 1 from `CONTRACTS.md`.
+Artifact naming, Windows runtime location, native source policy, and provenance
+are frozen in `PACKAGING.md`. The packaged manifest is exactly version 1 from
+`CONTRACTS.md`.
 
 Deliverables:
 
 - Windows x64 portable ZIP
-- Separate zipped macOS Intel and Apple Silicon `.app` bundles
-- Linux x64 AppImage
 
-macOS smoke artifacts are ad-hoc sealed with identity `-` and are not Developer ID signed or notarized. Other signing, installers, automatic updates, and production distribution are deferred. CI retention is seven days.
+Native macOS and Linux packages, sealing/layout requirements, installers,
+automatic updates, and production distribution are deferred. CI retention is
+seven days.
 
 ## Development-container network exception
 

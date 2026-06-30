@@ -25,6 +25,8 @@ Initialize, start, probe, retain, and stop the packaged PostgreSQL instance safe
 ## Acceptance evidence
 
 - First-run, retained-run, unavailable binary, corrupt root, wrong permissions, occupied port, failed migration, graceful shutdown, and forced shutdown tests.
+- All native runtime evidence is Windows 11 x64. Optional non-Windows
+  compilation is informational only.
 - Secret-permission and CLI/log leakage checks.
 - `zig build test` through the static aggregate registration and `git diff --check`.
 

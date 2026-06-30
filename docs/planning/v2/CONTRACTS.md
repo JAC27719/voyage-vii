@@ -55,14 +55,17 @@ Exit codes are mandatory:
 - `4`: runtime-asset failure
 - `5`: bind or startup failure
 - `6`: self-test failure
+- `7`: native shutdown timeout
 
 ## Origins and transport
 
 Accepted origins are exact single values:
 
 - Windows packaged: `http://tauri.localhost`
-- macOS/Linux packaged: `tauri://localhost`
 - development: `http://localhost:1420`
+
+Future macOS/Linux origins require a future ADR/task wave and are not current
+support contracts.
 
 Managed and packaged traffic is loopback-only. The development-container exception is defined in `ARCHITECTURE.md` and `DECISIONS.md`; it does not relax advertised URL, CORS, authentication, or host-publication requirements.
 
@@ -175,6 +178,7 @@ The complete allowed error-code set is:
 - `postgres_timeout`
 - `tigerbeetle_unavailable`
 - `tigerbeetle_timeout`
+- `native_shutdown_timeout`
 - `runtime_asset_missing`
 - `runtime_asset_invalid`
 - `data_root_locked`
@@ -191,11 +195,15 @@ Exact HTTP status mapping:
 | `409` | `retry_not_allowed`, `data_root_locked` |
 | `413` | `body_too_large` |
 | `500` | `postgres_authentication_failed`, `internal_error` |
-| `503` | `service_unavailable`, `shutting_down`, `postgres_unavailable`, `postgres_timeout`, `tigerbeetle_unavailable`, `tigerbeetle_timeout`, `runtime_asset_missing`, `runtime_asset_invalid` |
+| `503` | `service_unavailable`, `shutting_down`, `postgres_unavailable`, `postgres_timeout`, `tigerbeetle_unavailable`, `tigerbeetle_timeout`, `native_shutdown_timeout`, `runtime_asset_missing`, `runtime_asset_invalid` |
 
 Valid retry requests remain `202`; the status route remains `200`; health statuses remain as frozen above.
 
 Workers may map native causes only to this set. Adding or renaming a public code requires a coordinator amendment.
+
+`native_shutdown_timeout` is returned as HTTP `503` only if the TigerBeetle
+deinitialization watchdog failure is observable before mandatory process exit.
+The API otherwise terminates immediately with exit code `7`.
 
 ## Packaged runtime manifest v1
 
@@ -203,7 +211,8 @@ Workers may map native causes only to this set. Adding or renaming a public code
 
 - `schemaVersion`: integer `1`
 - `productVersion`: `0.1.0`, read from `VERSION`
-- `target`: one frozen target triple
+- `target`: the current frozen Windows target triple; the field remains
+  extensible for future target-bearing manifests
 - `components`: array in stable `api`, `postgresql`, `tigerbeetle` order
 
 Each component contains:
@@ -226,7 +235,8 @@ The writable-root `manifest.json` contains:
 
 - `schemaVersion`: integer `1`
 - `productVersion`: `0.1.0`
-- `target`: frozen target triple
+- `target`: the current frozen Windows target triple; the field remains
+  extensible for future targets
 - `createdAt`: RFC3339 UTC timestamp
 - `components`: object containing the PostgreSQL and TigerBeetle versions
 

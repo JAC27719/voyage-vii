@@ -13,6 +13,8 @@ The coordinator alone creates branches, stages, commits, pushes, opens the pull 
 1. `GUIDES-001`: validate and activate delegation controls, including the frozen dependency, contract, timeout, and packaging sources.
 2. `RESET-001`: remove active v1 code while preserving history and user work.
 3. `DOC-001`: add ADRs, governance, retrospective, privacy, and agent guidance.
+4. `PLAN-001`: amend the current platform scope and approve the bounded native
+   lifecycle recovery in ADR-0011.
 
 ### Wave 1 — Feasibility
 
@@ -20,7 +22,11 @@ The coordinator alone creates branches, stages, commits, pushes, opens the pull 
 2. `FEAS-002`: prove the static TigerBeetle C ABI.
 3. `FEAS-003`: prove all three dependencies coexist in one executable, prove the prescribed native runtime acquisition/build strategy, and declare go/no-go.
 
-`FEAS-001` and `FEAS-002` may run in parallel after reset. Any required-target failure stops implementation for an ADR.
+`FEAS-001` and `FEAS-002` may run in parallel after `RESET-001` and `PLAN-001`
+are approved. Their native acceptance gate is Windows 11 x64 only. Optional
+cross-target compilation is non-gating structural evidence and must be labeled
+non-native and unsupported. A Windows-gate failure stops implementation for an
+ADR.
 
 ### Wave 2 — API and managed runtime
 
@@ -54,16 +60,20 @@ After `DESKTOP-001`, supervisor, UI, and staging work may proceed concurrently i
 
 ### Wave 5 — Portable artifacts
 
-1. `PACKAGE-004`: implement the predeclared native distributable smoke harness.
+1. `PACKAGE-004`: implement the predeclared Windows distributable smoke harness
+   behind an adapter seam that can host future platform launchers.
 2. `PACKAGE-001`: Windows x64 ZIP and native smoke execution.
-3. `PACKAGE-002`: separate macOS Intel and Apple Silicon app ZIPs and native smoke execution.
-4. `PACKAGE-003`: Linux x64 AppImage and native smoke execution.
 
-After the smoke harness is approved, the three platform packages may run in parallel on native workers. Each package task must exercise its exact artifact with the harness and record the final artifact/runtime hashes. `AUDIT-001` repeats all four package tests against the final integrated artifacts.
+After the smoke harness is approved, `PACKAGE-001` exercises the exact Windows
+ZIP and records the final artifact/runtime hashes. `AUDIT-001` repeats that
+Windows package test against the final integrated artifact. macOS Intel/Apple
+Silicon and Linux packaging intent is preserved under
+[`future/`](future/) for a future ADR/task wave.
 
 ### Wave 6 — Delivery
 
-1. `CI-001`: non-deployment GitHub Actions and dependency automation after all native package tasks.
+1. `CI-001`: non-deployment Windows GitHub Actions and dependency automation
+   after `PACKAGE-001`.
 2. `DOC-002`: verified development and operations runbooks after CI, DBML documentation, and repository governance.
 3. `AUDIT-001`: independent end-to-end audit.
 
@@ -79,15 +89,30 @@ After each wave, the coordinator:
 
 ## Final acceptance
 
-- api.zig, pg.zig, and the TigerBeetle C ABI work on every target.
+- api.zig, the approved pg.zig baseline plus exact compatibility patch, and the
+  TigerBeetle C ABI work natively on Windows 11 x64.
 - Compose starts the external API and both databases.
 - Desktop managed mode initializes, retains, probes, retries, and shuts down both databases.
 - App and supervisor tokens remain within their intended trust boundaries.
 - No child process survives application shutdown.
-- All four native distributables pass first-run and retained-run smoke tests.
+- The Windows x64 ZIP passes native first-run and retained-run smoke tests.
 - Runtime artifacts contain exact provenance, hashes, licenses, and no credentials/debug files.
 - Every package uses the exact layout, naming, source, and sealing policy in `PACKAGING.md`.
 - The implemented PostgreSQL schema is accurately represented by importable DBML, and TigerBeetle identifier mappings are documented separately.
 - Documentation setup commands have been independently executed.
 - No active .NET, Terraform, AWS deployment, or obsolete CI remains.
 - `AUDIT-001` has no unresolved P0–P2 findings.
+
+## Portability guardrails
+
+- The current build, runtime, package, smoke, CI, documentation, and completion
+  gates are Windows 11 x64 only.
+- Core contracts, business logic, and runtime orchestration do not expose
+  Windows-native types.
+- Platform process, filesystem, path, locking, and containment behavior remains
+  behind explicit interfaces.
+- Target-bearing manifests and smoke launch adapters remain extensible.
+- A non-Windows stub or cross-build experiment is informational only and never
+  supported/native evidence.
+- Native macOS Intel, macOS Apple Silicon, and Linux work returns only through a
+  future ADR/task wave.
