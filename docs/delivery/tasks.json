@@ -617,22 +617,60 @@
       "id": "SEAM-001",
       "title": "Predeclare API adapter build seams",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "seam_001_impl",
+      "reviewer": "seam_001_review",
       "dependsOn": ["API-001", "FEAS-002", "FEAS-003"],
       "ownedPaths": ["services/api/build.zig", "services/api/build.zig.zon", "services/api/migrations/.gitkeep", "services/api/tests/all.zig", "services/api/tests/postgres/root.zig", "services/api/tests/tigerbeetle/root.zig"],
       "excludedPaths": ["PostgreSQL adapter behavior", "TigerBeetle adapter behavior", "runtime supervision", "desktop application"],
       "guide": "docs/delivery/tasks/SEAM-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "f280543df3e7ee70fd8b1913dfe41046bdf1391e",
+        "revision": "f280543df3e7ee70fd8b1913dfe41046bdf1391e:c1f37f3a42152125e253f9252c4caa7c97470557564aaacf86a1965d228ae5c4",
+        "changedPaths": [
+          "services/api/build.zig",
+          "services/api/build.zig.zon",
+          "services/api/migrations/.gitkeep",
+          "services/api/tests/all.zig",
+          "services/api/tests/postgres/root.zig",
+          "services/api/tests/tigerbeetle/root.zig"
+        ],
+        "summary": "Predeclare shared API adapter seams by adding the migrations package path, TigerBeetle native build options and gated link wiring, a native-inputs build options module, and aggregate PostgreSQL/TigerBeetle test stubs.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Pinned Zig build and aggregate tests",
+            "command": "C:\\Users\\jcane\\projects\\hydra\\spikes\\api-pg\\toolchain\\zig-x86_64-windows-0.15.2\\zig.exe build; zig build test from services/api",
+            "result": "PASS: executable build and aggregate tests passed without TigerBeetle native inputs"
+          },
+          {
+            "criterion": "Native input configuration guard",
+            "command": "zig build -Dtb-client-lib=C:\\does-not-exist\\tb_client.lib from services/api",
+            "result": "PASS: build configuration failed with '-Dtb-client-lib and -Dtb-client-include must be supplied together'"
+          },
+          {
+            "criterion": "Review, ownership, and hygiene",
+            "command": "git diff --cached --check; independent SEAM-001 staged revision review",
+            "result": "PASS: staged paths exactly matched the six owned seam files; reviewer recomputed the canonical revision and approved no production adapter behavior was added"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "seam_001_review",
+        "reviewedRevision": "f280543df3e7ee70fd8b1913dfe41046bdf1391e:c1f37f3a42152125e253f9252c4caa7c97470557564aaacf86a1965d228ae5c4",
+        "integrationCommit": "856f3c9c42c4327a0897736585a63d21fe51e3df",
+        "findings": [],
+        "residualRisks": [
+          "SEAM-001 intentionally adds only shared build and aggregate-test seams; API-002 and API-003 still own actual adapter behavior and native acceptance evidence."
+        ]
+      }
     },
     {
       "id": "API-002",
       "title": "Implement PostgreSQL adapter and migrations",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -647,7 +685,7 @@
       "id": "API-003",
       "title": "Implement TigerBeetle C client adapter",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
