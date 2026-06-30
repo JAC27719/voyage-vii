@@ -482,22 +482,66 @@
       "id": "FEAS-003",
       "title": "Run the architecture go or no-go gate",
       "wave": 1,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "feas_003_impl",
+      "reviewer": "feas_003_review",
       "dependsOn": ["FEAS-001", "FEAS-002"],
       "ownedPaths": ["spikes/integration/**", "docs/feasibility/decision.md"],
       "excludedPaths": ["production implementation"],
       "guide": "docs/delivery/tasks/FEAS-003.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "6ef9f3829ef2512f1fd0bb03c60219ccb8cc8c62",
+        "revision": "6ef9f3829ef2512f1fd0bb03c60219ccb8cc8c62:27403b072ddd56c4f9b69c04cb59cde3dbaf49afea9276e15213e44e30f77bb3",
+        "changedPaths": [
+          "docs/feasibility/decision.md",
+          "spikes/integration/.gitignore",
+          "spikes/integration/build.zig",
+          "spikes/integration/build.zig.zon",
+          "spikes/integration/evidence/README.md",
+          "spikes/integration/evidence/windows-native-evidence.md",
+          "spikes/integration/scripts/apply-pg-patch.ps1",
+          "spikes/integration/scripts/build-postgresql-windows.ps1",
+          "spikes/integration/scripts/package-postgresql-runtime.ps1",
+          "spikes/integration/scripts/run-evidence.ps1",
+          "spikes/integration/src/main.zig"
+        ],
+        "summary": "Record a Windows 11 x64 GO decision proving api.zig, the patched pg.zig baseline, PostgreSQL 18.4 source-built native runtime, and the TigerBeetle 0.17.7 C ABI coexist in one Zig executable with reviewable provenance evidence.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Native Windows integration response and shutdown",
+            "command": "spikes/integration/scripts/run-evidence.ps1 against packaged native PostgreSQL and official TigerBeetle 0.17.7",
+            "result": "PASS: /probe returned HTTP 200 with {\"status\":\"ok\",\"postgres\":\"ok\",\"tigerbeetle\":\"ok\"}; /shutdown returned HTTP 200, the API process exited, and no descendants remained"
+          },
+          {
+            "criterion": "Dependency, architecture, and provenance inventory",
+            "command": "Review staged docs/feasibility/decision.md and spikes/integration/evidence/windows-native-evidence.md",
+            "result": "PASS: official PostgreSQL source URL/hash, native MSVC/Meson build commands, packaged runtime hashes, TigerBeetle release/source URLs and hashes, C client artifacts, license inputs, and Windows x64 architecture evidence are recorded"
+          },
+          {
+            "criterion": "Hygiene and canonical review",
+            "command": "git diff --cached --check and independent canonical staged-diff hash review",
+            "result": "PASS: whitespace check exited 0; reviewer recomputed revision 6ef9f3829ef2512f1fd0bb03c60219ccb8cc8c62:27403b072ddd56c4f9b69c04cb59cde3dbaf49afea9276e15213e44e30f77bb3 and approved with no findings"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "feas_003_review",
+        "reviewedRevision": "6ef9f3829ef2512f1fd0bb03c60219ccb8cc8c62:27403b072ddd56c4f9b69c04cb59cde3dbaf49afea9276e15213e44e30f77bb3",
+        "integrationCommit": "6e0e133e4249b044e484cabaa81c4a19e73c13b5",
+        "findings": [],
+        "residualRisks": [
+          "Generated runtimes, binaries, caches, and logs remain untracked by design; later packaging must rebuild from the approved provenance rather than consume local outputs.",
+          "The reviewer did not rerun network or native PostgreSQL/TigerBeetle builds during re-review; review reproduced staged-diff, ownership, hygiene, and staged evidence checks."
+        ]
+      }
     },
     {
       "id": "API-001",
       "title": "Build API CLI, handshake, configuration, and contracts",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
