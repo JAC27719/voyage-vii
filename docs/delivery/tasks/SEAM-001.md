@@ -20,7 +20,7 @@ paths.
 ## Procedure
 
 1. Add the `services/api/migrations` package path needed for authoritative SQL
-   migrations.
+   migrations, with only a placeholder file until API-002 adds real migrations.
 2. Add build options for the approved TigerBeetle C client static library and
    include directory.
 3. Wire the TigerBeetle include path, object file, libc, and required Windows

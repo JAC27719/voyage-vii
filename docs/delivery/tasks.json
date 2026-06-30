@@ -622,7 +622,7 @@
       "worker": null,
       "reviewer": null,
       "dependsOn": ["API-001", "FEAS-002", "FEAS-003"],
-      "ownedPaths": ["services/api/build.zig", "services/api/build.zig.zon", "services/api/tests/all.zig", "services/api/tests/postgres/root.zig", "services/api/tests/tigerbeetle/root.zig"],
+      "ownedPaths": ["services/api/build.zig", "services/api/build.zig.zon", "services/api/migrations/.gitkeep", "services/api/tests/all.zig", "services/api/tests/postgres/root.zig", "services/api/tests/tigerbeetle/root.zig"],
       "excludedPaths": ["PostgreSQL adapter behavior", "TigerBeetle adapter behavior", "runtime supervision", "desktop application"],
       "guide": "docs/delivery/tasks/SEAM-001.md",
       "submission": null,
