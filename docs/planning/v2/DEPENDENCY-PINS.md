@@ -15,9 +15,8 @@ No worker may introduce an unlisted direct dependency or change a frozen direct 
   `12e48fc57b78486e338e8707448d9a87597dd3ad`
 - pg.zig Windows connect-timeout compatibility patch:
   `patches/pg.zig/windows-connect-timeout.patch`
-- Approved pg.zig patch SHA-256: pending FEAS-001 approval; production use is
-  blocked until the coordinator records the exact reviewer-approved lowercase
-  SHA-256 here
+- Approved pg.zig patch SHA-256:
+  `02d6791ab6bdb147c34972e0076992840be7e5fea2e51e6cdac94455033c578c`
 - TigerBeetle: `0.17.7`
 - PostgreSQL: `18.4`
 

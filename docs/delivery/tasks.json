@@ -365,7 +365,7 @@
       "id": "FEAS-001",
       "title": "Prove api.zig and pg.zig compatibility",
       "wave": 1,
-      "status": "changes_requested",
+      "status": "integrated",
       "inference": "low",
       "worker": "feas_001_impl",
       "reviewer": "feas_001_review",
@@ -373,8 +373,57 @@
       "ownedPaths": ["spikes/api-pg/**", "docs/feasibility/api-pg.md", "patches/pg.zig/windows-connect-timeout.patch"],
       "excludedPaths": ["production API", "desktop application"],
       "guide": "docs/delivery/tasks/FEAS-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "ce345bb22d270566892ca8a41428bd925ec3f1b0",
+        "revision": "ce345bb22d270566892ca8a41428bd925ec3f1b0:5f41398739bbd41801a591a3afb6a3094998ba1b7a29c404c46294ed810fcea2",
+        "changedPaths": [
+          "docs/feasibility/api-pg.md",
+          "patches/pg.zig/windows-connect-timeout.patch",
+          "spikes/api-pg/.dockerignore",
+          "spikes/api-pg/.gitattributes",
+          "spikes/api-pg/.gitignore",
+          "spikes/api-pg/Dockerfile.postgresql",
+          "spikes/api-pg/build.zig",
+          "spikes/api-pg/build.zig.zon",
+          "spikes/api-pg/docker-entrypoint.sh",
+          "spikes/api-pg/evidence/README.md",
+          "spikes/api-pg/scripts/apply-pg-patch.ps1",
+          "spikes/api-pg/scripts/inspect-binaries.ps1",
+          "spikes/api-pg/scripts/run-evidence.ps1",
+          "spikes/api-pg/scripts/start-postgresql.ps1",
+          "spikes/api-pg/scripts/stop-postgresql.ps1",
+          "spikes/api-pg/src/main.zig"
+        ],
+        "summary": "Prove api.zig endpoint containment and pg.zig Windows compatibility with a deterministic five-second Windows TCP connect patch and PostgreSQL 18.4 probe evidence.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Deterministic pg.zig patch",
+            "command": "Verify upstream src/stream.zig SHA-256, then git apply --unidiff-zero --check and apply the repository patch",
+            "result": "PASS: final patch SHA-256 02d6791ab6bdb147c34972e0076992840be7e5fea2e51e6cdac94455033c578c applies only after exact upstream verification"
+          },
+          {
+            "criterion": "Native Windows API lifecycle",
+            "command": "Run the api.zig endpoint, probe /probe, invoke /shutdown, wait for process exit, and inspect descendants",
+            "result": "PASS: endpoint returned HTTP 200 with the expected JSON, shutdown returned HTTP 200 with accepted JSON, the server exited, and no descendants remained"
+          },
+          {
+            "criterion": "Native Windows PostgreSQL probes",
+            "command": "Run nonresponsive timeout, unavailable server, auth failure, and SELECT 1 probes against source-built PostgreSQL 18.4",
+            "result": "PASS: nonresponsive attempts timed out near five seconds, unavailable/auth failures failed as expected, SELECT 1 passed, pg_cleanup completed, and FEAS-owned Docker resources were removed"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "feas_001_review",
+        "reviewedRevision": "ce345bb22d270566892ca8a41428bd925ec3f1b0:5f41398739bbd41801a591a3afb6a3094998ba1b7a29c404c46294ed810fcea2",
+        "integrationCommit": "007c1193ec40dbfbd1a73466809a79f05f1c83ab",
+        "findings": [],
+        "residualRisks": [
+          "FEAS-001 proves Windows native client compatibility against source-built PostgreSQL 18.4 in Docker, not Windows-native PostgreSQL packaging.",
+          "Non-Windows builds are structural and informational only and do not imply runtime support."
+        ]
+      }
     },
     {
       "id": "FEAS-002",
@@ -433,7 +482,7 @@
       "id": "FEAS-003",
       "title": "Run the architecture go or no-go gate",
       "wave": 1,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
