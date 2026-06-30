@@ -262,7 +262,7 @@
       "id": "PLAN-001",
       "title": "Amend Windows scope and native lifecycle recovery",
       "wave": 0,
-      "status": "submitted",
+      "status": "integrated",
       "inference": "low",
       "worker": "plan_001_impl",
       "reviewer": "plan_001_review",
@@ -278,7 +278,7 @@
       "guide": "docs/delivery/tasks/PLAN-001.md",
       "submission": {
         "base": "b65a15ec7eebc1f3abaef7db563d97c26c82a193",
-        "revision": "pending-coordinator-staged-hash",
+        "revision": "b65a15ec7eebc1f3abaef7db563d97c26c82a193:59d2aa5a8c6a50429535f9cf9b62a197766a24426758e7631768b23e1c387c57",
         "changedPaths": [
           "docs/adr/0011-windows-scope-and-native-lifecycle-recovery.md",
           "docs/adr/README.md",
@@ -349,13 +349,23 @@
           }
         ]
       },
-      "review": null
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "plan_001_review",
+        "reviewedRevision": "b65a15ec7eebc1f3abaef7db563d97c26c82a193:59d2aa5a8c6a50429535f9cf9b62a197766a24426758e7631768b23e1c387c57",
+        "integrationCommit": "342c31b7aa2950521578efe40acf3ec994b7fab9",
+        "findings": [],
+        "residualRisks": [
+          "Older ADRs retain historical four-target language, but ADR-0011 explicitly supersedes the affected requirements.",
+          "FEAS-001 and FEAS-002 require rework and re-review under the Windows-only lifecycle rules before integration."
+        ]
+      }
     },
     {
       "id": "FEAS-001",
       "title": "Prove api.zig and pg.zig compatibility",
       "wave": 1,
-      "status": "blocked",
+      "status": "changes_requested",
       "inference": "low",
       "worker": "feas_001_impl",
       "reviewer": "feas_001_review",
@@ -370,7 +380,7 @@
       "id": "FEAS-002",
       "title": "Prove TigerBeetle static C ABI compatibility",
       "wave": 1,
-      "status": "blocked",
+      "status": "changes_requested",
       "inference": "low",
       "worker": "feas_002_impl",
       "reviewer": "feas_002_review",
