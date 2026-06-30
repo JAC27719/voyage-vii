@@ -1,9 +1,16 @@
 const std = @import("std");
 const main = @import("app");
+const postgres_tests = @import("postgres/root.zig");
+const tigerbeetle_tests = @import("tigerbeetle/root.zig");
 
 test "aggregate imports every API-001 static seam" {
     try main.runSelfTest();
     try std.testing.expectEqualStrings("0.1.0", main.product_version);
+}
+
+test "aggregate imports API adapter test seams" {
+    try postgres_tests.selfTest();
+    try tigerbeetle_tests.selfTest();
 }
 
 test "all public errors required by the frozen contract are registered" {
