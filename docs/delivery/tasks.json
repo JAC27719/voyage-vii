@@ -677,6 +677,9 @@
       "dependsOn": ["API-001", "SEAM-001"],
       "ownedPaths": ["services/api/src/postgres/**", "services/api/migrations/**", "services/api/tests/postgres/**", "docs/database/postgresql.dbml", "docs/database/README.md"],
       "excludedPaths": ["HTTP routes", "runtime process supervision"],
+      "coordinatorNotes": [
+        "API-002 DBML validation uses a std-only implemented-schema compatibility check in the task-owned tests; no frozen external DBML parser or CLI is approved in DEPENDENCY-PINS.md."
+      ],
       "guide": "docs/delivery/tasks/API-002.md",
       "submission": null,
       "review": null
