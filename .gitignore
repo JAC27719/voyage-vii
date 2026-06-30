@@ -29,6 +29,10 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Zig and local spike outputs
+**/.zig-cache/
+**/zig-out/
+
 # IDE and OS
 .tools/
 .idea/
