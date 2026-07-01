@@ -1433,16 +1433,65 @@
       "id": "DESKTOP-003",
       "title": "Implement the SolidJS system-status UI",
       "wave": 3,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Volta",
       "dependsOn": ["DESKTOP-001", "API-004"],
       "ownedPaths": ["apps/desktop/src/**", "apps/desktop/tests/ui/**"],
       "excludedPaths": ["src-tauri runtime supervision", "Zig API"],
       "guide": "docs/delivery/tasks/DESKTOP-003.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "8a2af77057c7b9b76467954a537b0ed8b25a6241",
+        "revision": "8a2af77057c7b9b76467954a537b0ed8b25a6241:5a5be72282cf4a95ed71264a5167b29d4af65279",
+        "changedPaths": [
+          "apps/desktop/src/api-client.ts",
+          "apps/desktop/src/app.tsx",
+          "apps/desktop/src/diagnostics.ts",
+          "apps/desktop/src/module-registry.tsx",
+          "apps/desktop/src/runtime-bridge.ts",
+          "apps/desktop/src/styles.css",
+          "apps/desktop/src/system-status.tsx",
+          "apps/desktop/src/types.ts",
+          "apps/desktop/tests/ui/api-client.test.ts",
+          "apps/desktop/tests/ui/evidence/desktop-003-status-light.png",
+          "apps/desktop/tests/ui/system-status.test.tsx"
+        ],
+        "summary": "Implemented the static SolidJS system-status module, typed runtime/API bridges, SQLite and TigerBeetle status cards, retry actions, sanitized diagnostics, runtime-event refresh handling, polling cleanup, and focused UI/accessibility tests.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Frozen desktop frontend checks",
+            "command": "bun run typecheck; bun run lint; bun run format-check; bunx prettier \"tests/ui/**/*.{ts,tsx}\" --check",
+            "result": "PASS"
+          },
+          {
+            "criterion": "UI behavior, accessibility, keyboard, polling, generation, 401, retry, and mutation non-replay tests",
+            "command": "bun run test",
+            "result": "PASS: 2 test files, 11 tests"
+          },
+          {
+            "criterion": "Production build and bundle scan",
+            "command": "bun run build; rg -n \"app-token|supervisorToken|Authorization: Bearer|sqlite-path|tigerbeetle-address|appToken|postgresql|postgres\" apps/desktop/dist",
+            "result": "PASS: build succeeded; scan found only expected frontend auth-header, appToken property, and redaction-pattern strings, with no embedded secret values or direct database access strings"
+          },
+          {
+            "criterion": "Diff hygiene and screenshot evidence",
+            "command": "git diff --check; browser screenshot capture",
+            "result": "PASS: diff check reported only CRLF warnings; light-theme status screenshot staged at apps/desktop/tests/ui/evidence/desktop-003-status-light.png"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Volta",
+        "reviewedRevision": "8a2af77057c7b9b76467954a537b0ed8b25a6241:5a5be72282cf4a95ed71264a5167b29d4af65279",
+        "integrationCommit": "54d3ebee",
+        "findings": [],
+        "residualRisks": [
+          "Only the light-theme browser screenshot is staged; the embedded browser inspection surface was read-only and did not permit forcing a dark color scheme for screenshot capture.",
+          "The axe accessibility test disables color-contrast checks because jsdom lacks canvas support; WCAG color confidence depends on CSS review and system color choices."
+        ]
+      }
     },
     {
       "id": "DESKTOP-004",
@@ -1515,7 +1564,7 @@
       "id": "TEST-001",
       "title": "Create reusable cross-stack test orchestration",
       "wave": 4,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
