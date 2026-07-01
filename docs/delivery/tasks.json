@@ -1196,10 +1196,10 @@
       "id": "RUNTIME-004",
       "title": "Integrate managed runtime supervision",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "runtime_004_impl",
+      "reviewer": "runtime_004_review",
       "dependsOn": ["API-004", "RUNTIME-002", "RUNTIME-003"],
       "ownedPaths": [
         "services/api/src/runtime/supervisor/**",
@@ -1210,8 +1210,44 @@
       ],
       "excludedPaths": ["shared build files", "database adapters", "runtime manifest/provenance", "desktop supervisor", "packaging"],
       "guide": "docs/delivery/tasks/RUNTIME-004.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "873abeb0eade30028f14e4cf4ae6e2f8cbb8035d",
+        "revision": "873abeb0eade30028f14e4cf4ae6e2f8cbb8035d:7440611b8351595b04e52c82dc03a7f269785b34c714afc5e0cfbed312e93572",
+        "changedPaths": [
+          "services/api/src/main.zig",
+          "services/api/src/runtime/supervisor/root.zig",
+          "services/api/tests/all.zig",
+          "services/api/tests/runtime/integration/root.zig"
+        ],
+        "summary": "Wire the managed runtime supervisor into the live API entrypoint after the post-bind handshake, route HTTP through the frozen lifecycle seam, coordinate SQLite and TigerBeetle startup/retry/shutdown state, suppress duplicate retry overlap, join asynchronous startup before cleanup, measure Windows process memory, and register the runtime integration seam in the aggregate tests.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Static aggregate registration and build",
+            "command": "Pinned Zig 0.15.2 aggregate zig build test from services/api with -Dsqlite-amalgamation=C:\\Users\\jcane\\projects\\hydra\\spikes\\sqlite\\source\\sqlite-amalgamation-3530300",
+            "result": "PASS: aggregate tests include the runtime integration seam and the live API entrypoint, HTTP, supervisor, SQLite adapter, TigerBeetle adapter, platform, manifest, and logging self-tests"
+          },
+          {
+            "criterion": "Lifecycle review and rework",
+            "command": "Independent high-scrutiny staged review with canonical staged-diff hashes through rework revisions",
+            "result": "PASS: reviewer findings on component independence, startup retry schedule, detached-thread shutdown hazards, TigerBeetle failure cleanup, asset-validation ordering, memory measurement, post-handshake asynchronous startup, duplicate retry overlap, and stale HTTP snapshot writeback were corrected and approved"
+          },
+          {
+            "criterion": "Scope and hygiene",
+            "command": "git diff --cached --check and staged path verification",
+            "result": "PASS: approved staged paths were limited to main.zig, runtime/supervisor, aggregate test registration, and runtime integration tests; no shared build, dependency, adapter, manifest/provenance, desktop, or packaging files changed"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "runtime_004_review",
+        "reviewedRevision": "873abeb0eade30028f14e4cf4ae6e2f8cbb8035d:7440611b8351595b04e52c82dc03a7f269785b34c714afc5e0cfbed312e93572",
+        "integrationCommit": "eaad80bd95c17103bee4384afb5d120f4b8debba",
+        "findings": [],
+        "residualRisks": [
+          "Live packaged startup/shutdown/process-tree failure matrices were not run in this task because no packaged TigerBeetle runtime asset bundle was available; review approval is based on staged code inspection plus reproduced aggregate and hygiene checks."
+        ]
+      }
     },
     {
       "id": "COMPOSE-001",
