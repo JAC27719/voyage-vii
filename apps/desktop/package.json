@@ -1,0 +1,42 @@
+{
+  "name": "voyage-vii-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --bun vite --host 127.0.0.1",
+    "build": "tsc -p tsconfig.json && bun --bun vite build",
+    "preview": "bun --bun vite preview --host 127.0.0.1",
+    "tauri": "tauri",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" \"*.config.*\" --max-warnings=0",
+    "format-check": "prettier \"package.json\" \"index.html\" \"src/**/*.{ts,tsx,css}\" \"*.config.*\" \"src-tauri/tauri.conf.json\" \"src-tauri/capabilities/*.json\" --check",
+    "test": "bun --bun vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@solidjs/router": "0.16.1",
+    "@tauri-apps/api": "2.11.1",
+    "solid-js": "1.9.13"
+  },
+  "devDependencies": {
+    "@solidjs/testing-library": "0.8.10",
+    "@tailwindcss/vite": "4.3.2",
+    "@tauri-apps/cli": "2.11.4",
+    "@testing-library/jest-dom": "6.9.1",
+    "axe-core": "4.12.1",
+    "eslint": "10.6.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.6",
+    "eslint-plugin-solid": "0.14.5",
+    "jsdom": "29.1.1",
+    "prettier": "3.9.3",
+    "prettier-plugin-tailwindcss": "0.8.0",
+    "tailwindcss": "4.3.2",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.1",
+    "vite": "8.1.0",
+    "vite-plugin-solid": "2.11.12",
+    "@vitest/coverage-v8": "4.1.9",
+    "vitest": "4.1.9"
+  }
+}

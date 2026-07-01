@@ -1,0 +1,36 @@
+[package]
+name = "voyage-vii-desktop"
+version = "0.1.0"
+description = "Voyage VII desktop shell"
+authors = ["Voyage VII"]
+edition = "2021"
+rust-version = "1.96"
+
+[build-dependencies]
+tauri-build = { version = "=2.6.3", features = [] }
+
+[dependencies]
+anyhow = "=1.0.103"
+base64 = "=0.22.1"
+libc = "=0.2.186"
+nix = "=0.31.3"
+rand = "=0.10.1"
+reqwest = { version = "=0.13.4", default-features = false, features = ["json", "rustls"] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+subtle = "=2.6.1"
+tauri = { version = "=2.11.3", features = [] }
+tauri-plugin-opener = "=2.5.4"
+tauri-plugin-single-instance = "=2.4.2"
+tauri-plugin-window-state = "=2.4.1"
+tempfile = "=3.27.0"
+thiserror = "=2.0.18"
+tokio = { version = "=1.52.3", features = ["rt-multi-thread", "macros", "process", "time"] }
+tracing = "=0.1.44"
+tracing-subscriber = "=0.3.23"
+url = "=2.5.8"
+windows = { version = "=0.62.2", features = ["Win32_Foundation"] }
+zeroize = "=1.9.0"
+
+[dev-dependencies]
+tempfile = "=3.27.0"
