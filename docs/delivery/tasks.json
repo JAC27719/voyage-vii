@@ -1211,16 +1211,53 @@
       "id": "COMPOSE-001",
       "title": "Create the external-mode Compose environment",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "compose_001_impl",
+      "reviewer": "compose_001_review",
       "dependsOn": ["API-004"],
       "ownedPaths": ["compose.yaml", "infra/compose/**", "scripts/compose/**"],
       "excludedPaths": ["managed runtime", "cloud infrastructure"],
       "guide": "docs/delivery/tasks/COMPOSE-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "c92974398b8c4be58660be4f6c121c686bea8c3b",
+        "revision": "c92974398b8c4be58660be4f6c121c686bea8c3b:8cac3cae7fc24fa0923fad2f0c5ddf81c144816b4c695561bb1b91dbea783f06",
+        "changedPaths": [
+          "compose.yaml",
+          "infra/compose/README.md",
+          "scripts/compose/down-volumes.ps1",
+          "scripts/compose/stop.ps1",
+          "scripts/compose/up.ps1"
+        ],
+        "summary": "Create the local external-mode Compose environment with pinned TigerBeetle, required exact API image pin input, API-owned SQLite storage, internal-only database networking, redacted attached handshake capture, authenticated status and retry checks, disabled API Docker logging, and safe stop/destructive teardown scripts.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Compose configuration and structural audit",
+            "command": "docker compose --file compose.yaml config with a dummy exact :0.1.0@sha256:<64 hex> API image pin; structural review of resolved services, networks, ports, volumes, logging, and seccomp",
+            "result": "PASS: Compose resolves; API publishes only 127.0.0.1:7800; TigerBeetle has no host-published port; runtime network is internal; SQLite is an API-owned mounted file path; API logging driver is none; seccomp=unconfined is limited to TigerBeetle and documented as development-only"
+          },
+          {
+            "criterion": "Launcher and teardown checks",
+            "command": "PowerShell parser checks for scripts/compose/up.ps1, stop.ps1, and down-volumes.ps1; reviewer inspection of token handling and redaction",
+            "result": "PASS: launcher captures app and supervisor tokens only in process memory, redacts handshake and bearer material from console output, uses the app token for authenticated status and retry checks, clears token variables on exit, and provides safe stop plus explicitly confirmed destructive down --volumes"
+          },
+          {
+            "criterion": "TigerBeetle clean and retained startup plus hygiene",
+            "command": "docker buildx imagetools inspect ghcr.io/tigerbeetle/tigerbeetle:0.17.7; TigerBeetle clean-volume and retained-volume Compose startup; git diff --cached --check",
+            "result": "PASS: pinned TigerBeetle image digest was verified, TigerBeetle became healthy on clean and retained volumes, validation-created containers and volumes were removed, and staged whitespace checks passed"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "compose_001_review",
+        "reviewedRevision": "c92974398b8c4be58660be4f6c121c686bea8c3b:8cac3cae7fc24fa0923fad2f0c5ddf81c144816b4c695561bb1b91dbea783f06",
+        "integrationCommit": "e9f4743b2536f5a04f97b323897b07762351c91c",
+        "findings": [],
+        "residualRisks": [
+          "Full API startup, authenticated live status/retry checks, and Docker API-log token scan remain unrun because no approved first-party API image digest was available; the launcher enforces a required exact 0.1.0 tag+digest API image pin instead of guessing one."
+        ]
+      }
     },
     {
       "id": "DESKTOP-001",
