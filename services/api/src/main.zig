@@ -299,13 +299,34 @@ fn serve(allocator: std.mem.Allocator, config: ServeConfig) !void {
     try emitHandshake(endpoint.api_url, tokens);
     std.debug.print("api_state=launching runtime={s}\n", .{@tagName(config.runtime)});
 
+    var runtime = runtime_supervisor.ManagedRuntime.init(allocator, .{
+        .runtime_root = config.runtime_root,
+        .data_root = config.data_root,
+    });
+    defer runtime.deinit();
+    if (config.runtime == .managed) {
+        try runtime.startAsync();
+    } else {
+        runtime.markExternalStarting();
+    }
+
+    const http_config = http.Config{
+        .allowed_origin = config.allowed_origin,
+        .app_token = &tokens.app_token,
+        .supervisor_token = &tokens.supervisor_token,
+    };
+
     while (true) {
         var connection = server.accept() catch |err| {
             std.debug.print("api_accept=failed error={s}\n", .{@errorName(err)});
             continue;
         };
-        defer connection.stream.close();
-        try connection.stream.writeAll("HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\n\r\n");
+        const should_shutdown = try handleHttpConnection(allocator, connection.stream, http_config, &runtime);
+        connection.stream.close();
+        if (should_shutdown) {
+            runtime.shutdown();
+            return;
+        }
     }
 }
 
@@ -320,6 +341,123 @@ pub fn boundEndpoint(allocator: std.mem.Allocator, config: ServeConfig, address:
         return .{ .api_url = try allocator.dupe(u8, url) };
     }
     return .{ .api_url = try std.fmt.allocPrint(allocator, "http://127.0.0.1:{d}", .{address.getPort()}) };
+}
+
+fn handleHttpConnection(
+    allocator: std.mem.Allocator,
+    stream: std.net.Stream,
+    config: http.Config,
+    runtime: *runtime_supervisor.ManagedRuntime,
+) !bool {
+    var buffer: [128 * 1024]u8 = undefined;
+    const read_len = try stream.read(&buffer);
+    if (read_len == 0) return false;
+
+    const request = parseHttpRequest(buffer[0..read_len]) catch {
+        try stream.writeAll("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+        return false;
+    };
+
+    const previous_snapshot = runtime.snapshot();
+    var snapshot = previous_snapshot;
+    var response = try http.handle(allocator, config, &snapshot, request);
+    defer response.deinit(allocator);
+    const actions = runtime.mergeHttpSnapshotAndPlan(previous_snapshot, snapshot);
+
+    try writeHttpResponse(stream, response);
+    if (actions.retry_sqlite) runtime.runRetry(.sqlite);
+    if (actions.retry_tigerbeetle) runtime.runRetry(.tigerbeetle);
+    return actions.shutdown;
+}
+
+fn parseHttpRequest(bytes: []const u8) !http.Request {
+    const header_end = std.mem.indexOf(u8, bytes, "\r\n\r\n") orelse return error.InvalidRequest;
+    const head = bytes[0..header_end];
+    const body = bytes[header_end + 4 ..];
+
+    var lines = std.mem.splitSequence(u8, head, "\r\n");
+    const request_line = lines.next() orelse return error.InvalidRequest;
+    var parts = std.mem.splitScalar(u8, request_line, ' ');
+    const method_text = parts.next() orelse return error.InvalidRequest;
+    const path = parts.next() orelse return error.InvalidRequest;
+    _ = parts.next() orelse return error.InvalidRequest;
+
+    var origin: ?[]const u8 = null;
+    var authorization: ?[]const u8 = null;
+    var request_id: ?[]const u8 = null;
+    var content_length: usize = 0;
+    while (lines.next()) |line| {
+        const colon = std.mem.indexOfScalar(u8, line, ':') orelse continue;
+        const name = std.mem.trim(u8, line[0..colon], " \t");
+        const value = std.mem.trim(u8, line[colon + 1 ..], " \t");
+        if (std.ascii.eqlIgnoreCase(name, "Origin")) {
+            origin = value;
+        } else if (std.ascii.eqlIgnoreCase(name, "Authorization")) {
+            authorization = value;
+        } else if (std.ascii.eqlIgnoreCase(name, "X-Request-Id")) {
+            request_id = value;
+        } else if (std.ascii.eqlIgnoreCase(name, "Content-Length")) {
+            content_length = try std.fmt.parseInt(usize, value, 10);
+        }
+    }
+    if (content_length > body.len) return error.InvalidRequest;
+
+    return .{
+        .method = parseHttpMethod(method_text) orelse return error.InvalidRequest,
+        .path = path,
+        .body = body[0..content_length],
+        .origin = origin,
+        .authorization = authorization,
+        .request_id = request_id,
+    };
+}
+
+fn parseHttpMethod(value: []const u8) ?http.Method {
+    if (std.mem.eql(u8, value, "GET")) return .GET;
+    if (std.mem.eql(u8, value, "POST")) return .POST;
+    if (std.mem.eql(u8, value, "OPTIONS")) return .OPTIONS;
+    if (std.mem.eql(u8, value, "PUT")) return .PUT;
+    if (std.mem.eql(u8, value, "DELETE")) return .DELETE;
+    if (std.mem.eql(u8, value, "PATCH")) return .PATCH;
+    return null;
+}
+
+fn writeHttpResponse(stream: std.net.Stream, response: http.Response) !void {
+    var header: [1024]u8 = undefined;
+    const reason = reasonPhrase(response.status_code);
+    const cors = response.allow_origin != null;
+    const head = if (cors)
+        try std.fmt.bufPrint(
+            &header,
+            "HTTP/1.1 {d} {s}\r\nContent-Type: application/json\r\nContent-Length: {d}\r\nConnection: close\r\nX-Request-Id: {s}\r\nAccess-Control-Allow-Origin: {s}\r\nAccess-Control-Allow-Methods: {s}\r\n\r\n",
+            .{ response.status_code, reason, response.body.len, response.request_id, response.allow_origin.?, response.allow_methods orelse "GET, POST, OPTIONS" },
+        )
+    else
+        try std.fmt.bufPrint(
+            &header,
+            "HTTP/1.1 {d} {s}\r\nContent-Type: application/json\r\nContent-Length: {d}\r\nConnection: close\r\nX-Request-Id: {s}\r\n\r\n",
+            .{ response.status_code, reason, response.body.len, response.request_id },
+        );
+    try stream.writeAll(head);
+    try stream.writeAll(response.body);
+}
+
+fn reasonPhrase(code: u16) []const u8 {
+    return switch (code) {
+        200 => "OK",
+        202 => "Accepted",
+        204 => "No Content",
+        400 => "Bad Request",
+        401 => "Unauthorized",
+        403 => "Forbidden",
+        404 => "Not Found",
+        405 => "Method Not Allowed",
+        409 => "Conflict",
+        413 => "Payload Too Large",
+        500 => "Internal Server Error",
+        503 => "Service Unavailable",
+        else => "OK",
+    };
 }
 
 pub fn generateTokens() TokenPair {
@@ -410,7 +548,7 @@ test "managed serve requires only CLI flags and rejects external flags" {
         "--data-root",      "C:\\data",
         "--allowed-origin", development_origin,
         "--handshake",      "stdout-v1",
-        "--sqlite-path",   "C:\\data\\voyage-vii.sqlite3",
+        "--sqlite-path",    "C:\\data\\voyage-vii.sqlite3",
     }));
 }
 
@@ -424,15 +562,15 @@ test "external serve requires all database flags and gates non-loopback listen" 
     }));
 
     const config = try parseServe(&.{
-        "--runtime",                          "external",
-        "--runtime-root",                     "C:\\runtime",
-        "--data-root",                        "C:\\data",
-        "--allowed-origin",                   development_origin,
-        "--handshake",                        "stdout-v1",
-        "--development-container",            "--listen",
-        "0.0.0.0:7800",                       "--advertised-api-url",
-        "http://127.0.0.1:7800",              "--sqlite-path",
-        "C:\\data\\voyage-vii.sqlite3",       "--tigerbeetle-address",
+        "--runtime",                    "external",
+        "--runtime-root",               "C:\\runtime",
+        "--data-root",                  "C:\\data",
+        "--allowed-origin",             development_origin,
+        "--handshake",                  "stdout-v1",
+        "--development-container",      "--listen",
+        "0.0.0.0:7800",                 "--advertised-api-url",
+        "http://127.0.0.1:7800",        "--sqlite-path",
+        "C:\\data\\voyage-vii.sqlite3", "--tigerbeetle-address",
         "tigerbeetle:3000",
     });
     try std.testing.expectEqual(RuntimeMode.external, config.runtime);

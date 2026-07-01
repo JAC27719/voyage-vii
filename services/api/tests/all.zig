@@ -2,6 +2,7 @@ const std = @import("std");
 const main = @import("app");
 const sqlite_tests = @import("sqlite/root.zig");
 const tigerbeetle_tests = @import("tigerbeetle/root.zig");
+const runtime_integration_tests = @import("runtime/integration/root.zig");
 
 test "aggregate imports every API-001 static seam" {
     try main.runSelfTest();
@@ -11,6 +12,7 @@ test "aggregate imports every API-001 static seam" {
 test "aggregate imports API adapter test seams" {
     try sqlite_tests.selfTest();
     try tigerbeetle_tests.selfTest();
+    try runtime_integration_tests.selfTest();
 }
 
 test "all public errors required by the frozen contract are registered" {
