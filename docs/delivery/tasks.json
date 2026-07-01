@@ -731,22 +731,61 @@
       "id": "API-003",
       "title": "Implement TigerBeetle C client adapter",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "api_003_impl",
+      "reviewer": "api_003_review",
       "dependsOn": ["API-001", "FEAS-002", "SEAM-001"],
       "ownedPaths": ["services/api/src/tigerbeetle/**", "services/api/tests/tigerbeetle/**"],
       "excludedPaths": ["HTTP routes", "runtime process supervision"],
       "guide": "docs/delivery/tasks/API-003.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "2bb6a1e559fd690aaba4d990e7e915b97c88860b",
+        "revision": "2bb6a1e559fd690aaba4d990e7e915b97c88860b:751d5c219d01c590da74c753ae36bf86b88f70b0ed01fdc9342e3efff5ea8208",
+        "changedPaths": [
+          "services/api/src/tigerbeetle/root.zig"
+        ],
+        "summary": "Implement the TigerBeetle C client adapter with pinned native client state, serialized lookup probe submission, callback validation, timeout cancellation, dedicated-thread deinit, and an exit-7 stalled-deinit fixture.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Pinned Zig build, aggregate tests, and self-test",
+            "command": "C:\\Users\\jcane\\projects\\hydra\\spikes\\api-pg\\toolchain\\zig-x86_64-windows-0.15.2\\zig.exe build; zig build test from services/api; voyage-vii-api.exe self-test from repository root and services/api",
+            "result": "PASS: default executable build, aggregate tests, and runtime self-tests passed with pinned Zig 0.15.2"
+          },
+          {
+            "criterion": "Native C ABI build and tests",
+            "command": "zig build test -Dtb-client-lib=C:\\Users\\jcane\\AppData\\Local\\Temp\\hydra-feas-002\\tigerbeetle-git\\src\\clients\\c\\lib\\x86_64-windows\\tb_client.lib -Dtb-client-include=C:\\Users\\jcane\\AppData\\Local\\Temp\\hydra-feas-002\\tigerbeetle-git\\src\\clients\\c",
+            "result": "PASS: approved TigerBeetle 0.17.7 static C client linked into executable and aggregate tests without a CLI, proxy, sidecar, or dynamic TigerBeetle dependency"
+          },
+          {
+            "criterion": "Live native adapter acceptance",
+            "command": "Disposable TigerBeetle 0.17.7 server with VOYAGE_API_TB_ADDRESS, VOYAGE_API_TB_UNAVAILABLE_ADDRESS=127.0.0.1:30999, and VOYAGE_API_TB_STALLED_PARENT=1 through aggregate selfTest",
+            "result": "PASS: lookup, repeated init/deinit, unavailable timeout/cancellation, callback identity validation, and stalled-deinit child exit 7 within 12 seconds passed in the native aggregate run"
+          },
+          {
+            "criterion": "Review, ownership, and hygiene",
+            "command": "git diff --cached --check; independent API-003 staged revision review",
+            "result": "PASS: staged path matched API-003 ownership, canonical revision hash was reproduced, and Dewey approved the focused static review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "api_003_review",
+        "reviewedRevision": "2bb6a1e559fd690aaba4d990e7e915b97c88860b:751d5c219d01c590da74c753ae36bf86b88f70b0ed01fdc9342e3efff5ea8208",
+        "integrationCommit": "7eb516acd44c1ba6277b75c398d2597a6fe799f4",
+        "findings": [],
+        "residualRisks": [
+          "Native TigerBeetle acceptance is Windows 11 x64 only and requires the approved FEAS-002 static C client inputs.",
+          "Live TigerBeetle acceptance is opt-in through environment variables; normal aggregate tests compile the native-gated path when native inputs are supplied and skip live probes unless addresses are provided."
+        ]
+      }
     },
     {
       "id": "DBDOC-001",
       "title": "Create and verify database DBML documentation",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -761,7 +800,7 @@
       "id": "API-004",
       "title": "Implement HTTP security and lifecycle routes",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -842,7 +881,7 @@
       "id": "RUNTIME-003",
       "title": "Implement managed TigerBeetle lifecycle",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
