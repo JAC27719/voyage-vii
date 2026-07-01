@@ -909,22 +909,64 @@
       "id": "API-005",
       "title": "Implement SQLite adapter and migrations",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "api_005_impl",
+      "reviewer": "api_005_review",
       "dependsOn": ["FEAS-004", "API-001", "SEAM-001"],
       "ownedPaths": ["services/api/build.zig", "services/api/build.zig.zon", "services/api/src/main.zig", "services/api/src/sqlite/**", "services/api/migrations/**", "services/api/tests/all.zig", "services/api/tests/sqlite/**", "docs/database/sqlite.dbml", "docs/database/README.md"],
       "excludedPaths": ["HTTP routes", "runtime process supervision", "PostgreSQL compatibility work"],
       "guide": "docs/delivery/tasks/API-005.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "e69ff9dd1ea762d0c8d53532258f4301499d150c",
+        "revision": "e69ff9dd1ea762d0c8d53532258f4301499d150c:81d52cb7b391be44871b1e9e9b75c0815e9a1917293a7a3820315dd98ee0a1d5",
+        "changedPaths": [
+          "docs/database/README.md",
+          "docs/database/sqlite.dbml",
+          "services/api/build.zig",
+          "services/api/build.zig.zon",
+          "services/api/migrations/001_schema_migrations.sql",
+          "services/api/src/main.zig",
+          "services/api/src/sqlite/root.zig",
+          "services/api/tests/all.zig",
+          "services/api/tests/sqlite/root.zig"
+        ],
+        "summary": "Replace the API external database seam with a native SQLite adapter, approved amalgamation build wiring, strict root-contained database opening, WAL/foreign-key/busy-timeout configuration, transactional schema migration ledger, synchronized SQLite DBML, and focused aggregate/self-test coverage.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "SQLite build, aggregate tests, and runtime self-tests",
+            "command": "Pinned Zig 0.15.2 build and build test from services/api with -Dsqlite-amalgamation=C:\\Users\\jcane\\projects\\hydra\\spikes\\sqlite\\source\\sqlite-amalgamation-3530300; voyage-vii-api.exe self-test from repository root and services/api",
+            "result": "PASS: executable build, aggregate API tests, and runtime self-tests passed with the approved official SQLite 3.53.3 amalgamation source"
+          },
+          {
+            "criterion": "Migration and DBML synchronization",
+            "command": "Get-FileHash services/api/migrations/001_schema_migrations.sql -Algorithm SHA256; aggregate SQLite adapter self-test DBML compatibility check",
+            "result": "PASS: migration SHA-256 a861b67186348f53d94e0c7862ff927f2eb4fee38f2fb788a9feee68b7bdcaa9 matches the adapter constant; DBML covers schema_migrations table, columns, affinities, primary key, unique constraint/index, SHA-256 CHECK, timestamp default, and no relations or triggers"
+          },
+          {
+            "criterion": "PostgreSQL seam removal and hygiene",
+            "command": "Focused rg scans for old PostgreSQL flags/public errors/pg.zig dependency in API-005 owned surface; git diff --check -- API-005 paths; independent staged revision review",
+            "result": "PASS: no old PostgreSQL CLI flags, public errors, @import(\"pg\"), or pg dependency remain in API-005-owned API build/test surface; diff check passed with only LF-to-CRLF warnings; Hegel approved the staged revision"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "api_005_review",
+        "reviewedRevision": "e69ff9dd1ea762d0c8d53532258f4301499d150c:81d52cb7b391be44871b1e9e9b75c0815e9a1917293a7a3820315dd98ee0a1d5",
+        "integrationCommit": "d3428f2d55d43281da164135167b7c55e27bead2",
+        "findings": [],
+        "residualRisks": [
+          "PostgreSQL runtime lifecycle self-test code remains reachable only because runtime lifecycle cleanup is outside API-005 ownership and is superseded by later SQLite runtime tasks.",
+          "SQLite query_timeout_ms remains a frozen public constant; this revision relies on SQLite busy-timeout behavior and does not add a separate per-query cancellation mechanism."
+        ]
+      }
     },
     {
       "id": "DBDOC-001",
       "title": "Create and verify database DBML documentation",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -939,7 +981,7 @@
       "id": "API-004",
       "title": "Implement HTTP security and lifecycle routes",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -1005,7 +1047,7 @@
       "id": "RUNTIME-002",
       "title": "Implement managed SQLite lifecycle",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
