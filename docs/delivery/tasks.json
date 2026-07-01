@@ -1201,8 +1201,14 @@
       "worker": null,
       "reviewer": null,
       "dependsOn": ["API-004", "RUNTIME-002", "RUNTIME-003"],
-      "ownedPaths": ["services/api/src/runtime/supervisor/**", "services/api/tests/runtime/integration/**"],
-      "excludedPaths": ["desktop supervisor", "packaging"],
+      "ownedPaths": [
+        "services/api/src/runtime/supervisor/**",
+        "services/api/tests/runtime/integration/**",
+        "services/api/src/main.zig",
+        "services/api/src/http/**",
+        "services/api/tests/all.zig"
+      ],
+      "excludedPaths": ["shared build files", "database adapters", "runtime manifest/provenance", "desktop supervisor", "packaging"],
       "guide": "docs/delivery/tasks/RUNTIME-004.md",
       "submission": null,
       "review": null

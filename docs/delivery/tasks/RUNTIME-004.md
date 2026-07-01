@@ -5,7 +5,7 @@
 
 ## Frozen inputs
 
-Use status/handshake/manifest/error contracts from `CONTRACTS.md`, every lifecycle deadline from `TIMEOUTS.md`, and only API-001's predeclared supervisor seam. Stop if shared build, dependency, entrypoint, or aggregate-test files must change.
+Use status/handshake/manifest/error contracts from `CONTRACTS.md`, every lifecycle deadline from `TIMEOUTS.md`, and API-001's predeclared supervisor seam. This task owns the minimal shared API entrypoint, HTTP dispatch, and aggregate-test wiring required to make the managed supervisor live. Stop if shared build, dependency, database adapter, manifest/provenance, desktop supervisor, packaging, or unrelated task files must change.
 
 ## Objective
 
