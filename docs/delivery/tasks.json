@@ -1378,16 +1378,56 @@
       "id": "DESKTOP-002",
       "title": "Implement the Tauri process supervisor",
       "wave": 3,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Pascal",
       "dependsOn": ["DESKTOP-001", "RUNTIME-004", "DESKTOP-004"],
       "ownedPaths": ["apps/desktop/src-tauri/src/runtime/**", "apps/desktop/src-tauri/src/main.rs", "apps/desktop/src-tauri/tests/runtime/**", "apps/desktop/fixtures/fake-api/**"],
       "excludedPaths": ["frontend UI", "Zig API", "manifests", "capabilities and permissions", "shared configuration", "static test registration"],
       "guide": "docs/delivery/tasks/DESKTOP-002.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "6a8c80b625120ad2c4d6a93058e181e11cc46208",
+        "revision": "6a8c80b625120ad2c4d6a93058e181e11cc46208:a7c6bec24d01aaa82990b2a649bd3ea919974068e4b4d7bd313973a64ff84b69",
+        "changedPaths": [
+          "apps/desktop/fixtures/fake-api/fake-api.ps1",
+          "apps/desktop/src-tauri/src/main.rs",
+          "apps/desktop/src-tauri/src/runtime/mod.rs"
+        ],
+        "summary": "Implement the Tauri API process supervisor with managed packaged launch arguments, bounded stdout handshake parsing, token custody, credential-free runtime-change events, restart budget enforcement, shutdown escalation, Windows Job Object containment, no-descendant verification, and fake API coverage for handshake, restart, shutdown, exit-7, and process-tree scenarios.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Rust formatting",
+            "command": "rustup run 1.96.0 cargo fmt --check",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Rust linting",
+            "command": "rustup run 1.96.0 cargo clippy --all-targets --all-features -- -D warnings",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Runtime supervisor tests",
+            "command": "rustup run 1.96.0 cargo test --all-targets",
+            "result": "PASS: 14 runtime tests plus the existing desktop integration test passed, covering valid, delayed, malformed, duplicate, missing, crash, grandchild, exit-7, forced shutdown, env stripping, token redaction, restart budget, and supervisor-token shutdown scenarios"
+          },
+          {
+            "criterion": "Diff hygiene",
+            "command": "git diff --cached --check; git diff --check",
+            "result": "PASS"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Pascal",
+        "reviewedRevision": "6a8c80b625120ad2c4d6a93058e181e11cc46208:a7c6bec24d01aaa82990b2a649bd3ea919974068e4b4d7bd313973a64ff84b69",
+        "integrationCommit": "bbaea637241ac0b5fc91f57c69b74cfbc32740e6",
+        "findings": [],
+        "residualRisks": [
+          "Full packaged-runtime smoke with the real API and TigerBeetle bundle remains assigned to later package and hardening tasks."
+        ]
+      }
     },
     {
       "id": "DESKTOP-003",
