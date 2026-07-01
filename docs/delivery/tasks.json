@@ -1305,7 +1305,7 @@
       "id": "DESKTOP-001",
       "title": "Create the Tauri desktop foundation",
       "wave": 3,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
