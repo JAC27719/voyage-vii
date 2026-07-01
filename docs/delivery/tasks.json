@@ -966,16 +966,47 @@
       "id": "DBDOC-001",
       "title": "Create and verify database DBML documentation",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "dbdoc_001_impl",
+      "reviewer": "dbdoc_001_review",
       "dependsOn": ["API-005", "API-003"],
       "ownedPaths": ["docs/database/README.md", "docs/database/tigerbeetle.md", "docs/database/proposed/**", "docs/database/review/**"],
       "excludedPaths": ["docs/database/sqlite.dbml", "SQL migrations", "production database code", "credentials", "sample production data"],
       "guide": "docs/delivery/tasks/DBDOC-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "40f8edcfb22487db5c5b213960b05c5756c21d60",
+        "revision": "40f8edcfb22487db5c5b213960b05c5756c21d60:e7293609c92f43f135b951d049f3022a4699b06ea57c951f3a35956a7ca5b1a2",
+        "changedPaths": [
+          "docs/database/README.md",
+          "docs/database/proposed/finance-unimplemented.dbml",
+          "docs/database/review/sqlite-schema-review.md",
+          "docs/database/tigerbeetle.md"
+        ],
+        "summary": "Add independent implemented SQLite schema review, TigerBeetle account/transfer mapping documentation, clearly separated unimplemented proposed finance DBML, and README synchronization guidance without changing sqlite.dbml or migrations.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "SQLite migration-to-DBML comparison",
+            "command": "Pinned Zig 0.15.2 aggregate zig build test from services/api with approved SQLite amalgamation; manual table/column/constraint/index checklist in docs/database/review/sqlite-schema-review.md",
+            "result": "PASS: schema_migrations table, columns, affinities, primary key, unique constraint/index, SHA-256 CHECK, timestamp default, no relations, and no triggers match sqlite.dbml"
+          },
+          {
+            "criterion": "Separation, TigerBeetle mapping, and hygiene",
+            "command": "Sensitive-content scan across DBDOC paths; git diff --cached --check; independent DBDOC-001 review and focused re-review",
+            "result": "PASS: proposed finance DBML is marked unimplemented, TigerBeetle is documented as a non-relational mapping, ledger/code ambiguity was fixed, and Epicurus approved the re-review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "dbdoc_001_review",
+        "reviewedRevision": "40f8edcfb22487db5c5b213960b05c5756c21d60:e7293609c92f43f135b951d049f3022a4699b06ea57c951f3a35956a7ca5b1a2",
+        "integrationCommit": "9a702c098856ddb82b5a270a30930196e4f67b4c",
+        "findings": [],
+        "residualRisks": [
+          "Future finance structures remain unimplemented proposals until a later task adds executable SQLite migrations and updates sqlite.dbml in the same review unit."
+        ]
+      }
     },
     {
       "id": "API-004",
