@@ -981,16 +981,45 @@
       "id": "API-004",
       "title": "Implement HTTP security and lifecycle routes",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "api_004_impl",
+      "reviewer": "api_004_review",
       "dependsOn": ["API-001", "API-005", "API-003"],
       "ownedPaths": ["services/api/src/http/**", "services/api/src/status/**", "services/api/tests/http/**"],
       "excludedPaths": ["database lifecycle", "desktop application"],
       "guide": "docs/delivery/tasks/API-004.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "ddf192b5c050a927d363fa1551e231bb47d4d217",
+        "revision": "ddf192b5c050a927d363fa1551e231bb47d4d217:1a641c06824f859778e10efefa4fcf0b1e07a734f521e5b7c136e624678bc0c7",
+        "changedPaths": [
+          "services/api/src/http/root.zig",
+          "services/api/src/status/root.zig"
+        ],
+        "summary": "Implement the frozen HTTP/status contract seam with exact routes, scoped bearer authentication, CORS preflight handling, request-id propagation, JSON escaping, health/readiness/status bodies, retry idempotence, shutdown quiescence, and public error/status mappings.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Route, auth, retry, shutdown, and golden body tests",
+            "command": "Pinned Zig 0.15.2 aggregate zig build test from services/api with -Dsqlite-amalgamation=C:\\Users\\jcane\\projects\\hydra\\spikes\\sqlite\\source\\sqlite-amalgamation-3530300",
+            "result": "PASS: aggregate tests cover health/readiness bodies, app/supervisor scope separation, CORS preflight and origin rejection, 64 KiB body limit, retry idempotence, shutdown duplicate handling, and JSON escaping"
+          },
+          {
+            "criterion": "Review and hygiene",
+            "command": "git diff --cached --check; independent API-004 staged review and focused re-review",
+            "result": "PASS: staged paths matched API-004 ownership; initial reviewer findings on shutdown retry, JSON escaping, and unknown-component preflight were fixed; Heisenberg approved the re-review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "api_004_review",
+        "reviewedRevision": "ddf192b5c050a927d363fa1551e231bb47d4d217:1a641c06824f859778e10efefa4fcf0b1e07a734f521e5b7c136e624678bc0c7",
+        "integrationCommit": "acccb90905fd7c9dcedecc9ea5e8b208f6847697",
+        "findings": [],
+        "residualRisks": [
+          "API-004 implements a directly testable HTTP/status seam only; live accept-loop integration is deferred because the task explicitly stops before shared entrypoint changes."
+        ]
+      }
     },
     {
       "id": "RUNTIME-001",
@@ -1092,7 +1121,7 @@
       "id": "COMPOSE-001",
       "title": "Create the external-mode Compose environment",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
