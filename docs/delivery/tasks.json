@@ -1433,7 +1433,7 @@
       "id": "DESKTOP-003",
       "title": "Implement the SolidJS system-status UI",
       "wave": 3,
-      "status": "ready",
+      "status": "in_progress",
       "inference": "low",
       "worker": null,
       "reviewer": null,
