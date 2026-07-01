@@ -5,7 +5,7 @@
 
 ## Frozen inputs
 
-Use the DESKTOP-001 predeclared runtime seam, `DEPENDENCY-PINS.md`, `CONTRACTS.md`, `TIMEOUTS.md`, and `PACKAGING.md`. Replace only `src-tauri/src/runtime/**`, its owned tests, and fake fixtures. Stop if any manifest, lockfile, shared configuration, main entrypoint, or static test registration must change.
+Use the DESKTOP-001 predeclared runtime seam, `DEPENDENCY-PINS.md`, `CONTRACTS.md`, `TIMEOUTS.md`, and `PACKAGING.md`. Replace only `src-tauri/src/runtime/**`, the existing runtime hook points in `src-tauri/src/main.rs`, owned runtime tests, and fake fixtures. The `main.rs` edit is limited to installing the runtime supervisor state, starting it from setup, serving `get_runtime_snapshot` from that state, and preserving the already-declared command names. Stop if any manifest, lockfile, shared configuration, capability/permission file, or static test registration must change.
 
 ## Objective
 
@@ -37,7 +37,7 @@ Supervise the packaged Zig API, protect both tokens, and contain the complete ch
 - Token scan over logs, events, panic output, and files.
 - Graceful, forced, and exit-7 process-tree cleanup on native Windows 11 x64.
 - Concurrent close/restart race tests.
-- `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-targets`, and `git diff --check` pass without manifest or shared-entrypoint changes.
+- `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-targets`, and `git diff --check` pass without manifest, capability, permission, shared-configuration, or static-registration changes.
 
 ## Reviewer focus
 
