@@ -1408,7 +1408,7 @@
       "id": "DESKTOP-004",
       "title": "Implement verified portable runtime staging",
       "wave": 3,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
