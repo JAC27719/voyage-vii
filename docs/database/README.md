@@ -14,3 +14,9 @@ superseded PostgreSQL history.
 
 To inspect visually, import `sqlite.dbml` into dbdiagram.io. The file must not
 contain credentials, connection strings, local paths, or production data.
+
+Independent synchronization reviews live under `docs/database/review/`.
+TigerBeetle field mappings are documented in `docs/database/tigerbeetle.md`
+because TigerBeetle is not a relational SQL schema. Proposed, unimplemented
+finance diagrams live under `docs/database/proposed/` and must not be treated
+as executable schema until a later migration task moves them into SQLite.
