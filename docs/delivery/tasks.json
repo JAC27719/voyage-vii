@@ -614,16 +614,55 @@
       "id": "FEAS-004",
       "title": "Prove SQLite native integration",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "feas_004_impl",
+      "reviewer": "feas_004_review",
       "dependsOn": ["PLAN-002"],
       "ownedPaths": ["spikes/sqlite/**", "docs/feasibility/sqlite.md", "docs/planning/v2/DEPENDENCY-PINS.md"],
       "excludedPaths": ["production API behavior", "desktop application", "Git state"],
       "guide": "docs/delivery/tasks/FEAS-004.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "9090d3e3b9abead7c48347a01d13c0fc87a77990",
+        "revision": "9090d3e3b9abead7c48347a01d13c0fc87a77990:b311dee2e20c2004b974804443b757c7626b7feddf4fbe5e4b8d66d62ee62db3",
+        "changedPaths": [
+          "docs/feasibility/sqlite.md",
+          "docs/planning/v2/DEPENDENCY-PINS.md",
+          "spikes/sqlite/.gitignore",
+          "spikes/sqlite/build.zig",
+          "spikes/sqlite/scripts/run-evidence.ps1",
+          "spikes/sqlite/src/main.zig"
+        ],
+        "summary": "Freeze the official SQLite 3.53.3 amalgamation source, prove native Zig 0.15.2 C API integration on Windows 11 x64, and record WAL, foreign-key, busy-timeout, migration, probe, and close evidence.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Official SQLite source provenance",
+            "command": "spikes/sqlite/scripts/run-evidence.ps1 -Zig C:\\Users\\jcane\\projects\\hydra\\spikes\\api-pg\\toolchain\\zig-x86_64-windows-0.15.2\\zig.exe",
+            "result": "PASS: downloaded https://www.sqlite.org/2026/sqlite-amalgamation-3530300.zip, verified size 2945929 and SHA3-256 d45c688a8cb23f68611a894a756a12d7eb6ab6e9e2468ca70adbeab3808b5ab9, and recorded SQLite public-domain license posture"
+          },
+          {
+            "criterion": "Native Windows SQLite build and behavior",
+            "command": "spikes/sqlite/scripts/run-evidence.ps1 native build/run with pinned Zig 0.15.2",
+            "result": "PASS: built unmodified sqlite3.c into sqlite-spike.exe; native run verified SQLite 3.53.3, WAL mode, foreign keys, 5000 ms busy timeout, transaction, schema_migrations DDL/write, SELECT 1, migration count, and clean close"
+          },
+          {
+            "criterion": "Dependency exclusion, review, and hygiene",
+            "command": "rg wrapper/fork/binary supplier search; git diff --cached --check; independent FEAS-004 staged revision review",
+            "result": "PASS: no wrapper, fork, binary distribution, alternate supplier, or new SQLite dependency was introduced; diff hygiene passed; reviewer approved corrected revision after WAL text lifetime fix"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "feas_004_review",
+        "reviewedRevision": "9090d3e3b9abead7c48347a01d13c0fc87a77990:b311dee2e20c2004b974804443b757c7626b7feddf4fbe5e4b8d66d62ee62db3",
+        "integrationCommit": "e7ba34a75634c96adef21f4651144fa194d1cdaa",
+        "findings": [],
+        "residualRisks": [
+          "Evidence runs produce ignored local artifacts under spikes/sqlite/cache, evidence, runtime, source, and zig-out; later packaging must rebuild from the frozen official source instead of consuming local outputs.",
+          "FEAS-004 proves native SQLite C API integration only; production adapter behavior remains owned by API-005."
+        ]
+      }
     },
     {
       "id": "API-001",
@@ -870,7 +909,7 @@
       "id": "API-005",
       "title": "Implement SQLite adapter and migrations",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
