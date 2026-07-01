@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "productVersion": "0.1.0",
+  "target": "x86_64-pc-windows-msvc",
+  "cachePath": "tools/runtime-staging/.cache",
+  "outputPath": "apps/desktop/src-tauri/resources/runtime",
+  "reportPath": "tools/runtime-staging/reports",
+  "components": [
+    {
+      "id": "api",
+      "version": "0.1.0",
+      "kind": "first-party-build",
+      "target": "x86_64-pc-windows-msvc",
+      "path": "api/voyage-vii-api.exe",
+      "licensePath": null,
+      "source": {
+        "kind": "first-party-build",
+        "url": null,
+        "revision": null
+      },
+      "status": "pending-package-task"
+    },
+    {
+      "id": "sqlite",
+      "version": "3.53.3",
+      "kind": "official-source",
+      "target": "x86_64-pc-windows-msvc",
+      "archive": {
+        "url": "https://www.sqlite.org/2026/sqlite-amalgamation-3530300.zip",
+        "revision": "3.53.3",
+        "format": "zip",
+        "size": 2945929,
+        "sha256": "646421e12aac110282ef8cc68f1a62d4bb15fc7b8f09da0b53e29ee690500431",
+        "sha3_256": "d45c688a8cb23f68611a894a756a12d7eb6ab6e9e2468ca70adbeab3808b5ab9"
+      },
+      "requiredFiles": [
+        {
+          "archivePath": "sqlite-amalgamation-3530300/sqlite3.c",
+          "destination": "sqlite/sqlite3.c",
+          "sha256": "87497ab605bedd0dbee27a209c1eeff8c89b229b13f921a7efdbb81a13f779fd"
+        },
+        {
+          "archivePath": "sqlite-amalgamation-3530300/sqlite3.h",
+          "destination": "sqlite/sqlite3.h",
+          "sha256": "4ff81af4849acabc76fc8349abb926814395072617ca18e08800abf734ab7612"
+        }
+      ],
+      "license": {
+        "kind": "public-domain",
+        "url": "https://www.sqlite.org/copyright.html",
+        "destination": "licenses/sqlite/PUBLIC-DOMAIN.txt",
+        "notice": "SQLite is in the public domain. See https://www.sqlite.org/copyright.html."
+      }
+    },
+    {
+      "id": "tigerbeetle",
+      "version": "0.17.7",
+      "kind": "official-release",
+      "target": "x86_64-pc-windows-msvc",
+      "archive": {
+        "url": "https://github.com/tigerbeetle/tigerbeetle/releases/download/0.17.7/tigerbeetle-x86_64-windows.zip",
+        "revision": "0.17.7",
+        "format": "zip",
+        "sha256": "ad1d8a77df5589f4181eb73abc560f5b17cdb9ac68b700093a9878fd46e448c7"
+      },
+      "requiredFiles": [
+        {
+          "archivePath": "tigerbeetle.exe",
+          "destination": "tigerbeetle/tigerbeetle.exe",
+          "sha256": "fcb78aa4536e765e2cc15e6f2e222b17c00a325b87e497b1509471682e903a48",
+          "peMachine": "0x8664"
+        }
+      ],
+      "licenseArchive": {
+        "url": "https://github.com/tigerbeetle/tigerbeetle/archive/refs/tags/0.17.7.zip",
+        "revision": "0.17.7",
+        "format": "zip",
+        "sha256": "b343fa0e4501a063a47b893ec39f278133c93cb67c585dfe81b64ccee7186e9a",
+        "licenseArchivePath": "tigerbeetle-0.17.7/LICENSE",
+        "licenseSha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+        "destination": "licenses/tigerbeetle/LICENSE"
+      }
+    }
+  ]
+}

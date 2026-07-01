@@ -1,0 +1,4 @@
+/.cache/
+/reports/
+!/stage-runtime.ps1
+!.gitignore
