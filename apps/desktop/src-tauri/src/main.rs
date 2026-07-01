@@ -28,8 +28,8 @@ struct RuntimeSnapshot {
 }
 
 #[tauri::command]
-fn get_runtime_snapshot() -> RuntimeSnapshot {
-    runtime::initial_snapshot()
+fn get_runtime_snapshot(runtime: tauri::State<'_, runtime::RuntimeHandle>) -> RuntimeSnapshot {
+    snapshot_from_runtime(&runtime)
 }
 
 #[tauri::command]
@@ -38,7 +38,9 @@ fn open_logs() -> Result<(), String> {
 }
 
 fn main() {
+    let runtime = runtime::RuntimeHandle::new();
     let builder = tauri::Builder::default()
+        .manage(runtime)
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.unminimize();
@@ -52,6 +54,9 @@ fn main() {
         .setup(|app| {
             runtime::self_test().map_err(|err| err.to_string())?;
             smoke::self_test().map_err(|err| err.to_string())?;
+            app.state::<runtime::RuntimeHandle>()
+                .start(app.handle().clone())
+                .map_err(|err| err.to_string())?;
             if let Some(window) = app.get_webview_window("main") {
                 window.show()?;
                 window.set_focus()?;
@@ -64,13 +69,18 @@ fn main() {
         .expect("failed to run Voyage VII");
 }
 
+fn snapshot_from_runtime(runtime: &runtime::RuntimeHandle) -> RuntimeSnapshot {
+    runtime.snapshot()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
     fn static_seams_are_registered() {
         super::runtime::self_test().expect("runtime seam");
         super::smoke::self_test().expect("smoke seam");
-        let snapshot = super::get_runtime_snapshot();
+        let runtime = super::runtime::RuntimeHandle::new();
+        let snapshot = super::snapshot_from_runtime(&runtime);
         assert_eq!(snapshot.generation, 0);
     }
 }
