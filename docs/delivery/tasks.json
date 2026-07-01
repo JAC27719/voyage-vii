@@ -365,7 +365,7 @@
       "id": "PLAN-002",
       "title": "Amend database posture to SQLite",
       "wave": 2,
-      "status": "submitted",
+      "status": "integrated",
       "inference": "low",
       "worker": "plan_002_impl",
       "reviewer": "plan_002_review",
@@ -375,7 +375,7 @@
       "guide": "docs/delivery/tasks/PLAN-002.md",
       "submission": {
         "base": "3fd92c5816fb22fae0cb72aac6b48eeb6194fd2d",
-        "revision": "pending-coordinator-staged-hash",
+        "revision": "3fd92c5816fb22fae0cb72aac6b48eeb6194fd2d:77de513e25615c75f2d8156d568a2049a8926b380782877a820e591bf9e59d93",
         "changedPaths": [
           "AGENTS.md",
           "docs/adr/0012-sqlite-general-purpose-database.md",
@@ -406,13 +406,33 @@
         "summary": "Add ADR-0012, replace future PostgreSQL delivery work with SQLite, retain TigerBeetle, and retarget contracts, planning, packaging, DBML, lifecycle, and task graph records.",
         "acceptanceEvidence": [
           {
-            "criterion": "pending",
-            "command": "pending coordinator validation",
-            "result": "pending"
+            "criterion": "Registry schema and graph",
+            "command": "Test-Json against docs/delivery/task-registry.schema.json; read-only PowerShell ID/dependency/DAG/wave/audit validation",
+            "result": "PASS: schema validates; 33 unique tasks; dependencies resolve; graph is acyclic and wave-ordered; AUDIT-001 depends on every peer"
+          },
+          {
+            "criterion": "Contracts, ADR, and active PostgreSQL replacement",
+            "command": "Targeted read-only searches across AGENTS.md, docs/adr, docs/planning/v2, docs/delivery/tasks, docs/delivery/tasks.json, and docs/database",
+            "result": "PASS: ADR-0012 explicitly supersedes PostgreSQL-specific decisions; public contracts use sqlite component IDs/errors; future active tasks depend on FEAS-004/API-005 instead of PostgreSQL implementation work"
+          },
+          {
+            "criterion": "Links, review, and hygiene",
+            "command": "Local Markdown link validation; git diff --cached --check; independent PLAN-002 staged revision review",
+            "result": "PASS: local Markdown links resolve, diff hygiene passes after REV-001 rework, reviewer reproduced revision 3fd92c5816fb22fae0cb72aac6b48eeb6194fd2d:77de513e25615c75f2d8156d568a2049a8926b380782877a820e591bf9e59d93 and approved"
           }
         ]
       },
-      "review": null
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "plan_002_review",
+        "reviewedRevision": "3fd92c5816fb22fae0cb72aac6b48eeb6194fd2d:77de513e25615c75f2d8156d568a2049a8926b380782877a820e591bf9e59d93",
+        "integrationCommit": "3aff716b7c99558d376e0fb861dee829c9187b95",
+        "findings": [],
+        "residualRisks": [
+          "FEAS-004 must freeze the exact official SQLite version, archive URL, hash, and compile options before API-005 can implement production SQLite behavior.",
+          "Integrated PostgreSQL feasibility and adapter records remain historical evidence only and are superseded for future work by ADR-0012."
+        ]
+      }
     },
     {
       "id": "FEAS-001",
