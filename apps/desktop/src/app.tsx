@@ -1,49 +1,38 @@
-import { invoke } from "@tauri-apps/api/core";
-import { createResource } from "solid-js";
+import { Navigate, Route, Router } from "@solidjs/router";
+import { For } from "solid-js";
 
-type RuntimeSnapshot = {
-  generation: number;
-  state: "launching" | "connected" | "restarting" | "failed" | "stopping";
-  connection?: {
-    apiUrl: string;
-    appToken: string;
-  };
-  error?: {
-    code: string;
-    message: string;
-  };
-};
-
-const fallbackSnapshot: RuntimeSnapshot = {
-  generation: 0,
-  state: "launching",
-};
-
-async function getRuntimeSnapshot(): Promise<RuntimeSnapshot> {
-  try {
-    return await invoke<RuntimeSnapshot>("get_runtime_snapshot");
-  } catch {
-    return fallbackSnapshot;
-  }
-}
+import { modules } from "./module-registry";
 
 export function App() {
-  const [snapshot] = createResource(getRuntimeSnapshot);
-
   return (
-    <main class="app-shell">
+    <div class="app-shell">
       <aside class="sidebar" aria-label="Primary">
-        <div class="brand-mark">VII</div>
-      </aside>
-      <section class="workspace" aria-live="polite">
-        <div class="status-line">
-          <span
-            class="status-dot"
-            data-state={snapshot()?.state ?? "launching"}
-          />
-          <span>{snapshot()?.state ?? "launching"}</span>
+        <div class="brand-mark" aria-label="Voyage VII">
+          VII
         </div>
+        <nav aria-label="Modules">
+          <For each={modules}>
+            {(module) => (
+              <a href={module.path} aria-current="page">
+                {module.label}
+              </a>
+            )}
+          </For>
+        </nav>
+      </aside>
+      <section class="workspace">
+        <Router>
+          <Route
+            path="/"
+            component={() => <Navigate href="/system/status" />}
+          />
+          <For each={modules}>
+            {(module) => (
+              <Route path={module.path} component={module.component} />
+            )}
+          </For>
+        </Router>
       </section>
-    </main>
+    </div>
   );
 }
