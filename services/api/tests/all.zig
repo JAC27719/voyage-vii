@@ -1,6 +1,6 @@
 const std = @import("std");
 const main = @import("app");
-const postgres_tests = @import("postgres/root.zig");
+const sqlite_tests = @import("sqlite/root.zig");
 const tigerbeetle_tests = @import("tigerbeetle/root.zig");
 
 test "aggregate imports every API-001 static seam" {
@@ -9,7 +9,7 @@ test "aggregate imports every API-001 static seam" {
 }
 
 test "aggregate imports API adapter test seams" {
-    try postgres_tests.selfTest();
+    try sqlite_tests.selfTest();
     try tigerbeetle_tests.selfTest();
 }
 
@@ -27,9 +27,9 @@ test "all public errors required by the frozen contract are registered" {
         "service_unavailable",
         "shutting_down",
         "internal_error",
-        "postgres_unavailable",
-        "postgres_authentication_failed",
-        "postgres_timeout",
+        "sqlite_unavailable",
+        "sqlite_busy",
+        "sqlite_timeout",
         "tigerbeetle_unavailable",
         "tigerbeetle_timeout",
         "native_shutdown_timeout",

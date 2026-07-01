@@ -1,9 +1,8 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const api = @import("api");
-const pg = @import("pg");
 
-const postgres = @import("postgres/root.zig");
+pub const sqlite_adapter = @import("sqlite/root.zig");
 const tigerbeetle = @import("tigerbeetle/root.zig");
 const http = @import("http/root.zig");
 const status = @import("status/root.zig");
@@ -27,7 +26,6 @@ pub const token_raw_len = 32;
 pub const token_encoded_len = std.base64.url_safe_no_pad.Encoder.calcSize(token_raw_len);
 
 const ApiImport = api;
-const PgImport = pg;
 
 pub const ExitCode = enum(u8) {
     ok = 0,
@@ -61,7 +59,6 @@ pub const ConfigError = error{
     ManagedModeRejectedExternalFlag,
     DevelopmentContainerRequiresExternalMode,
     NonLoopbackListenRequiresDevelopmentContainer,
-    PasswordFileMustBeAbsolute,
 };
 
 pub const Command = union(enum) {
@@ -71,11 +68,7 @@ pub const Command = union(enum) {
 };
 
 pub const ExternalDatabaseConfig = struct {
-    postgres_host: []const u8,
-    postgres_port: u16,
-    postgres_database: []const u8,
-    postgres_user: []const u8,
-    postgres_password_file: []const u8,
+    sqlite_path: []const u8,
     tigerbeetle_address: []const u8,
 };
 
@@ -161,11 +154,7 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
     var listen_seen = false;
     var advertised_api_url: ?[]const u8 = null;
     var development_container = false;
-    var postgres_host: ?[]const u8 = null;
-    var postgres_port: ?u16 = null;
-    var postgres_database: ?[]const u8 = null;
-    var postgres_user: ?[]const u8 = null;
-    var postgres_password_file: ?[]const u8 = null;
+    var sqlite_path: ?[]const u8 = null;
     var tigerbeetle_address: ?[]const u8 = null;
 
     var index: usize = 0;
@@ -208,22 +197,10 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
             if (advertised_api_url != null) return error.DuplicateFlag;
             if (!isValidApiUrl(value)) return error.InvalidAdvertisedApiUrl;
             advertised_api_url = value;
-        } else if (std.mem.eql(u8, flag, "--postgres-host")) {
-            if (postgres_host != null) return error.DuplicateFlag;
-            postgres_host = value;
-        } else if (std.mem.eql(u8, flag, "--postgres-port")) {
-            if (postgres_port != null) return error.DuplicateFlag;
-            postgres_port = std.fmt.parseInt(u16, value, 10) catch return error.InvalidArguments;
-        } else if (std.mem.eql(u8, flag, "--postgres-database")) {
-            if (postgres_database != null) return error.DuplicateFlag;
-            postgres_database = value;
-        } else if (std.mem.eql(u8, flag, "--postgres-user")) {
-            if (postgres_user != null) return error.DuplicateFlag;
-            postgres_user = value;
-        } else if (std.mem.eql(u8, flag, "--postgres-password-file")) {
-            if (postgres_password_file != null) return error.DuplicateFlag;
-            if (!std.fs.path.isAbsolute(value)) return error.PasswordFileMustBeAbsolute;
-            postgres_password_file = value;
+        } else if (std.mem.eql(u8, flag, "--sqlite-path")) {
+            if (sqlite_path != null) return error.DuplicateFlag;
+            if (!std.fs.path.isAbsolute(value)) return error.PathMustBeAbsolute;
+            sqlite_path = value;
         } else if (std.mem.eql(u8, flag, "--tigerbeetle-address")) {
             if (tigerbeetle_address != null) return error.DuplicateFlag;
             tigerbeetle_address = value;
@@ -253,8 +230,7 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
         return error.NonLoopbackListenRequiresDevelopmentContainer;
     }
 
-    const any_external = postgres_host != null or postgres_port != null or postgres_database != null or
-        postgres_user != null or postgres_password_file != null or tigerbeetle_address != null;
+    const any_external = sqlite_path != null or tigerbeetle_address != null;
     if (mode == .managed) {
         if (development_container or any_external) return error.ManagedModeRejectedExternalFlag;
         return config;
@@ -270,11 +246,7 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
         .advertised_api_url = config.advertised_api_url,
         .development_container = config.development_container,
         .external = .{
-            .postgres_host = postgres_host orelse return error.MissingExternalFlag,
-            .postgres_port = postgres_port orelse return error.MissingExternalFlag,
-            .postgres_database = postgres_database orelse return error.MissingExternalFlag,
-            .postgres_user = postgres_user orelse return error.MissingExternalFlag,
-            .postgres_password_file = postgres_password_file orelse return error.MissingExternalFlag,
+            .sqlite_path = sqlite_path orelse return error.MissingExternalFlag,
             .tigerbeetle_address = tigerbeetle_address orelse return error.MissingExternalFlag,
         },
     };
@@ -379,8 +351,7 @@ pub fn emitHandshake(api_url: []const u8, tokens: TokenPair) !void {
 
 pub fn runSelfTest() !void {
     _ = ApiImport;
-    _ = PgImport;
-    try postgres.selfTest();
+    try sqlite_adapter.selfTest();
     try tigerbeetle.selfTest();
     try http.selfTest();
     try status.selfTest();
@@ -439,7 +410,7 @@ test "managed serve requires only CLI flags and rejects external flags" {
         "--data-root",      "C:\\data",
         "--allowed-origin", development_origin,
         "--handshake",      "stdout-v1",
-        "--postgres-host",  "127.0.0.1",
+        "--sqlite-path",   "C:\\data\\voyage-vii.sqlite3",
     }));
 }
 
@@ -460,12 +431,8 @@ test "external serve requires all database flags and gates non-loopback listen" 
         "--handshake",                        "stdout-v1",
         "--development-container",            "--listen",
         "0.0.0.0:7800",                       "--advertised-api-url",
-        "http://127.0.0.1:7800",              "--postgres-host",
-        "postgresql",                         "--postgres-port",
-        "5432",                               "--postgres-database",
-        "voyage",                             "--postgres-user",
-        "voyage",                             "--postgres-password-file",
-        "C:\\secrets\\postgres-password.txt", "--tigerbeetle-address",
+        "http://127.0.0.1:7800",              "--sqlite-path",
+        "C:\\data\\voyage-vii.sqlite3",       "--tigerbeetle-address",
         "tigerbeetle:3000",
     });
     try std.testing.expectEqual(RuntimeMode.external, config.runtime);
