@@ -1076,16 +1076,46 @@
       "id": "RUNTIME-002",
       "title": "Implement managed SQLite lifecycle",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "runtime_002_impl",
+      "reviewer": "runtime_002_review",
       "dependsOn": ["API-005", "RUNTIME-001"],
       "ownedPaths": ["services/api/src/runtime/sqlite/**", "services/api/tests/runtime/sqlite/**"],
       "excludedPaths": ["TigerBeetle lifecycle", "desktop application"],
       "guide": "docs/delivery/tasks/RUNTIME-002.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "7cf47203755abaa10d784a8c9aa7ebef2729c0a8",
+        "revision": "7cf47203755abaa10d784a8c9aa7ebef2729c0a8:e787dabb26bad391328f47a5f6d85b408c5c5982ef7aa0b0499e918c277e82f8",
+        "changedPaths": [
+          "services/api/src/runtime/sqlite/root.zig",
+          "services/api/tests/runtime/sqlite/root.zig"
+        ],
+        "summary": "Implement managed SQLite lifecycle planning and operation with root-contained database/WAL/SHM paths, pristine/initialized/invalid root detection, adapter open/apply/probe flow, retry schedule, sanitized component status, and checkpoint-before-close shutdown sequencing.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Aggregate and focused SQLite lifecycle tests",
+            "command": "Pinned Zig 0.15.2 aggregate zig build test from services/api with approved SQLite amalgamation; temporary focused RUNTIME-002 harness from repository root",
+            "result": "PASS: aggregate tests passed and focused lifecycle tests covered first-run, retained-run, invalid roots, root-contained paths, busy state, failed migration sanitization, checkpoint/close, and self-test reachability"
+          },
+          {
+            "criterion": "Review and hygiene",
+            "command": "git diff --cached --check; independent RUNTIME-002 staged review and focused re-review",
+            "result": "PASS: staged paths matched RUNTIME-002 ownership; reviewer-found retry handle leak was fixed and Laplace approved the re-review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "runtime_002_review",
+        "reviewedRevision": "7cf47203755abaa10d784a8c9aa7ebef2729c0a8:e787dabb26bad391328f47a5f6d85b408c5c5982ef7aa0b0499e918c277e82f8",
+        "integrationCommit": "310a3b536146867fa2cd1be5e5b8dc277cfcab9a",
+        "findings": [],
+        "residualRisks": [
+          "Focused tests are supplied in the owned runtime sqlite test path and run through a temporary harness because shared aggregate registration is outside RUNTIME-002 ownership.",
+          "The ten-second checkpoint deadline is represented as a frozen sequencing boundary; a separate cancellation wrapper is deferred to common runtime supervision."
+        ]
+      }
     },
     {
       "id": "RUNTIME-003",
