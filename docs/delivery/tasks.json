@@ -614,7 +614,7 @@
       "id": "FEAS-004",
       "title": "Prove SQLite native integration",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
