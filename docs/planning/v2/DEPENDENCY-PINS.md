@@ -12,15 +12,20 @@ No worker may introduce an unlisted direct dependency or change a frozen direct 
 - Bun: `1.3.14`
 - api.zig: `f9a287916ad0e34fda71c8e5b619c5774c8fbb45`
 - TigerBeetle: `0.17.7`
-- SQLite: authorized by ADR-0012; exact version, official archive URL, and
-  archive hash are frozen by `FEAS-004` before `API-005` may begin.
+- SQLite: `3.53.3`
+- SQLite official amalgamation archive:
+  `https://www.sqlite.org/2026/sqlite-amalgamation-3530300.zip`
+- SQLite amalgamation size: `2945929` bytes
+- SQLite amalgamation SHA3-256:
+  `d45c688a8cb23f68611a894a756a12d7eb6ab6e9e2468ca70adbeab3808b5ab9`
+- SQLite approved compile-time options: none
 
 Zig dependency declarations must resolve the exact listed revisions. The
-SQLite build must use the official amalgamation archive frozen by `FEAS-004`
-or stop for a coordinator amendment. No fork, substitute client, unofficial
-binary, or unrelated SQLite compile-time feature selection is permitted without
-a new ADR or planning amendment. Native source and release provenance must also
-satisfy `PACKAGING.md`.
+SQLite build must use the official amalgamation archive and hash above or stop
+for a coordinator amendment. No fork, substitute client, unofficial binary, or
+unrelated SQLite compile-time feature selection is permitted without a new ADR
+or planning amendment. Native source and release provenance must also satisfy
+`PACKAGING.md`.
 
 ## NPM direct dependencies
 

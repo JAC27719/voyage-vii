@@ -1,0 +1,8 @@
+cache/
+evidence/
+runtime/
+source/
+zig-cache/
+zig-out/
+/.zig-cache/
+/.zig-cache-*/
