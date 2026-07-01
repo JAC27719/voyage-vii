@@ -1378,7 +1378,7 @@
       "id": "DESKTOP-002",
       "title": "Implement the Tauri process supervisor",
       "wave": 3,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -1393,7 +1393,7 @@
       "id": "DESKTOP-003",
       "title": "Implement the SolidJS system-status UI",
       "wave": 3,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
@@ -1408,22 +1408,59 @@
       "id": "DESKTOP-004",
       "title": "Implement verified portable runtime staging",
       "wave": 3,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Hume",
       "dependsOn": ["DESKTOP-001", "FEAS-003", "FEAS-004"],
       "ownedPaths": ["runtime/sources.json", "tools/runtime-staging/**", "apps/desktop/src-tauri/resources/.gitignore", "tests/runtime-staging/**"],
       "excludedPaths": ["tracked runtime binaries", "production lifecycle code"],
       "guide": "docs/delivery/tasks/DESKTOP-004.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "5b85cb96f7081ee60c14f667bd9ccf68f00e1c6f",
+        "revision": "5b85cb96f7081ee60c14f667bd9ccf68f00e1c6f:a2b88cf4db73a38ddc47dc47161e4b898571d50d",
+        "changedPaths": [
+          "apps/desktop/src-tauri/resources/.gitignore",
+          "runtime/sources.json",
+          "tests/runtime-staging/run-tests.ps1",
+          "tools/runtime-staging/.gitignore",
+          "tools/runtime-staging/stage-runtime.ps1"
+        ],
+        "summary": "Implement verified Windows x64 runtime staging with pinned official SQLite and TigerBeetle inputs, hash-addressed caching, offline replay, safe ZIP extraction, PE architecture validation, generated manifest inputs, third-party notices, ignored generated outputs, and fixture-based safety tests.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Fixture-based staging safety tests",
+            "command": "tests/runtime-staging/run-tests.ps1",
+            "result": "PASS: warm-cache and offline staging, offline cache miss, corrupt archive, traversal file and directory entries, absolute archive path, duplicate ZIP entry, symlink, missing file, duplicate destination, destination escape, wrong architecture, wrong target, unsafe production output root, and alternate production source manifest cases all behaved as expected"
+          },
+          {
+            "criterion": "Official runtime staging and offline replay",
+            "command": "tools/runtime-staging/stage-runtime.ps1; tools/runtime-staging/stage-runtime.ps1 -Offline",
+            "result": "PASS: staged 7 Windows x64 runtime files totaling 33,300,015 bytes from verified cached official inputs and regenerated reports at tools/runtime-staging/reports/last-run.json and last-run.md"
+          },
+          {
+            "criterion": "Generated-output and diff hygiene",
+            "command": "git status --short --ignored apps/desktop/src-tauri/resources tools/runtime-staging runtime tests/runtime-staging; git diff --check",
+            "result": "PASS: runtime output, staging cache, and reports are ignored while source manifest, staging tool, tests, and .gitignore files are tracked; diff whitespace check passed"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Hume",
+        "reviewedRevision": "5b85cb96f7081ee60c14f667bd9ccf68f00e1c6f:a2b88cf4db73a38ddc47dc47161e4b898571d50d",
+        "integrationCommit": "188b084ac401cdc0237172f816706dd8c7052659",
+        "findings": [],
+        "residualRisks": [
+          "The staging scripts require PowerShell 7 or newer, declared with #requires -Version 7.0."
+        ]
+      }
     },
     {
       "id": "TOOL-001",
       "title": "Create project-local bootstrap and doctor tooling",
       "wave": 4,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
