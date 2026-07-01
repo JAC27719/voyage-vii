@@ -28,7 +28,7 @@ Future objective: produce and validate the Linux x64 AppImage.
 2. Build native `x86_64-unknown-linux-gnu` and stage the matching runtime.
 3. Stage runtime under AppDir `usr/lib/voyage-vii/resources/runtime`, fill the final API source commit/output hash, emit final manifest v1, and include only necessary Tauri/WebKitGTK/AppImage dependencies.
 4. Inspect ELF architecture, interpreter, dynamic dependencies, and required glibc versions.
-5. Scope PostgreSQL library-path changes to its child process.
+5. Scope any native library-path changes to their child process.
 6. Read root `VERSION`, create the artifact name frozen by the future ADR, and
    record its SHA-256.
 7. Support direct execution and `APPIMAGE_EXTRACT_AND_RUN=1` where FUSE is unavailable.

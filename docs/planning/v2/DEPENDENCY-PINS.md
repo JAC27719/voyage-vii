@@ -11,23 +11,16 @@ No worker may introduce an unlisted direct dependency or change a frozen direct 
 - Rust: `1.96.0`
 - Bun: `1.3.14`
 - api.zig: `f9a287916ad0e34fda71c8e5b619c5774c8fbb45`
-- pg.zig `zig-0.15` upstream baseline:
-  `12e48fc57b78486e338e8707448d9a87597dd3ad`
-- pg.zig Windows connect-timeout compatibility patch:
-  `patches/pg.zig/windows-connect-timeout.patch`
-- Approved pg.zig patch SHA-256:
-  `02d6791ab6bdb147c34972e0076992840be7e5fea2e51e6cdac94455033c578c`
 - TigerBeetle: `0.17.7`
-- PostgreSQL: `18.4`
+- SQLite: authorized by ADR-0012; exact version, official archive URL, and
+  archive hash are frozen by `FEAS-004` before `API-005` may begin.
 
 Zig dependency declarations must resolve the exact listed revisions. The
-pg.zig build must verify the exact upstream tree before applying the patch,
-apply it deterministically, and verify the recorded patch SHA-256. The patch
-may only implement a cancellable five-second Windows TCP connect deadline,
-close the socket on timeout, leave no background work, and preserve all other
-pg.zig public behavior. No fork, substitute client, or unrelated change is
-permitted. Native source and release provenance must also satisfy
-`PACKAGING.md`.
+SQLite build must use the official amalgamation archive frozen by `FEAS-004`
+or stop for a coordinator amendment. No fork, substitute client, unofficial
+binary, or unrelated SQLite compile-time feature selection is permitted without
+a new ADR or planning amendment. Native source and release provenance must also
+satisfy `PACKAGING.md`.
 
 ## NPM direct dependencies
 

@@ -6,7 +6,7 @@ Voyage VII is a local-first desktop application. The first v2 slice proves that
 the complete runtime can be developed, packaged, launched, observed, retried,
 and shut down safely on Windows 11 x64.
 
-TigerBeetle is not the REST server. The REST server is a Zig executable using api.zig. That executable connects to PostgreSQL through pg.zig and to TigerBeetle through TigerBeetle's C ABI.
+TigerBeetle is not the REST server. The REST server is a Zig executable using api.zig. That executable uses SQLite through the official C API and connects to TigerBeetle through TigerBeetle's C ABI.
 
 ```text
 SolidJS / Tailwind UI
@@ -15,9 +15,9 @@ SolidJS / Tailwind UI
         v
 Zig API using api.zig
    |                    |
-   | pg.zig             | TigerBeetle C ABI
+   | SQLite C API       | TigerBeetle C ABI
    v                    v
-PostgreSQL          TigerBeetle
+SQLite             TigerBeetle
 
 Tauri / Rust
    |
@@ -25,7 +25,7 @@ Tauri / Rust
        token custody, logs, restart policy, and final process containment
 ```
 
-Tauri contains no database access or financial business logic. The Zig API owns and supervises PostgreSQL and TigerBeetle in managed mode.
+Tauri contains no database access or financial business logic. The Zig API owns SQLite access and supervises TigerBeetle in managed mode.
 
 ## Identity and targets
 
@@ -51,12 +51,11 @@ needless Windows coupling.
 
 - Application Zig: `0.15.2`
 - api.zig: `f9a287916ad0e34fda71c8e5b619c5774c8fbb45`
-- pg.zig `zig-0.15`: `12e48fc57b78486e338e8707448d9a87597dd3ad`
 - TigerBeetle: `0.17.7`, client built with its required Zig `0.14.1`
-- PostgreSQL: `18.4`
+- SQLite: exact official amalgamation version, URL, and hash frozen by `FEAS-004`
 - Tauri: version 2
 
-All toolchain, NPM, and Rust direct pins are frozen in `DEPENDENCY-PINS.md`. Manifests use exact constraints and committed lockfiles. A failure to use api.zig or the static TigerBeetle C ABI on any target is a stop-the-line ADR decision. No worker may silently substitute another framework, dependency, supplier, or transport.
+All toolchain, NPM, and Rust direct pins are frozen in `DEPENDENCY-PINS.md`. Manifests use exact constraints and committed lockfiles. A failure to use api.zig, the official SQLite C API, or the static TigerBeetle C ABI on any target is a stop-the-line ADR decision. No worker may silently substitute another framework, dependency, supplier, or transport.
 
 ## API process contract
 
@@ -77,7 +76,7 @@ Requirements:
 
 The pinned api.zig accept loop has no public stop API. Graceful API shutdown
 therefore accepts the supervisor route, quiesces requests, protects and stops
-PostgreSQL, TigerBeetle, logs, and owned resources, and exits the API process.
+SQLite, TigerBeetle, logs, and owned resources, and exits the API process.
 The accept loop need not return; Windows closes the listener at process exit.
 
 ## REST contract
@@ -127,17 +126,17 @@ The writable application root contains:
 manifest.json
 runtime.lock
 logs/
-postgresql/
+sqlite/
 tigerbeetle/
 ```
 
 - Hold an exclusive OS lock.
-- PostgreSQL uses a random persisted SCRAM secret, loopback binding, UTF-8/C locale, pool size two, and fast shutdown.
+- SQLite uses one managed database path under the data root, WAL mode, foreign keys, a bounded busy timeout, and transactional migrations.
 - TigerBeetle uses a random persisted cluster ID, one local replica, and a 128 MiB cache.
 - TigerBeetle formatting is allowed only for a demonstrably pristine root.
 - Database startup retries are initial attempt plus three retries after one, two, and four seconds.
 - Healthy probes run every ten seconds; transitioning/unhealthy probes run every second without overlap.
-- PostgreSQL probe is `SELECT 1`; TigerBeetle probe is a real harmless lookup.
+- SQLite probe is `SELECT 1`; TigerBeetle probe is a real harmless lookup.
 - Total rotating logs should remain near 50 MiB.
 - Idle memory target is approximately 500 MiB or less.
 - There is no automatic reset, repair, migration upgrade, or backup feature in this slice.
@@ -145,15 +144,15 @@ tigerbeetle/
 
 ## Database schema documentation
 
-Track the implemented PostgreSQL schema in `docs/database/postgresql.dbml` using DBML accepted by dbdiagram.io.
+Track the implemented SQLite schema in `docs/database/sqlite.dbml` using DBML accepted by dbdiagram.io.
 
 - SQL migrations remain the executable runtime source of truth.
 - The DBML file is the required visual/design representation of the same schema.
-- Every migration that changes a table, column, type, constraint, index, or relation must update DBML in the same reviewed task.
+- Every migration that changes a table, column, type, constraint, index, trigger, or relation must update DBML in the same reviewed task.
 - DBML must include schema namespaces, primary and foreign keys, nullability, defaults, unique constraints, indexes, relation direction, and concise domain notes.
 - `docs/database/README.md` explains how to import the file into dbdiagram.io and how synchronization is reviewed.
-- Proposed, unimplemented schemas belong under `docs/database/proposed/` and must be labeled as proposals. They must never appear in `postgresql.dbml`.
-- TigerBeetle is not relational. Its account/transfer field mappings and links to PostgreSQL identifiers belong in `docs/database/tigerbeetle.md`, not as fictitious relational tables in the implemented PostgreSQL diagram.
+- Proposed, unimplemented schemas belong under `docs/database/proposed/` and must be labeled as proposals. They must never appear in `sqlite.dbml`.
+- TigerBeetle is not relational. Its account/transfer field mappings and links to SQLite relational identifiers belong in `docs/database/tigerbeetle.md`, not as fictitious relational tables in the implemented SQLite diagram.
 - DBML and companion documentation must contain no credentials, connection strings, local paths, or production data.
 
 ## Packaged runtime
@@ -174,9 +173,9 @@ seven days.
 
 Managed and packaged operation remains loopback-only. In external development-container mode only:
 
-- PostgreSQL and TigerBeetle traffic uses an internal, non-published Compose bridge.
+- TigerBeetle traffic uses an internal, non-published Compose bridge. SQLite is an API-owned file and has no database port.
 - The API listens on `0.0.0.0:7800` only inside its container.
 - Compose publishes that API port host-side exclusively as `127.0.0.1:7800`.
-- PostgreSQL and TigerBeetle ports are never host-published.
+- TigerBeetle ports are never host-published. SQLite is never exposed over the network.
 - The API advertises `http://127.0.0.1:7800`.
 - Exact-origin CORS, bearer authentication, ephemeral API-generated tokens, request limits, and redaction remain mandatory.

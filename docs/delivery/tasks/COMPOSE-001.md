@@ -9,14 +9,14 @@ Use external-mode CLI, development-container exception, tokens, origin/auth, and
 
 ## Objective
 
-Provide one local command that runs PostgreSQL, TigerBeetle, and the Zig API in external mode.
+Provide one local command that runs TigerBeetle and the Zig API with API-owned SQLite storage in external mode.
 
 ## Procedure
 
-1. Pin PostgreSQL, TigerBeetle, and API images by exact tag and digest.
+1. Pin TigerBeetle and API images by exact tag and digest.
 2. Use named volumes and non-root execution where the image supports it.
-3. Put API, PostgreSQL, and TigerBeetle on an internal non-published bridge. Do not host-publish PostgreSQL or TigerBeetle.
-4. Run the API with explicit frozen external CLI flags, a PostgreSQL password secret file, `--development-container`, `--listen 0.0.0.0:7800`, `--advertised-api-url http://127.0.0.1:7800`, and development origin `http://localhost:1420`; it must not spawn managed databases.
+3. Put API and TigerBeetle on an internal non-published bridge. Do not host-publish TigerBeetle. SQLite must be a mounted API-owned file path, not a network service.
+4. Run the API with explicit frozen external CLI flags, `--sqlite-path`, `--development-container`, `--listen 0.0.0.0:7800`, `--advertised-api-url http://127.0.0.1:7800`, and development origin `http://localhost:1420`; it must not spawn managed databases.
 5. Publish the API host-side only as `127.0.0.1:7800`.
 6. Keep API-generated app/supervisor tokens distinct and ephemeral. A launcher captures the one attached-stdout handshake directly into process memory, redacts it from the console, and never persists it.
 7. Disable the API service's Compose logging driver so handshake stdout cannot enter Docker logs; API stderr is captured only by the attached launcher under the same redaction boundary.

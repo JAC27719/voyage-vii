@@ -19,11 +19,11 @@ When tradeoffs conflict, prefer:
 - Keep the repository private and do not add a license yet.
 - Use one staged pull request with logical commits and a merge commit.
 - Rename the repository only after the v2 pull request merges.
-- Use Zig/api.zig for REST, pg.zig for PostgreSQL, and the TigerBeetle C ABI.
+- Use Zig/api.zig for REST, the official SQLite C API for the general-purpose database, and the TigerBeetle C ABI.
 - Keep the exact api.zig pin and define graceful API shutdown at the process
   boundary because its accept loop has no stop API.
-- Keep the exact pg.zig upstream commit as the baseline and permit only the
-  reviewer-approved repository patch described in ADR-0011.
+- Freeze SQLite's exact official archive and hash through `FEAS-004` before
+  implementing the production SQLite adapter.
 - Call official `tb_client_deinit` on a dedicated shutdown thread with the
   frozen watchdog and exit-7 containment behavior in ADR-0011.
 - Make the Zig API the database supervisor; make Tauri the API supervisor.
@@ -35,7 +35,7 @@ When tradeoffs conflict, prefer:
 - Keep DevTools debug-only.
 - Use strict CSP and exact-origin CORS.
 - Use structured rotating logs without names, amounts, tokens, authorization headers, SQL values, or raw exceptions.
-- Use PostgreSQL and TigerBeetle concurrently in Compose for development.
+- Use API-owned SQLite storage and TigerBeetle in Compose for development.
 - Pin images by tag and digest; use named volumes and non-root users where supported.
 - Permit TigerBeetle `seccomp=unconfined` only in local development.
 - Use a static SolidJS module registry and a manually typed client checked against shared schemas/fixtures.
@@ -52,7 +52,7 @@ When tradeoffs conflict, prefer:
 - Use Dependabot without automerge.
 - Keep documentation versioned in Markdown; ADRs are superseded rather than rewritten.
 - Freeze exact direct dependencies in `DEPENDENCY-PINS.md`, shared interfaces in `CONTRACTS.md`, limits in `TIMEOUTS.md`, and artifact provenance/layout in `PACKAGING.md`.
-- Track the implemented PostgreSQL schema and relations in version-controlled, dbdiagram.io-compatible DBML.
+- Track the implemented SQLite schema and relations in version-controlled, dbdiagram.io-compatible DBML.
 - Keep executable SQL migrations authoritative, but require the corresponding DBML update in the same reviewed schema-change task.
 - Keep proposed schemas separate from the implemented diagram and document TigerBeetle mappings without pretending TigerBeetle is relational.
 
@@ -72,7 +72,7 @@ When tradeoffs conflict, prefer:
 The slice is complete when a developer can:
 
 1. Bootstrap the project on Windows 11 x64.
-2. Run PostgreSQL, TigerBeetle, and the API through Compose.
+2. Run the API with SQLite storage and TigerBeetle through Compose.
 3. Run the desktop app with managed local databases.
 4. See accurate component state and perform bounded retries.
 5. Open logs and copy sanitized diagnostics.

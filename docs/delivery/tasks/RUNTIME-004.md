@@ -14,8 +14,8 @@ Coordinate both managed databases and publish truthful API lifecycle state.
 ## Procedure
 
 1. Acquire the root lock and validate assets before mutation.
-2. Start PostgreSQL and TigerBeetle concurrently where safe.
-3. Complete PostgreSQL migrations and both production adapter probes.
+2. Open SQLite and start TigerBeetle concurrently where safe.
+3. Complete SQLite migrations and both production adapter probes.
 4. Preserve the already emitted post-bind handshake and reach full database readiness within 60 seconds without conflating the two deadlines.
 5. Maintain independent component states and attempts.
 6. Retry only the requested failed component and suppress concurrent duplicate retry.

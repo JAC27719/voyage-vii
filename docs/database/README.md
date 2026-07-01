@@ -1,14 +1,15 @@
 # Database Schema Documentation
 
 `services/api/migrations/*.sql` is the executable source of truth for the
-implemented PostgreSQL schema. `docs/database/postgresql.dbml` is the matching
+implemented SQLite schema. `docs/database/sqlite.dbml` is the matching
 dbdiagram.io-compatible representation and must change in the same reviewed
-task as any migration that changes tables, columns, types, constraints, indexes,
-or relations.
+task as any migration that changes tables, columns, types, constraints,
+indexes, triggers, or relations.
 
-API-002 introduces only the `schema_migrations` table. The synchronized review
-checks compare that migration with the DBML table, primary key, unique
-constraint, column types, nullability, default, and SHA-256 metadata.
+API-002 and `docs/database/postgresql.dbml` are retained only as superseded
+PostgreSQL history. API-005 creates the active SQLite implemented schema and
+DBML.
 
-To inspect visually, import `postgresql.dbml` into dbdiagram.io. The file must
-not contain credentials, connection strings, local paths, or production data.
+To inspect visually, import `sqlite.dbml` into dbdiagram.io after API-005
+creates it. The file must not contain credentials, connection strings, local
+paths, or production data.

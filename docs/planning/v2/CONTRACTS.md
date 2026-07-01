@@ -29,14 +29,11 @@ Managed mode rejects `--development-container` and every external database flag.
 
 External mode requires all of:
 
-- `--postgres-host <host>`
-- `--postgres-port <port>`
-- `--postgres-database <database>`
-- `--postgres-user <user>`
-- `--postgres-password-file <absolute-path>`
+- `--sqlite-path <absolute-path>`
 - `--tigerbeetle-address <address>`
 
-The PostgreSQL password file must be absolute, read without logging its path or contents beyond sanitized diagnostics, and never copied into arguments, manifests, or logs.
+The SQLite path must be absolute, root-contained unless `--development-container`
+is present, and logged only through sanitized diagnostics.
 
 A non-loopback `--listen` value is rejected unless the mode is `external` and `--development-container` is present. Development Compose uses `--listen 0.0.0.0:7800` and `--advertised-api-url http://127.0.0.1:7800`.
 
@@ -96,7 +93,7 @@ Routes:
 | `GET /health/live` | Unauthenticated |
 | `GET /health/ready` | Unauthenticated |
 | `GET /api/v1/system/status` | App token only |
-| `POST /api/v1/system/components/{postgresql\|tigerbeetle}/retry` | App token only |
+| `POST /api/v1/system/components/{sqlite\|tigerbeetle}/retry` | App token only |
 | `POST /api/v1/system/retry` | App token only |
 | `POST /api/v1/system/shutdown` | Supervisor token only |
 
@@ -123,7 +120,7 @@ Readiness returns `200` only for `ready`; `notReady` returns `503`.
 The status route returns `200`. Its response has `schemaVersion: 1`, `requestId`, `overallState`, and `components`.
 
 - `overallState`: `starting | ready | degraded | stopping`
-- component `id`: `postgresql | tigerbeetle`
+- component `id`: `sqlite | tigerbeetle`
 - component `displayName`: technical display name
 - component `version`: pinned version
 - component `state`: `starting | healthy | retrying | unhealthy | stopping | stopped`
@@ -134,10 +131,10 @@ The status route returns `200`. Its response has `schemaVersion: 1`, `requestId`
 Retry returns `202`:
 
 ```json
-{"requestId":"opaque-id","accepted":true,"targets":["postgresql"]}
+{"requestId":"opaque-id","accepted":true,"targets":["sqlite"]}
 ```
 
-`targets` contains only requested component IDs in stable `postgresql`, `tigerbeetle` order. Healthy-component and duplicate-active retries return `accepted: false` without restart. Retry-all never restarts a healthy component.
+`targets` contains only requested component IDs in stable `sqlite`, `tigerbeetle` order. Healthy-component and duplicate-active retries return `accepted: false` without restart. Retry-all never restarts a healthy component.
 
 Shutdown returns `202`:
 
@@ -173,9 +170,9 @@ The complete allowed error-code set is:
 - `service_unavailable`
 - `shutting_down`
 - `internal_error`
-- `postgres_unavailable`
-- `postgres_authentication_failed`
-- `postgres_timeout`
+- `sqlite_unavailable`
+- `sqlite_busy`
+- `sqlite_timeout`
 - `tigerbeetle_unavailable`
 - `tigerbeetle_timeout`
 - `native_shutdown_timeout`
@@ -194,8 +191,8 @@ Exact HTTP status mapping:
 | `405` | `method_not_allowed` |
 | `409` | `retry_not_allowed`, `data_root_locked` |
 | `413` | `body_too_large` |
-| `500` | `postgres_authentication_failed`, `internal_error` |
-| `503` | `service_unavailable`, `shutting_down`, `postgres_unavailable`, `postgres_timeout`, `tigerbeetle_unavailable`, `tigerbeetle_timeout`, `native_shutdown_timeout`, `runtime_asset_missing`, `runtime_asset_invalid` |
+| `500` | `internal_error` |
+| `503` | `service_unavailable`, `shutting_down`, `sqlite_unavailable`, `sqlite_busy`, `sqlite_timeout`, `tigerbeetle_unavailable`, `tigerbeetle_timeout`, `native_shutdown_timeout`, `runtime_asset_missing`, `runtime_asset_invalid` |
 
 Valid retry requests remain `202`; the status route remains `200`; health statuses remain as frozen above.
 
@@ -213,15 +210,15 @@ The API otherwise terminates immediately with exit code `7`.
 - `productVersion`: `0.1.0`, read from `VERSION`
 - `target`: the current frozen Windows target triple; the field remains
   extensible for future target-bearing manifests
-- `components`: array in stable `api`, `postgresql`, `tigerbeetle` order
+- `components`: array in stable `api`, `sqlite`, `tigerbeetle` order
 
 Each component contains:
 
-- `id`: `api | postgresql | tigerbeetle`
+- `id`: `api | sqlite | tigerbeetle`
 - `version`
 - `path`: relative POSIX path
 - `sha256`: 64-character lowercase hexadecimal SHA-256
-- `licensePath`: required relative POSIX path for `postgresql` and `tigerbeetle`; exactly `null` for the first-party `api`
+- `licensePath`: required relative POSIX path for `sqlite` and `tigerbeetle`; exactly `null` for the first-party `api`
 - `source`:
   - `kind`: `official-source | official-release | first-party-build`
   - `url`: required absolute HTTPS URL for `official-source` and `official-release`; exactly `null` for `first-party-build`
@@ -238,6 +235,6 @@ The writable-root `manifest.json` contains:
 - `target`: the current frozen Windows target triple; the field remains
   extensible for future targets
 - `createdAt`: RFC3339 UTC timestamp
-- `components`: object containing the PostgreSQL and TigerBeetle versions
+- `components`: object containing the SQLite and TigerBeetle versions
 
-Nonsecret cluster identifiers may be present when needed for validation. Credentials and database secrets are stored separately with restrictive permissions and never appear in the manifest.
+Nonsecret cluster identifiers may be present when needed for validation. Database secrets are stored separately with restrictive permissions when a component requires them and never appear in the manifest.

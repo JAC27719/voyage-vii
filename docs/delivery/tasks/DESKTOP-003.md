@@ -20,7 +20,7 @@ Implement the accessible status-only desktop interface using the shared contract
 5. Build a typed client for `CONTRACTS.md` that adds `Authorization: Bearer`, handles `X-Request-Id`, uses the ten-second HTTP deadline, aborts obsolete requests, and never automatically replays mutations.
 6. Refresh the snapshot once after a generation change or `401`.
 7. Poll every second while launching/restarting/unhealthy/retrying and every ten seconds while healthy, without overlap.
-8. Render starting, healthy, and degraded summaries plus PostgreSQL/TigerBeetle cards.
+8. Render starting, healthy, and degraded summaries plus SQLite/TigerBeetle cards.
 9. Add component retry, retry-all, open logs, and copy sanitized diagnostics.
 10. Use semantic structure, visible focus, keyboard access, WCAG AA colors, system theme, and restrained polite announcements.
 

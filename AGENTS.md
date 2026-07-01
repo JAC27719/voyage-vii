@@ -10,7 +10,7 @@
 - Do not stage, commit, switch branches, push, or open a pull request when acting as an implementer.
 - Run every acceptance and verification check required by the task and report the complete changed-path set, commands, results, limitations, risks, and escalations.
 - Submit each implementation to an independent high-scrutiny reviewer. Reviewers do not edit the submission and must reproduce relevant checks against the coordinator-issued staged revision.
-- Keep PostgreSQL migrations and the corresponding implemented DBML update in the same owned and reviewed task.
+- Keep SQLite migrations and the corresponding implemented DBML update in the same owned and reviewed task.
 
 The complete role, revision, review, and rework rules are in
 [the delegated delivery workflow](docs/delivery/WORKFLOW.md). Frozen decisions

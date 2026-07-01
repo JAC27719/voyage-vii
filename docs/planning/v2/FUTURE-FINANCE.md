@@ -2,13 +2,13 @@
 
 These decisions guide future design but are outside the first v2 implementation slice.
 
-Any future relational finance design starts under `docs/database/proposed/` as DBML. It moves into `docs/database/postgresql.dbml` only in the same reviewed task that adds the executable SQL migration. TigerBeetle account and transfer structures remain documented as external mappings rather than PostgreSQL tables.
+Any future relational finance design starts under `docs/database/proposed/` as DBML. It moves into `docs/database/sqlite.dbml` only in the same reviewed task that adds the executable SQL migration. TigerBeetle account and transfer structures remain documented as external mappings rather than SQLite tables.
 
 ## Ledger model
 
 - One OS-trusted local user, one single-person USD ledger.
 - Strict double-entry accounting on a cash basis.
-- PostgreSQL owns user, ledger, account metadata, periods, budgets, and lifecycle state.
+- SQLite owns user, ledger, account metadata, periods, budgets, and lifecycle state.
 - TigerBeetle alone stores balances and transfers; MVP does not duplicate transaction rows in SQL.
 - Account classes use RED ALE: Revenue, Expense, Dividend, Asset, Liability, Equity.
 - TigerBeetle ledger codes: Asset `1`, Liability `2`, Equity `3`, Revenue `4`, Expense `5`, Dividend `6`.
@@ -19,7 +19,7 @@ Any future relational finance design starts under `docs/database/proposed/` as D
 
 ## Identifiers and transfer metadata
 
-- Use PostgreSQL-native UUIDv7.
+- Use application-generated UUIDv7 stored canonically in SQLite.
 - Convert canonical UUID big-endian bytes to TigerBeetle `u128`.
 - Derive the TigerBeetle ledger `u32` from domain-separated BLAKE3.
 - Store effective epoch-day in `user_data_64`; reserve remaining user-data fields.

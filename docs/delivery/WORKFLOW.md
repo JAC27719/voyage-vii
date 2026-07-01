@@ -24,7 +24,7 @@ Implementers must be configured for **low inference**.
 - Do not stage, commit, switch branches, push, or open pull requests.
 - Stop and escalate if requirements conflict, evidence is unavailable, a prerequisite is invalid, or an unlisted change is necessary.
 - Never interpret silence as permission to improvise.
-- A task that changes the PostgreSQL schema must own and update both the executable migration and `docs/database/postgresql.dbml`; otherwise it must stop for coordinator reassignment.
+- A task that changes the SQLite schema must own and update both the executable migration and `docs/database/sqlite.dbml`; otherwise it must stop for coordinator reassignment.
 
 ### Reviewer
 
@@ -144,7 +144,7 @@ Severity:
 
 - Parallel tasks must have disjoint owned paths and approved prerequisites.
 - Shared manifests and lockfiles have one active owner.
-- PostgreSQL migrations and the implemented DBML diagram are one review unit even when that requires serializing otherwise independent work.
+- SQLite migrations and the implemented DBML diagram are one review unit even when that requires serializing otherwise independent work.
 - A task needing another owner’s path stops and requests coordinator reassignment.
 - Reviewers may read the full tree but cannot edit it.
 

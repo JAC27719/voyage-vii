@@ -18,9 +18,9 @@ The coordinator alone creates branches, stages, commits, pushes, opens the pull 
 
 ### Wave 1 — Feasibility
 
-1. `FEAS-001`: prove api.zig and pg.zig with PostgreSQL 18.4.
+1. `FEAS-001`: historical PostgreSQL/api.zig proof, superseded for future work by ADR-0012.
 2. `FEAS-002`: prove the static TigerBeetle C ABI.
-3. `FEAS-003`: prove all three dependencies coexist in one executable, prove the prescribed native runtime acquisition/build strategy, and declare go/no-go.
+3. `FEAS-003`: historical PostgreSQL/TigerBeetle coexistence proof, superseded in part by ADR-0012.
 
 `FEAS-001` and `FEAS-002` may run in parallel after `RESET-001` and `PLAN-001`
 are approved. Their native acceptance gate is Windows 11 x64 only. Optional
@@ -31,15 +31,18 @@ ADR.
 ### Wave 2 — API and managed runtime
 
 1. `API-001`: CLI, configuration, handshake, schemas, shell, and buildable static seams for later API modules.
-2. `API-002`: PostgreSQL adapter, migrations, and synchronized implemented-schema DBML.
+2. `API-002`: historical PostgreSQL adapter, superseded for future work by ADR-0012.
 3. `API-003`: TigerBeetle adapter.
-4. `DBDOC-001`: independently verify implemented-schema DBML and create TigerBeetle mapping/proposed-schema documentation without separating DBML from its migration review unit.
-5. `API-004`: REST routes, authorization, probes, retries, and shutdown.
-6. `RUNTIME-001`: paths, manifests, locking, child processes, ports, and logs.
-7. `RUNTIME-002`: managed PostgreSQL lifecycle.
-8. `RUNTIME-003`: managed TigerBeetle lifecycle.
-9. `RUNTIME-004`: integrated managed supervisor.
-10. `COMPOSE-001`: external-mode local environment.
+4. `PLAN-002`: amend the database posture to SQLite after API-003.
+5. `FEAS-004`: freeze and prove official SQLite native integration.
+6. `API-005`: SQLite adapter, migrations, and synchronized implemented-schema DBML.
+7. `DBDOC-001`: independently verify implemented-schema DBML and create TigerBeetle mapping/proposed-schema documentation without separating DBML from its migration review unit.
+8. `API-004`: REST routes, authorization, probes, retries, and shutdown.
+9. `RUNTIME-001`: paths, manifests, locking, child processes, ports, and logs.
+10. `RUNTIME-002`: managed SQLite lifecycle.
+11. `RUNTIME-003`: managed TigerBeetle lifecycle.
+12. `RUNTIME-004`: integrated managed supervisor.
+13. `COMPOSE-001`: external-mode local environment.
 
 Adapters and runtime substrate may proceed in parallel after `API-001` where path ownership permits.
 
@@ -89,16 +92,16 @@ After each wave, the coordinator:
 
 ## Final acceptance
 
-- api.zig, the approved pg.zig baseline plus exact compatibility patch, and the
-  TigerBeetle C ABI work natively on Windows 11 x64.
-- Compose starts the external API and both databases.
+- api.zig, the official SQLite C API integration, and the TigerBeetle C ABI
+  work natively on Windows 11 x64.
+- Compose starts the external API with SQLite storage and TigerBeetle.
 - Desktop managed mode initializes, retains, probes, retries, and shuts down both databases.
 - App and supervisor tokens remain within their intended trust boundaries.
 - No child process survives application shutdown.
 - The Windows x64 ZIP passes native first-run and retained-run smoke tests.
 - Runtime artifacts contain exact provenance, hashes, licenses, and no credentials/debug files.
 - Every package uses the exact layout, naming, source, and sealing policy in `PACKAGING.md`.
-- The implemented PostgreSQL schema is accurately represented by importable DBML, and TigerBeetle identifier mappings are documented separately.
+- The implemented SQLite schema is accurately represented by importable DBML, and TigerBeetle identifier mappings are documented separately.
 - Documentation setup commands have been independently executed.
 - No active .NET, Terraform, AWS deployment, or obsolete CI remains.
 - `AUDIT-001` has no unresolved P0–P2 findings.

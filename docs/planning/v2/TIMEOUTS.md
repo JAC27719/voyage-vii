@@ -8,14 +8,14 @@ These values are frozen. “Bounded” in a task guide means the applicable valu
 | --- | --- |
 | API handshake | 15 seconds; maximum 16 KiB |
 | Initial full database readiness | 60 seconds |
-| PostgreSQL connect | 5 seconds |
-| PostgreSQL pool acquisition | 5 seconds |
-| PostgreSQL query or probe | 3 seconds |
+| SQLite open | 5 seconds |
+| SQLite busy timeout | 5 seconds |
+| SQLite query, checkpoint, or probe | 3 seconds |
 | TigerBeetle request/callback | 5 seconds |
 | Frontend HTTP request | 10 seconds |
 | Healthy component probe interval | 10 seconds |
 | Transitioning or unhealthy component probe interval | 1 second |
-| PostgreSQL graceful stop | 10 seconds |
+| SQLite close and checkpoint | 10 seconds |
 | TigerBeetle process graceful stop | 10 seconds |
 | TigerBeetle C `tb_client_deinit` watchdog | 10 seconds |
 | Adapter cancellation/shutdown | 10 seconds |
