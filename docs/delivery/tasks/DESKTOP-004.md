@@ -23,12 +23,18 @@ target-extensible.
 3. Reject absolute archive paths, `..`, escaping links, duplicate destinations, missing files, and wrong architecture.
 4. Never execute downloaded content during staging.
 5. Stage third-party runtimes into the exact target-relative locations in `PACKAGING.md`, retain required TigerBeetle files and SQLite source/license provenance, and define the first-party API component slot.
-6. Exclude headers, debug symbols, server documentation, caches, and unrelated tools.
-7. Generate manifest-v1 inputs for SQLite/TigerBeetle and an unfilled first-party API slot; package tasks supply the audited API commit/output hash and generate the final manifest.
-8. Generate combined notices and license copies.
-9. Provide offline mode that succeeds only with verified cached inputs.
-10. Ensure staging leaves the checked-in source manifest unchanged and all generated content ignored.
-11. Reject any claim that non-Windows cross-build or staged stub output is a
+6. Exclude debug symbols, server documentation, caches, unrelated tools, and
+   non-required headers. The official SQLite amalgamation `sqlite3.h` is a
+   required source companion to `sqlite3.c` and is retained with SQLite source
+   provenance.
+7. For TigerBeetle license staging, treat the verified `0.17.7` source ZIP
+   hash as authoritative and stage the root `LICENSE` entry with its actual
+   SHA-256 from that verified archive.
+8. Generate manifest-v1 inputs for SQLite/TigerBeetle and an unfilled first-party API slot; package tasks supply the audited API commit/output hash and generate the final manifest.
+9. Generate combined notices and license copies.
+10. Provide offline mode that succeeds only with verified cached inputs.
+11. Ensure staging leaves the checked-in source manifest unchanged and all generated content ignored.
+12. Reject any claim that non-Windows cross-build or staged stub output is a
     supported/native runtime.
 
 ## Acceptance evidence
