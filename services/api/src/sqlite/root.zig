@@ -118,19 +118,21 @@ pub const Database = struct {
         try execBytes(self.handle, ledger_sql);
 
         var applied = try loadAppliedMigrations(allocator, self.handle);
-        defer freeAppliedMigrations(allocator, applied.items);
         defer applied.deinit(allocator);
+        defer freeAppliedMigrations(allocator, applied.items);
 
         const pending = try planMigrations(applied.items, migrations[0..]);
         for (pending) |migration| {
             const sql = if (migration.version == 1) ledger_sql else try readMigrationSql(allocator, migration);
             defer if (migration.version != 1) allocator.free(sql);
             try execBytes(self.handle, sql);
-            const insert = try std.fmt.allocPrintZ(
+            const insert_text = try std.fmt.allocPrint(
                 allocator,
                 "INSERT INTO schema_migrations (version, name, sha256) VALUES ({d}, '{s}', '{s}');",
                 .{ migration.version, migration.name, migration.sha256 },
             );
+            defer allocator.free(insert_text);
+            const insert = try allocator.dupeZ(u8, insert_text);
             defer allocator.free(insert);
             try exec(self.handle, insert);
         }
