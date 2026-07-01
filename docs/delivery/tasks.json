@@ -1549,7 +1549,7 @@
       "id": "TOOL-001",
       "title": "Create project-local bootstrap and doctor tooling",
       "wave": 4,
-      "status": "ready",
+      "status": "in_progress",
       "inference": "low",
       "worker": null,
       "reviewer": null,
