@@ -14,7 +14,7 @@ Create the complete locked-down Tauri 2/SolidJS foundation, manifests, configura
 ## Procedure
 
 1. Scaffold Tauri 2, SolidJS, Vite, TypeScript, Tailwind, and Bun with the exact pins in `DEPENDENCY-PINS.md`, exact manifest constraints, and committed lockfiles.
-2. Own and create all Cargo/package manifests, lockfiles, build scripts, HTML, TypeScript/Vite/Tailwind/ESLint/Prettier/Vitest configuration, base frontend entrypoints, Tauri configuration, and capabilities.
+2. Own and create all Cargo/package manifests, lockfiles, build scripts, HTML, TypeScript/Vite/Tailwind/ESLint/Prettier/Vitest configuration, base frontend entrypoints, Tauri configuration, capabilities, and app-command permission files.
 3. Declare every listed future direct Rust/NPM dependency and approved package script required by DESKTOP-002, DESKTOP-003, and PACKAGE-004 now; listed but unused dependencies may be omitted only when no approved future packet requires them.
 4. Create buildable static `runtime` and `smoke` Rust modules, frontend app/module seams, and aggregate Rust/frontend test registration. Wire them from the shared entrypoints.
 5. Configure product `Voyage VII`, version from root `VERSION`, and bundle ID `io.github.jac27719.voyage-vii`.
