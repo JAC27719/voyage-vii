@@ -914,7 +914,7 @@
       "worker": null,
       "reviewer": null,
       "dependsOn": ["FEAS-004", "API-001", "SEAM-001"],
-      "ownedPaths": ["services/api/src/sqlite/**", "services/api/migrations/**", "services/api/tests/sqlite/**", "docs/database/sqlite.dbml", "docs/database/README.md"],
+      "ownedPaths": ["services/api/build.zig", "services/api/build.zig.zon", "services/api/src/main.zig", "services/api/src/sqlite/**", "services/api/migrations/**", "services/api/tests/all.zig", "services/api/tests/sqlite/**", "docs/database/sqlite.dbml", "docs/database/README.md"],
       "excludedPaths": ["HTTP routes", "runtime process supervision", "PostgreSQL compatibility work"],
       "guide": "docs/delivery/tasks/API-005.md",
       "submission": null,
