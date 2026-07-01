@@ -1121,22 +1121,51 @@
       "id": "RUNTIME-003",
       "title": "Implement managed TigerBeetle lifecycle",
       "wave": 2,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "runtime_003_impl",
+      "reviewer": "runtime_003_review",
       "dependsOn": ["API-003", "RUNTIME-001"],
       "ownedPaths": ["services/api/src/runtime/tigerbeetle/**", "services/api/tests/runtime/tigerbeetle/**"],
       "excludedPaths": ["SQLite lifecycle", "desktop application"],
       "guide": "docs/delivery/tasks/RUNTIME-003.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "4104d2754a2b806d1f687eb39acc091a2224d322",
+        "revision": "4104d2754a2b806d1f687eb39acc091a2224d322:b62a4d8607f19e22ab88bafe43be5fac3344d48d31284e8ef1b20c315ad4964e",
+        "changedPaths": [
+          "services/api/src/runtime/tigerbeetle/root.zig",
+          "services/api/tests/runtime/tigerbeetle/root.zig"
+        ],
+        "summary": "Implement managed TigerBeetle lifecycle planning with pristine/initialized/invalid root classification, cluster-ID persistence, pinned executable validation, proven format/start commands, one-replica loopback startup, retry and shutdown policy, contained-process wait/escalate/reap behavior, and production adapter probe mapping.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Aggregate lifecycle and policy tests",
+            "command": "Pinned Zig 0.15.2 fmt and aggregate zig build test from services/api with approved SQLite amalgamation",
+            "result": "PASS: aggregate tests passed with storage classification, command construction, wrong-binary rejection, occupied-port detection, retry policy, and contained-process shutdown coverage"
+          },
+          {
+            "criterion": "Review and hygiene",
+            "command": "git diff --cached --check; independent RUNTIME-003 staged review and focused re-review",
+            "result": "PASS: staged paths matched RUNTIME-003 ownership; reviewer findings on binary validation, CLI flag form, and shutdown behavior were fixed; Copernicus approved the re-review"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "runtime_003_review",
+        "reviewedRevision": "4104d2754a2b806d1f687eb39acc091a2224d322:b62a4d8607f19e22ab88bafe43be5fac3344d48d31284e8ef1b20c315ad4964e",
+        "integrationCommit": "814361dcb75c7297e8877301cc319e597dcf391d",
+        "findings": [],
+        "residualRisks": [
+          "Full production orchestration still depends on later shared runtime registration and entrypoint work, which is outside RUNTIME-003 ownership."
+        ]
+      }
     },
     {
       "id": "RUNTIME-004",
       "title": "Integrate managed runtime supervision",
       "wave": 2,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
