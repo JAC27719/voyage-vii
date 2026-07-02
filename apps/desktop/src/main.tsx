@@ -8,4 +8,5 @@ if (!root) {
   throw new Error("Missing root element");
 }
 
+root.replaceChildren();
 render(() => <App />, root);

@@ -2,8 +2,29 @@ import { Navigate, Route, Router } from "@solidjs/router";
 import { For } from "solid-js";
 
 import { modules } from "./module-registry";
+import type { ModuleDefinition } from "./module-registry";
+import { StartupView } from "./startup";
 
 export function App() {
+  return (
+    <Router>
+      <Route path="/" component={() => <Navigate href="/startup" />} />
+      <Route path="/startup" component={StartupView} />
+      <For each={modules}>
+        {(module) => (
+          <Route
+            path={module.path}
+            component={() => <ModuleShell module={module} />}
+          />
+        )}
+      </For>
+    </Router>
+  );
+}
+
+function ModuleShell(props: { module: ModuleDefinition }) {
+  const Module = props.module.component;
+
   return (
     <div class="app-shell">
       <aside class="sidebar" aria-label="Primary">
@@ -21,17 +42,7 @@ export function App() {
         </nav>
       </aside>
       <section class="workspace">
-        <Router>
-          <Route
-            path="/"
-            component={() => <Navigate href="/system/status" />}
-          />
-          <For each={modules}>
-            {(module) => (
-              <Route path={module.path} component={module.component} />
-            )}
-          </For>
-        </Router>
+        <Module />
       </section>
     </div>
   );
