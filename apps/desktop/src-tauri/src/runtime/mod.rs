@@ -28,6 +28,7 @@ const SHUTDOWN_TERMINATE_WAIT: Duration = Duration::from_secs(5);
 const RESTART_LIMIT: usize = 3;
 const RESTART_WINDOW: Duration = Duration::from_secs(5 * 60);
 const PACKAGED_ORIGIN: &str = "http://tauri.localhost";
+const DEVELOPMENT_ORIGIN: &str = "http://localhost:1420";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -236,7 +237,7 @@ impl SupervisorConfig {
             },
             runtime_root,
             data_root,
-            PACKAGED_ORIGIN.to_string(),
+            allowed_origin().to_string(),
         ))
     }
 
@@ -311,6 +312,14 @@ fn portable_runtime_root(app_dir: &Path) -> PathBuf {
 
 fn is_packaged_runtime_root(root: &Path) -> bool {
     root.join("manifest.json").is_file() && root.join("api").join("voyage-vii-api.exe").is_file()
+}
+
+fn allowed_origin() -> &'static str {
+    if cfg!(debug_assertions) {
+        DEVELOPMENT_ORIGIN
+    } else {
+        PACKAGED_ORIGIN
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -795,6 +804,7 @@ pub fn self_test() -> anyhow::Result<()> {
     anyhow::ensure!(SHUTDOWN_TERMINATE_WAIT == Duration::from_secs(5));
     anyhow::ensure!(RESTART_LIMIT == 3);
     anyhow::ensure!(PACKAGED_ORIGIN == "http://tauri.localhost");
+    anyhow::ensure!(DEVELOPMENT_ORIGIN == "http://localhost:1420");
     let snapshot = initial_snapshot();
     anyhow::ensure!(snapshot.generation == 0);
     anyhow::ensure!(snapshot.connection.is_none());
@@ -1301,6 +1311,11 @@ mod tests {
     fn packaged_runtime_selection_fails_when_no_candidate_is_valid() {
         let temp = TempDir::new().expect("temp dir");
         assert!(select_packaged_runtime_root(Some(temp.path()), None).is_err());
+    }
+
+    #[test]
+    fn debug_build_allows_development_origin() {
+        assert_eq!(allowed_origin(), DEVELOPMENT_ORIGIN);
     }
 
     #[test]
