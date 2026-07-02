@@ -269,7 +269,19 @@ fn packaged_runtime_root(app: &tauri::AppHandle) -> anyhow::Result<PathBuf> {
     }
 
     let resource_dir = app.path().resource_dir()?;
-    select_packaged_runtime_root(None, Some(&resource_dir))
+    if let Ok(runtime_root) = select_packaged_runtime_root(None, Some(&resource_dir)) {
+        return Ok(runtime_root);
+    }
+
+    #[cfg(debug_assertions)]
+    if let Some(runtime_root) = development_runtime_roots()
+        .into_iter()
+        .find(|candidate| is_packaged_runtime_root(candidate))
+    {
+        return Ok(runtime_root);
+    }
+
+    anyhow::bail!("packaged runtime was not found beside the app executable or in Tauri resources")
 }
 
 fn select_packaged_runtime_root(
@@ -299,6 +311,17 @@ fn portable_runtime_root(app_dir: &Path) -> PathBuf {
 
 fn is_packaged_runtime_root(root: &Path) -> bool {
     root.join("manifest.json").is_file() && root.join("api").join("voyage-vii-api.exe").is_file()
+}
+
+#[cfg(debug_assertions)]
+fn development_runtime_roots() -> Vec<PathBuf> {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    vec![
+        manifest_dir.join("resources").join("runtime"),
+        manifest_dir
+            .join("../../..")
+            .join("tools/package/windows/build/package-root/resources/runtime"),
+    ]
 }
 
 trait EventSink: Send + 'static {
@@ -1278,6 +1301,17 @@ mod tests {
     fn packaged_runtime_selection_fails_when_no_candidate_is_valid() {
         let temp = TempDir::new().expect("temp dir");
         assert!(select_packaged_runtime_root(Some(temp.path()), None).is_err());
+    }
+
+    #[test]
+    fn development_runtime_roots_include_source_and_package_outputs() {
+        let roots = development_runtime_roots();
+        assert!(roots
+            .iter()
+            .any(|root| root.ends_with(Path::new("apps/desktop/src-tauri/resources/runtime"))));
+        assert!(roots.iter().any(|root| root.ends_with(Path::new(
+            "tools/package/windows/build/package-root/resources/runtime"
+        ))));
     }
 
     fn create_packaged_runtime_root(root: &Path) {
