@@ -1792,7 +1792,7 @@
       "guide": "docs/delivery/tasks/PACKAGE-001.md",
       "submission": {
         "base": "fe32052d955d48812f495048d47b1d720074680b",
-        "revision": "fe32052d955d48812f495048d47b1d720074680b:f09e1fb6970961fcae8392be47140dd883e56ace",
+        "revision": "fe32052d955d48812f495048d47b1d720074680b:128c7f17fe88b2f67486c39fc4f47ada40cdda0f",
         "changedPaths": [
           "docs/delivery/tasks.json",
           "docs/packaging/windows.md",
@@ -1803,7 +1803,7 @@
           "tools/package/windows/.gitignore",
           "tools/package/windows/build-windows-zip.ps1"
         ],
-        "summary": "Add the Windows x64 portable ZIP build script and runbook, assemble the desktop/API/runtime layout, validate PE inventory and forbidden files, enforce clean tracked package inputs and approved TigerBeetle C client hashes, fix packaged API readiness by resolving SQLite migrations beside the API executable, and harden managed TigerBeetle startup for the PACKAGE-004 smoke gate.",
+        "summary": "Add the Windows x64 portable ZIP build script and runbook, build the desktop host with Tauri production assets without installer formats, assemble the desktop/API/runtime layout, validate PE inventory and forbidden files, enforce clean tracked package inputs and approved TigerBeetle C client hashes, fix packaged API readiness by resolving SQLite migrations beside the API executable, and harden managed TigerBeetle startup for the PACKAGE-004 smoke gate.",
         "acceptanceEvidence": [
           {
             "criterion": "API unit and lifecycle checks",
@@ -1813,7 +1813,7 @@
           {
             "criterion": "Windows ZIP build and PACKAGE-004 smoke",
             "command": "pwsh -NoProfile -File tools/package/windows/build-windows-zip.ps1 -Offline",
-            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 e8e7fae8daebc746fce0228dcef8e0f2951d989afd37b92f4a9b2f88f3b194c0; PE inventory was Windows x64, desktop subsystem was Windows GUI, forbidden package files were absent, extraction from a path containing spaces and non-ASCII succeeded, fresh smoke completed in 17644 ms, retained smoke completed in 17598 ms, and no Voyage/TigerBeetle processes remained."
+            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 8265d5b13355670ab5a9de66c31f650c801c74826c07751bc9415e16d8ad8ff7; PE inventory was Windows x64, desktop subsystem was Windows GUI, forbidden package files were absent, extraction from a path containing spaces and non-ASCII succeeded, fresh smoke completed in 17728 ms, retained smoke completed in 16624 ms, and no Voyage/TigerBeetle processes remained."
           },
           {
             "criterion": "Registry, script, and diff hygiene",
@@ -1825,8 +1825,8 @@
       "review": {
         "verdict": "APPROVED",
         "reviewer": "Wegener",
-        "reviewedRevision": "fe32052d955d48812f495048d47b1d720074680b:f09e1fb6970961fcae8392be47140dd883e56ace",
-        "integrationCommit": "f09e1fb6970961fcae8392be47140dd883e56ace",
+        "reviewedRevision": "fe32052d955d48812f495048d47b1d720074680b:128c7f17fe88b2f67486c39fc4f47ada40cdda0f",
+        "integrationCommit": "128c7f17fe88b2f67486c39fc4f47ada40cdda0f",
         "findings": [],
         "residualRisks": [
           "Generated desktop dependency/build output remains untracked local state and is intentionally excluded from the package commit.",
