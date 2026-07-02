@@ -30,14 +30,13 @@ When tradeoffs conflict, prefer:
 - Support explicit API `managed` and `external` modes.
 - Keep app and supervisor bearer tokens separate, API-generated, and ephemeral in every mode.
 - Keep managed and packaged database and API traffic on loopback.
-- Permit external development-container mode to use an internal non-published Compose bridge for API-to-database traffic. The API may listen on `0.0.0.0:7800` only inside the container when host publication is exclusively `127.0.0.1:7800`; database ports remain unpublished.
+- Remove Docker and Compose from the active project workflow until a future ADR
+  approves a real use case.
 - Use no cookies, telemetry, or metrics.
 - Keep DevTools debug-only.
 - Use strict CSP and exact-origin CORS.
 - Use structured rotating logs without names, amounts, tokens, authorization headers, SQL values, or raw exceptions.
-- Use API-owned SQLite storage and TigerBeetle in Compose for development.
-- Pin images by tag and digest; use named volumes and non-root users where supported.
-- Permit TigerBeetle `seccomp=unconfined` only in local development.
+- Use API-owned SQLite storage and managed TigerBeetle for development.
 - Use a static SolidJS module registry and a manually typed client checked against shared schemas/fixtures.
 - Use system theme, WCAG AA contrast, technical component names, and a minimal status-focused sidebar.
 - Keep the first UI window at `1100×720`, resizable, with remembered geometry.
@@ -72,8 +71,9 @@ When tradeoffs conflict, prefer:
 The slice is complete when a developer can:
 
 1. Bootstrap the project on Windows 11 x64.
-2. Run the API with SQLite storage and TigerBeetle through Compose.
-3. Run the desktop app with managed local databases.
+2. Run the desktop app with managed local databases.
+3. Run the API with SQLite storage and TigerBeetle through native managed
+   workflows.
 4. See accurate component state and perform bounded retries.
 5. Open logs and copy sanitized diagnostics.
 6. Stop the app without secrets, data loss, or orphan processes.

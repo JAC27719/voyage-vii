@@ -19,23 +19,23 @@ voyage-vii-api serve \
   --handshake stdout-v1 \
   [--listen <ip:port>] \
   [--advertised-api-url <url>] \
-  [--development-container] \
   [external database flags]
 ```
 
 `--runtime-root`, `--data-root`, `--allowed-origin`, and `--handshake stdout-v1` are required in both modes. `--listen` defaults to `127.0.0.1:0`. `--advertised-api-url` defaults to the actual bound loopback URL and must always be an HTTP loopback URL with no credentials, path, query, or fragment.
 
-Managed mode rejects `--development-container` and every external database flag.
+Managed mode rejects every external database flag.
 
 External mode requires all of:
 
 - `--sqlite-path <absolute-path>`
 - `--tigerbeetle-address <address>`
 
-The SQLite path must be absolute, root-contained unless `--development-container`
-is present, and logged only through sanitized diagnostics.
+The SQLite path must be absolute, root-contained, and logged only through
+sanitized diagnostics.
 
-A non-loopback `--listen` value is rejected unless the mode is `external` and `--development-container` is present. Development Compose uses `--listen 0.0.0.0:7800` and `--advertised-api-url http://127.0.0.1:7800`.
+A non-loopback `--listen` value is rejected. Docker and Compose are not active
+project workflows.
 
 The CLI is the sole configuration source. There are no implicit environment-variable, configuration-file, registry, or user-profile values and therefore no configuration-precedence rules.
 
@@ -64,7 +64,8 @@ Accepted origins are exact single values:
 Future macOS/Linux origins require a future ADR/task wave and are not current
 support contracts.
 
-Managed and packaged traffic is loopback-only. The development-container exception is defined in `ARCHITECTURE.md` and `DECISIONS.md`; it does not relax advertised URL, CORS, authentication, or host-publication requirements.
+Managed and packaged traffic is loopback-only. Docker and Compose are not
+active project workflows.
 
 ## Handshake and tokens
 

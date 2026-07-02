@@ -1,5 +1,4 @@
 const std = @import("std");
-const builtin = @import("builtin");
 const api = @import("api");
 
 pub const sqlite_adapter = @import("sqlite/root.zig");
@@ -57,8 +56,6 @@ pub const ConfigError = error{
     InvalidAdvertisedApiUrl,
     MissingExternalFlag,
     ManagedModeRejectedExternalFlag,
-    DevelopmentContainerRequiresExternalMode,
-    NonLoopbackListenRequiresDevelopmentContainer,
 };
 
 pub const Command = union(enum) {
@@ -80,7 +77,6 @@ pub const ServeConfig = struct {
     handshake: []const u8,
     listen: ListenAddress,
     advertised_api_url: ?[]const u8,
-    development_container: bool,
     external: ?ExternalDatabaseConfig,
 };
 
@@ -153,19 +149,12 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
     var listen: ListenAddress = ListenAddress.default();
     var listen_seen = false;
     var advertised_api_url: ?[]const u8 = null;
-    var development_container = false;
     var sqlite_path: ?[]const u8 = null;
     var tigerbeetle_address: ?[]const u8 = null;
 
     var index: usize = 0;
     while (index < args.len) : (index += 1) {
         const flag = args[index];
-        if (std.mem.eql(u8, flag, "--development-container")) {
-            if (development_container) return error.DuplicateFlag;
-            development_container = true;
-            continue;
-        }
-
         index += 1;
         if (index >= args.len) return error.MissingRequiredFlag;
         const value = args[index];
@@ -219,20 +208,16 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
         .handshake = handshake orelse return error.MissingRequiredFlag,
         .listen = listen,
         .advertised_api_url = advertised_api_url,
-        .development_container = development_container,
         .external = null,
     };
 
-    if (development_container and mode != .external) {
-        return error.DevelopmentContainerRequiresExternalMode;
-    }
-    if (!isLoopbackListen(listen.host) and !(mode == .external and development_container)) {
-        return error.NonLoopbackListenRequiresDevelopmentContainer;
+    if (!isLoopbackListen(listen.host)) {
+        return error.InvalidListen;
     }
 
     const any_external = sqlite_path != null or tigerbeetle_address != null;
     if (mode == .managed) {
-        if (development_container or any_external) return error.ManagedModeRejectedExternalFlag;
+        if (any_external) return error.ManagedModeRejectedExternalFlag;
         return config;
     }
 
@@ -244,7 +229,6 @@ pub fn parseServe(args: []const []const u8) ConfigError!ServeConfig {
         .handshake = config.handshake,
         .listen = config.listen,
         .advertised_api_url = config.advertised_api_url,
-        .development_container = config.development_container,
         .external = .{
             .sqlite_path = sqlite_path orelse return error.MissingExternalFlag,
             .tigerbeetle_address = tigerbeetle_address orelse return error.MissingExternalFlag,
@@ -307,7 +291,11 @@ fn serve(allocator: std.mem.Allocator, config: ServeConfig) !void {
     if (config.runtime == .managed) {
         try runtime.startAsync();
     } else {
-        runtime.markExternalStarting();
+        const external = config.external orelse return error.MissingExternalFlag;
+        try runtime.startExternalAsync(.{
+            .sqlite_path = external.sqlite_path,
+            .tigerbeetle_address = external.tigerbeetle_address,
+        });
     }
 
     const http_config = http.Config{
@@ -556,7 +544,7 @@ test "managed serve requires only CLI flags and rejects external flags" {
     }));
 }
 
-test "external serve requires all database flags and gates non-loopback listen" {
+test "external serve requires all database flags and rejects non-loopback listen" {
     try std.testing.expectError(error.MissingExternalFlag, parseServe(&.{
         "--runtime",        "external",
         "--runtime-root",   "C:\\runtime",
@@ -565,17 +553,27 @@ test "external serve requires all database flags and gates non-loopback listen" 
         "--handshake",      "stdout-v1",
     }));
 
+    try std.testing.expectError(error.InvalidListen, parseServe(&.{
+        "--runtime",                    "external",
+        "--runtime-root",               "C:\\runtime",
+        "--data-root",                  "C:\\data",
+        "--allowed-origin",             development_origin,
+        "--handshake",                  "stdout-v1",
+        "--listen",                     "0.0.0.0:7800",
+        "--advertised-api-url",
+        "http://127.0.0.1:7800",        "--sqlite-path",
+        "C:\\data\\voyage-vii.sqlite3", "--tigerbeetle-address",
+        "tigerbeetle:3000",
+    }));
+
     const config = try parseServe(&.{
         "--runtime",                    "external",
         "--runtime-root",               "C:\\runtime",
         "--data-root",                  "C:\\data",
         "--allowed-origin",             development_origin,
         "--handshake",                  "stdout-v1",
-        "--development-container",      "--listen",
-        "0.0.0.0:7800",                 "--advertised-api-url",
-        "http://127.0.0.1:7800",        "--sqlite-path",
-        "C:\\data\\voyage-vii.sqlite3", "--tigerbeetle-address",
-        "tigerbeetle:3000",
+        "--sqlite-path",                "C:\\data\\voyage-vii.sqlite3",
+        "--tigerbeetle-address",        "127.0.0.1:3000",
     });
     try std.testing.expectEqual(RuntimeMode.external, config.runtime);
     try std.testing.expect(config.external != null);
@@ -589,10 +587,4 @@ test "origin and advertised API URL validation is exact" {
     try std.testing.expect(!isValidApiUrl("https://127.0.0.1:7800"));
     try std.testing.expect(!isValidApiUrl("http://user@127.0.0.1:7800"));
     try std.testing.expect(!isValidApiUrl("http://127.0.0.1:7800/path"));
-}
-
-comptime {
-    if (builtin.os.tag != .windows) {
-        @compileLog("Voyage VII v2 API-001 current native gate is Windows 11 x64 only.");
-    }
 }

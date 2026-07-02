@@ -56,7 +56,5 @@ posture change. These are not fixed in HARDEN-001 because they fall outside
 
 ## Local limitations
 
-- Real Compose smoke requires an approved exact API image pin in the frozen
-  `0.1.0@sha256:<64 lowercase hex>` form.
 - The local host currently exposes Zig 0.14 syntax behavior to `zig build test`;
   full API unit completion requires the frozen application Zig 0.15.2 toolchain.

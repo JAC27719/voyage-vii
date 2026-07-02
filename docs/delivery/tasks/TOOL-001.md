@@ -1,7 +1,7 @@
 # TOOL-001 — Project-Local Bootstrap and Doctor
 
 **Implementer inference:** Low  
-**Prerequisites:** `DESKTOP-004` and `COMPOSE-001` approved.
+**Prerequisites:** `DESKTOP-004` approved.
 
 ## Frozen inputs
 
@@ -13,13 +13,13 @@ Provide repeatable dependency preparation and diagnostic commands without privil
 
 ## Procedure
 
-1. Implement profiles `compose`, `desktop`, `packaging`, and `all`.
+1. Implement profiles `desktop`, `packaging`, and `all`.
 2. Require Windows 11 x64 for current supported operations; identify every
    other OS/architecture as deferred and unsupported.
 3. Verify required Windows system prerequisites and print Windows installation instructions.
 4. Download only project-local, pinned, checksum-verified dependencies.
 5. Reuse the runtime staging cache rather than creating a second download mechanism.
-6. Provide a doctor report for tool versions, Docker readiness, native build prerequisites, WebView requirements, and writable cache/data paths.
+6. Provide a doctor report for tool versions, native build prerequisites, WebView requirements, and writable cache/data paths.
 7. Support warm-cache and documented offline behavior.
 8. Never invoke privileged installers or alter user-global configuration.
 

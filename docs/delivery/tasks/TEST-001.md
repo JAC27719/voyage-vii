@@ -1,7 +1,7 @@
 # TEST-001 — Reusable Cross-Stack Test Orchestration
 
 **Implementer inference:** Low  
-**Prerequisites:** `RUNTIME-004`, `COMPOSE-001`, `DESKTOP-002`, and `DESKTOP-003` approved.
+**Prerequisites:** `RUNTIME-004`, `DESKTOP-002`, and `DESKTOP-003` approved.
 
 ## Frozen inputs
 
@@ -9,12 +9,12 @@ Use exact response/manifests/origins from `CONTRACTS.md`, 120-second step and 20
 
 ## Objective
 
-Expose consistent Windows 11 x64 commands for unit, Compose, managed, failure,
-and package verification.
+Expose consistent Windows 11 x64 commands for unit, managed, failure, and
+package verification.
 
 ## Procedure
 
-1. Provide `unit`, `compose-smoke`, `managed-smoke`, `managed-failure`, `package-smoke`, and `all`.
+1. Provide `unit`, `managed-smoke`, `managed-failure`, `package-smoke`, and `all`.
 2. Reuse product entrypoints and shared fixtures; do not reimplement lifecycle behavior in the harness.
 3. Allocate isolated canonical temporary roots with a sentinel.
 4. Enforce 120 seconds per step and 20 minutes overall.

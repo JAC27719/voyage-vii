@@ -2,9 +2,8 @@
 
 [CmdletBinding()]
 param(
-  [ValidateSet("unit", "compose-smoke", "managed-smoke", "managed-failure", "package-smoke", "all")]
+  [ValidateSet("unit", "managed-smoke", "managed-failure", "package-smoke", "all")]
   [string]$Command = "all",
-  [string]$ApiImage,
   [switch]$KeepSuccessfulRoots
 )
 
@@ -282,10 +281,6 @@ function Invoke-WithRoot([string]$Name, [scriptblock]$Body) {
   }
 }
 
-function Test-ApiImagePin([string]$Image) {
-  return -not [string]::IsNullOrWhiteSpace($Image) -and $Image -match '^[^:@\s]+(?:/[^:@\s]+)*:0\.1\.0@sha256:[0-9a-f]{64}$'
-}
-
 function Invoke-Unit {
   Invoke-WithRoot "unit" {
     param($root)
@@ -296,41 +291,6 @@ function Invoke-Unit {
     Invoke-Step "desktop-rust-tests" $root "rustup" @("run", "1.96.0", "cargo", "test", "--locked") (Resolve-RepoPath "apps/desktop/src-tauri")
     Invoke-Step "runtime-staging-tests" $root "pwsh" @("-NoProfile", "-File", (Resolve-RepoPath "tests/runtime-staging/run-tests.ps1")) (Get-RepoRoot)
     Invoke-Step "api-zig-tests" $root "zig" @("build", "test") (Resolve-RepoPath "services/api")
-  }
-}
-
-function Invoke-ComposeSmoke {
-  if (-not (Test-ApiImagePin $ApiImage)) {
-    throw "compose-smoke requires -ApiImage name:0.1.0@sha256:<64 lowercase hex>."
-  }
-  Invoke-WithRoot "compose-smoke" {
-    param($root)
-    $primaryError = $null
-    try {
-      Invoke-Step "compose-up" $root "pwsh" @("-NoProfile", "-File", (Resolve-RepoPath "scripts/compose/up.ps1"), "-ApiImage", $ApiImage) (Get-RepoRoot) $StepTimeoutSeconds
-    } catch {
-      $primaryError = $_
-    }
-
-    try {
-      Invoke-Step `
-        -Name "compose-stop" `
-        -Root $root `
-        -FilePath "pwsh" `
-        -Arguments @("-NoProfile", "-File", (Resolve-RepoPath "scripts/compose/stop.ps1")) `
-        -WorkingDirectory (Get-RepoRoot) `
-        -TimeoutSeconds $StepTimeoutSeconds `
-        -Environment @{ VOYAGE_VII_API_IMAGE = $ApiImage }
-    } catch {
-      Write-Warning "Compose cleanup failed; preserved details in $root."
-      if ($null -eq $primaryError) {
-        throw
-      }
-    }
-
-    if ($null -ne $primaryError) {
-      throw $primaryError
-    }
   }
 }
 
@@ -428,13 +388,11 @@ Assert-Windows11X64
 
 switch ($Command) {
   "unit" { Invoke-Unit }
-  "compose-smoke" { Invoke-ComposeSmoke }
   "managed-smoke" { Invoke-ManagedSmoke }
   "managed-failure" { Invoke-ManagedFailure }
   "package-smoke" { Invoke-PackageSmoke }
   "all" {
     Invoke-Unit
-    Invoke-ComposeSmoke
     Invoke-ManagedSmoke
     Invoke-ManagedFailure
     Invoke-PackageSmoke

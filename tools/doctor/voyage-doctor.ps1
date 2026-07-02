@@ -46,38 +46,6 @@ function Get-PinnedCommandVersion([string]$Name, [string[]]$Arguments, [string]$
   return $result
 }
 
-function Test-DockerReady {
-  $docker = Get-Command "docker" -ErrorAction SilentlyContinue
-  if (-not $docker) {
-    return [pscustomobject]@{ found = $false; ready = $false; compose = $false; message = "Docker CLI is missing." }
-  }
-  $info = & $docker.Source "info" "--format" "{{.ServerVersion}}" 2>&1
-  $infoText = ($info -join "`n")
-  $ready = $LASTEXITCODE -eq 0 -and $infoText -notmatch "error during connect|access is denied|permission denied"
-  $compose = $false
-  if ($ready) {
-    & $docker.Source "compose" "version" *> $null
-    $compose = $LASTEXITCODE -eq 0
-  }
-  return [pscustomobject]@{
-    found = $true
-    ready = $ready
-    compose = $compose
-    message = if ($ready) { "Docker engine $infoText is reachable." } else { $infoText }
-  }
-}
-
-function Test-ApiImagePin {
-  $image = [Environment]::GetEnvironmentVariable("VOYAGE_VII_API_IMAGE", "Process")
-  $ok = -not [string]::IsNullOrWhiteSpace($image) -and $image -match '^[^:@\s]+(?:/[^:@\s]+)*:0\.1\.0@sha256:[0-9a-f]{64}$'
-  return [pscustomobject]@{
-    set = -not [string]::IsNullOrWhiteSpace($image)
-    ok = $ok
-    value = if ($image) { $image -replace '@sha256:[0-9a-f]{64}$', '@sha256:[redacted-digest]' } else { $null }
-    message = if ($ok) { "Exact 0.1.0 digest pin is present." } else { "Set VOYAGE_VII_API_IMAGE to name:0.1.0@sha256:<64 lowercase hex> before compose smoke runs." }
-  }
-}
-
 function Test-WebView2 {
   if (-not $IsWindows) {
     return [pscustomobject]@{ found = $false; message = "WebView2 is only required on Windows." }
@@ -133,13 +101,10 @@ $report = [pscustomobject]@{
     Get-PinnedCommandVersion "rustc" @("--version") "1.96.0" '^rustc 1\.96\.0\b'
     Get-PinnedCommandVersion "cargo" @("--version") "1.96.0" '^cargo 1\.96\.0\b'
     Get-PinnedCommandVersion "zig" @("version") "0.15.2" '^0\.15\.2$'
-    Get-CommandVersion "docker" @("--version")
     Get-CommandVersion "cl" @()
     Get-CommandVersion "link" @()
     Get-CommandVersion "rc" @("/?")
   )
-  docker = Test-DockerReady
-  composeApiImage = Test-ApiImagePin
   webView2 = Test-WebView2
   writablePaths = @(
     Test-WritablePath (Resolve-RepoPath "tools/bootstrap/.cache")
@@ -149,7 +114,6 @@ $report = [pscustomobject]@{
   )
   instructions = @(
     "Install pinned toolchains from docs/planning/v2/DEPENDENCY-PINS.md.",
-    "Install Docker Desktop with Compose v2 for compose profile readiness.",
     "Install Microsoft Edge WebView2 Runtime for Windows desktop support.",
     "Run scripts/bootstrap/bootstrap.ps1 -Profile desktop for project-local frontend and Rust dependency preparation.",
     "Run scripts/bootstrap/bootstrap.ps1 -Profile packaging to reuse the runtime staging cache."
@@ -171,8 +135,6 @@ foreach ($tool in $report.tools) {
   Write-Host ("- {0}: found={1}; ok={2}; version={3}{4}" -f $tool.name, $tool.found, $tool.ok, $tool.version, $expected)
 }
 Write-Host ""
-Write-Host "docker: ready=$($report.docker.ready); compose=$($report.docker.compose); $($report.docker.message)"
-Write-Host "compose image: ok=$($report.composeApiImage.ok); $($report.composeApiImage.message)"
 Write-Host "webview2: found=$($report.webView2.found); $($report.webView2.message)"
 Write-Host ""
 Write-Host "writable paths"

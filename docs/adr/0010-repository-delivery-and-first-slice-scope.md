@@ -34,9 +34,9 @@ When tradeoffs conflict, the frozen priority order is:
 4. Simplicity
 5. Performance
 
-The first slice proves bootstrap, external Compose, managed desktop runtime,
-status, bounded retries, sanitized diagnostics, safe shutdown, and native
-smoke tests on all four targets. It excludes financial product behavior,
+The first slice proves bootstrap, managed desktop runtime, status, bounded
+retries, sanitized diagnostics, safe shutdown, and native smoke tests on
+Windows 11 x64. It excludes financial product behavior,
 cloud/deployment, telemetry/metrics, production distribution, and automated
 database upgrade, reset, repair, or backup. Historical rationale remains in
 [RETROSPECTIVE.md](../planning/v2/RETROSPECTIVE.md); deferred financial ideas

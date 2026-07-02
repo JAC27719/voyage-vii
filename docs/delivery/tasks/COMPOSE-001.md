@@ -1,40 +1,35 @@
-# COMPOSE-001 — External-Mode Compose Environment
+# COMPOSE-001 - Superseded Docker/Compose Environment
+
+Docker and Compose are removed from the active project workflow. This packet is
+retained only as historical delivery context; it must not be used to recreate
+project Dockerfiles, Compose files, container image builders, or Compose smoke
+gates without a newly approved use case.
 
 **Implementer inference:** Low  
 **Prerequisites:** `API-004` approved.
 
 ## Frozen inputs
 
-Use external-mode CLI, development-container exception, tokens, origin/auth, and handshake rules from `CONTRACTS.md`; container limits from `TIMEOUTS.md`; and exact component pins from `DEPENDENCY-PINS.md`. Do not add fixed tokens, implicit environment configuration, alternate ports, or published database ports.
+Current frozen inputs come from the Docker/Compose removal decision in
+`DECISIONS.md` and the loopback-only transport contract in `CONTRACTS.md`.
 
 ## Objective
 
-Provide one local command that runs TigerBeetle and the Zig API with API-owned SQLite storage in external mode.
+No active implementation objective. The former objective was superseded by the
+decision to support the native managed desktop workflow and remove Docker until
+there is a real project use case.
 
 ## Procedure
 
-1. Pin TigerBeetle and API images by exact tag and digest.
-2. Use named volumes and non-root execution where the image supports it.
-3. Put API and TigerBeetle on an internal non-published bridge. Do not host-publish TigerBeetle. SQLite must be a mounted API-owned file path, not a network service.
-4. Run the API with explicit frozen external CLI flags, `--sqlite-path`, `--development-container`, `--listen 0.0.0.0:7800`, `--advertised-api-url http://127.0.0.1:7800`, and development origin `http://localhost:1420`; it must not spawn managed databases.
-5. Publish the API host-side only as `127.0.0.1:7800`.
-6. Keep API-generated app/supervisor tokens distinct and ephemeral. A launcher captures the one attached-stdout handshake directly into process memory, redacts it from the console, and never persists it.
-7. Disable the API service's Compose logging driver so handshake stdout cannot enter Docker logs; API stderr is captured only by the attached launcher under the same redaction boundary.
-8. Add health checks and dependency conditions without masking terminal failures.
-9. Apply `seccomp=unconfined` only to TigerBeetle and document it as development-only.
-10. Provide safe normal stop and an explicit destructive `down --volumes` command.
+No active procedure. Do not recreate Docker/Compose files or commands without a
+newly approved task.
 
 ## Acceptance evidence
 
-- `docker compose config` output plus image-tag/digest and network/publication audit.
-- Clean-volume and retained-volume startup.
-- Authenticated status/retry checks using only the in-memory captured app token.
-- Docker-log scan proving no handshake/token/API log persistence.
-- `docker compose down` normal teardown and separately authorized `docker compose down --volumes` verification.
-- Current host acceptance is Windows 11 x64 with the approved local container
-  runtime; container execution does not confer native Linux desktop support.
+- Active Docker/Compose files, helper scripts, bootstrap profile, test command,
+  doctor check, and CI gate remain absent.
 - `git diff --check`.
 
 ## Reviewer focus
 
-Check external-mode purity, port exposure, token labeling, volume safety, non-root behavior, and absence of cloud/deployment content.
+Check that Docker/Compose does not return without an approved use case.

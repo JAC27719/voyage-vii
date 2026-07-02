@@ -1,9 +1,7 @@
 # Operations Runbook
 
 Voyage VII v2 operates locally on Windows 11 x64. Managed and packaged traffic
-is loopback-only. The development-container exception is limited to Compose
-external mode and does not relax CORS, token, advertised URL, or host-publication
-rules.
+is loopback-only.
 
 ## Process Ownership
 
@@ -48,11 +46,7 @@ Every response includes `X-Request-Id`. Request bodies are limited to 64 KiB.
 
 ## Ports
 
-Managed and packaged mode bind loopback only. Compose external mode uses
-`--listen 0.0.0.0:7800` only inside the API container and advertises
-`http://127.0.0.1:7800`. Compose publishes the API host-side only as
-`127.0.0.1:7800`. TigerBeetle is internal to the Compose network and is not
-host-published.
+Managed and packaged mode bind loopback only.
 
 ## Status And Retry
 

@@ -169,13 +169,8 @@ Native macOS and Linux packages, sealing/layout requirements, installers,
 automatic updates, and production distribution are deferred. CI retention is
 seven days.
 
-## Development-container network exception
+## Local network boundary
 
-Managed and packaged operation remains loopback-only. In external development-container mode only:
-
-- TigerBeetle traffic uses an internal, non-published Compose bridge. SQLite is an API-owned file and has no database port.
-- The API listens on `0.0.0.0:7800` only inside its container.
-- Compose publishes that API port host-side exclusively as `127.0.0.1:7800`.
-- TigerBeetle ports are never host-published. SQLite is never exposed over the network.
-- The API advertises `http://127.0.0.1:7800`.
-- Exact-origin CORS, bearer authentication, ephemeral API-generated tokens, request limits, and redaction remain mandatory.
+Managed and packaged operation remains loopback-only. Docker and Compose are
+not active project workflows. Exact-origin CORS, bearer authentication,
+ephemeral API-generated tokens, request limits, and redaction remain mandatory.

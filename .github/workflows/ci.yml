@@ -144,53 +144,6 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  compose:
-    name: Compose Gate
-    runs-on: windows-2025
-    timeout-minutes: 30
-    env:
-      VOYAGE_VII_API_IMAGE: ${{ vars.VOYAGE_VII_API_IMAGE }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Run live Compose smoke with approved image pin
-        if: ${{ vars.VOYAGE_VII_API_IMAGE != '' }}
-        run: pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke -ApiImage "$env:VOYAGE_VII_API_IMAGE"
-
-      - name: Verify Compose image-pin guard
-        if: ${{ vars.VOYAGE_VII_API_IMAGE == '' }}
-        run: |
-          $ErrorActionPreference = "Stop"
-          $log = Join-Path $env:RUNNER_TEMP "compose-missing-pin.log"
-          pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke *> $log
-          if ($LASTEXITCODE -eq 0) {
-            throw "compose-smoke unexpectedly passed without an approved API image pin."
-          }
-          $text = Get-Content -Raw -LiteralPath $log
-          if ($text -notmatch "compose-smoke requires -ApiImage") {
-            throw "compose-smoke did not emit the required exact pin error."
-          }
-          $env:VOYAGE_VII_API_IMAGE = "voyage-vii-api:0.1.0@sha256:0000000000000000000000000000000000000000000000000000000000000000"
-          docker compose --file compose.yaml config --quiet
-          if ($LASTEXITCODE -ne 0) {
-            throw "docker compose config failed with a synthetic exact API image pin."
-          }
-          "Real compose smoke remains gated on repository variable VOYAGE_VII_API_IMAGE containing an approved exact 0.1.0 digest pin." |
-            Set-Content -LiteralPath (Join-Path $env:RUNNER_TEMP "compose-gate-summary.txt") -Encoding utf8
-
-      - name: Upload failure diagnostics
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: compose-diagnostics
-          path: |
-            ${{ runner.temp }}/voyage-vii-tests/**
-            ${{ runner.temp }}/compose-*.log
-            ${{ runner.temp }}/compose-gate-summary.txt
-          retention-days: 7
-          if-no-files-found: ignore
-
   managed-smoke:
     name: Managed Smoke
     runs-on: windows-2025

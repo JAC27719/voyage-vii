@@ -31,12 +31,6 @@ pwsh -NoProfile -File tools/doctor/voyage-doctor.ps1 -Json
 
 ## Bootstrap Profiles
 
-Compose profile readiness:
-
-```powershell
-pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile compose
-```
-
 Desktop dependency readiness:
 
 ```powershell
@@ -54,34 +48,6 @@ Run all current bootstrap profiles:
 ```powershell
 pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile all -Offline
 ```
-
-## External Compose Mode
-
-Compose runs the API in external mode with API-owned SQLite storage and
-TigerBeetle on an internal Compose network. The API is published host-side only
-on `127.0.0.1:7800`; TigerBeetle is not host-published. The API advertises
-`http://127.0.0.1:7800` and uses development origin `http://localhost:1420`.
-
-The API image must be an approved exact `0.1.0` tag and digest pin. DOC-002
-does not document a live Compose startup command because no approved
-first-party API image digest is currently recorded for operator use. The
-verified local command is the Compose configuration check with an exact pin
-shape:
-
-```powershell
-$env:VOYAGE_VII_API_IMAGE = "voyage-vii-api:0.1.0@sha256:0000000000000000000000000000000000000000000000000000000000000000"
-docker compose --file compose.yaml config --quiet
-```
-
-Normal stop is safe to run when Compose containers exist:
-
-```powershell
-$env:VOYAGE_VII_API_IMAGE = "voyage-vii-api:0.1.0@sha256:0000000000000000000000000000000000000000000000000000000000000000"
-pwsh -NoProfile -File scripts/compose/stop.ps1
-```
-
-Destructive volume removal exists in `scripts/compose/down-volumes.ps1` and is
-intentionally not a normal runbook command.
 
 ## Managed Desktop Mode
 
@@ -113,9 +79,6 @@ Unit and static checks:
 ```powershell
 pwsh -NoProfile -File scripts/test/test.ps1 -Command unit
 ```
-
-Compose smoke with an approved image pin is a CI-001-gated command and remains
-blocked until an approved exact API image digest is available.
 
 Managed smoke:
 

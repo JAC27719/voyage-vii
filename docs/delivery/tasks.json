@@ -1251,7 +1251,7 @@
     },
     {
       "id": "COMPOSE-001",
-      "title": "Create the external-mode Compose environment",
+      "title": "Superseded Docker/Compose environment",
       "wave": 2,
       "status": "integrated",
       "inference": "low",
@@ -1271,22 +1271,22 @@
           "scripts/compose/stop.ps1",
           "scripts/compose/up.ps1"
         ],
-        "summary": "Create the local external-mode Compose environment with pinned TigerBeetle, required exact API image pin input, API-owned SQLite storage, internal-only database networking, redacted attached handshake capture, authenticated status and retry checks, disabled API Docker logging, and safe stop/destructive teardown scripts.",
+        "summary": "Historical Compose implementation superseded by the project decision to remove Docker/Compose until there is a real use case.",
         "acceptanceEvidence": [
           {
-            "criterion": "Compose configuration and structural audit",
-            "command": "docker compose --file compose.yaml config with a dummy exact :0.1.0@sha256:<64 hex> API image pin; structural review of resolved services, networks, ports, volumes, logging, and seccomp",
-            "result": "PASS: Compose resolves; API publishes only 127.0.0.1:7800; TigerBeetle has no host-published port; runtime network is internal; SQLite is an API-owned mounted file path; API logging driver is none; seccomp=unconfined is limited to TigerBeetle and documented as development-only"
+            "criterion": "Superseded Docker/Compose posture",
+            "command": "Review current removal changes",
+            "result": "PASS: Compose files, helper scripts, container image builder, Compose smoke command, bootstrap profile, doctor checks, and CI Compose gate are removed from the active workflow"
           },
           {
-            "criterion": "Launcher and teardown checks",
-            "command": "PowerShell parser checks for scripts/compose/up.ps1, stop.ps1, and down-volumes.ps1; reviewer inspection of token handling and redaction",
-            "result": "PASS: launcher captures app and supervisor tokens only in process memory, redacts handshake and bearer material from console output, uses the app token for authenticated status and retry checks, clears token variables on exit, and provides safe stop plus explicitly confirmed destructive down --volumes"
+            "criterion": "Historical record retention",
+            "command": "Review docs/delivery/tasks/COMPOSE-001.md",
+            "result": "PASS: packet now states Docker/Compose is superseded and retained only as historical delivery context"
           },
           {
-            "criterion": "TigerBeetle clean and retained startup plus hygiene",
-            "command": "docker buildx imagetools inspect ghcr.io/tigerbeetle/tigerbeetle:0.17.7; TigerBeetle clean-volume and retained-volume Compose startup; git diff --cached --check",
-            "result": "PASS: pinned TigerBeetle image digest was verified, TigerBeetle became healthy on clean and retained volumes, validation-created containers and volumes were removed, and staged whitespace checks passed"
+            "criterion": "Native managed workflow retained",
+            "command": "Review test, bootstrap, doctor, and CI command surfaces",
+            "result": "PASS: remaining active local commands target unit, managed smoke, managed failure, package smoke, hardening, and packaging without Docker"
           }
         ]
       },
@@ -1297,7 +1297,7 @@
         "integrationCommit": "e9f4743b2536f5a04f97b323897b07762351c91c",
         "findings": [],
         "residualRisks": [
-          "Full API startup, authenticated live status/retry checks, and Docker API-log token scan remain unrun because no approved first-party API image digest was available; the launcher enforces a required exact 0.1.0 tag+digest API image pin instead of guessing one."
+          "Docker/Compose is no longer an active project workflow. Historical Compose evidence is retained only for traceability."
         ]
       }
     },
@@ -1553,7 +1553,7 @@
       "inference": "low",
       "worker": "codex",
       "reviewer": "Zeno",
-      "dependsOn": ["DESKTOP-004", "COMPOSE-001"],
+      "dependsOn": ["DESKTOP-004"],
       "ownedPaths": ["tools/bootstrap/**", "tools/doctor/**", "scripts/bootstrap/**"],
       "excludedPaths": ["system package installation", "CI workflows"],
       "guide": "docs/delivery/tasks/TOOL-001.md",
@@ -1567,7 +1567,7 @@
           "tools/bootstrap/voyage-bootstrap.ps1",
           "tools/doctor/voyage-doctor.ps1"
         ],
-        "summary": "Added Windows 11 x64 project-local bootstrap and doctor entrypoints for compose, desktop, packaging, and all profiles with pinned-version diagnostics, exact Compose image pin validation, runtime staging cache reuse, ignored bootstrap cache output, and project-local writable path reporting.",
+        "summary": "Added Windows 11 x64 project-local bootstrap and doctor entrypoints for desktop, packaging, and all profiles with pinned-version diagnostics, runtime staging cache reuse, ignored bootstrap cache output, and project-local writable path reporting.",
         "acceptanceEvidence": [
           {
             "criterion": "PowerShell syntax and diff hygiene",
@@ -1577,12 +1577,12 @@
           {
             "criterion": "Doctor report and prerequisite diagnostics",
             "command": "pwsh -NoProfile -File scripts/bootstrap/doctor.ps1 -Json; pwsh -NoProfile -File scripts/bootstrap/doctor.ps1",
-            "result": "PASS: reported Windows x64 support, Bun 1.3.14 ok, Rust/Cargo/Zig mismatches, Docker engine access denied, WebView2 present, native tool availability, and writable project-local paths"
+            "result": "PASS: reported Windows x64 support, Bun 1.3.14 ok, Rust/Cargo/Zig mismatches, WebView2 present, native tool availability, and writable project-local paths"
           },
           {
-            "criterion": "Compose profile and image pin validation",
-            "command": "pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile compose; invalid and synthetic exact VOYAGE_VII_API_IMAGE pin scenarios",
-            "result": "PASS: missing pin prints exact requirement, invalid pin fails, synthetic exact 0.1.0 digest pin runs docker compose config validation"
+            "criterion": "Docker/Compose profile removal",
+            "command": "Review scripts/bootstrap/bootstrap.ps1 and tools/bootstrap/voyage-bootstrap.ps1",
+            "result": "PASS: bootstrap no longer exposes a compose profile or Docker image pin validation"
           },
           {
             "criterion": "Packaging offline warm-cache reuse and mutation inventory",
@@ -1604,7 +1604,7 @@
         "findings": [],
         "residualRisks": [
           "Clean successful desktop and all bootstrap runs remain gated by installing the frozen Rust/Cargo 1.96.0 toolchain in the local environment.",
-          "Docker engine access was denied in this local environment, so compose service startup was not exercised by TOOL-001."
+          "Docker/Compose is no longer an active project workflow."
         ]
       }
     },
@@ -1616,7 +1616,7 @@
       "inference": "low",
       "worker": "codex",
       "reviewer": "Linnaeus",
-      "dependsOn": ["RUNTIME-004", "COMPOSE-001", "DESKTOP-002", "DESKTOP-003"],
+      "dependsOn": ["RUNTIME-004", "DESKTOP-002", "DESKTOP-003"],
       "ownedPaths": ["tools/test-harness/**", "tests/cross-stack/**", "scripts/test/**"],
       "excludedPaths": ["production behavior", "CI workflows"],
       "guide": "docs/delivery/tasks/TEST-001.md",
@@ -1628,7 +1628,7 @@
           "tests/cross-stack/README.md",
           "tools/test-harness/voyage-test.ps1"
         ],
-        "summary": "Add reusable Windows 11 x64 cross-stack test orchestration for unit, Compose, managed runtime, managed failure, package smoke, and all commands with isolated temp roots, bounded timeouts, sanitized logs, command traces, process inventories, descendant-process checks, sentinel-guarded cleanup, exact API image pin validation, and product-entrypoint reuse.",
+        "summary": "Add reusable Windows 11 x64 cross-stack test orchestration for unit, managed runtime, managed failure, package smoke, and all commands with isolated temp roots, bounded timeouts, sanitized logs, command traces, process inventories, descendant-process checks, sentinel-guarded cleanup, and product-entrypoint reuse.",
         "acceptanceEvidence": [
           {
             "criterion": "PowerShell parser and diff hygiene",
@@ -1651,9 +1651,9 @@
             "result": "PASS: Rust 1.96.0 runtime tests passed through the reusable harness"
           },
           {
-            "criterion": "Compose and unit command surface",
-            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke; pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke -ApiImage voyage-vii-api:0.1.0@sha256:<synthetic 64 hex>; pwsh -NoProfile -File scripts/test/test.ps1 -Command unit",
-            "result": "PASS with environment limitations: missing compose image pin is rejected with the exact required format; synthetic compose pin reaches the product compose entrypoint and cleanup; unit reaches desktop, Rust, runtime-staging, and API Zig test entrypoints, with the API Zig step blocked locally by host Zig 0.14 syntax incompatibility versus the frozen Zig 0.15.2 requirement"
+            "criterion": "Unit command surface and Docker/Compose removal",
+            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command unit; review scripts/test/test.ps1 and tools/test-harness/voyage-test.ps1",
+            "result": "PASS with environment limitations: unit reaches desktop, Rust, runtime-staging, and API Zig test entrypoints, with the API Zig step blocked locally by host Zig 0.14 syntax incompatibility versus the frozen Zig 0.15.2 requirement; compose-smoke and ApiImage are no longer accepted commands or parameters"
           }
         ]
       },
@@ -1664,7 +1664,7 @@
         "integrationCommit": "caff8dbe",
         "findings": [],
         "residualRisks": [
-          "A real compose-smoke run remains gated on an approved exact API image pin.",
+          "Docker/Compose is no longer an active project workflow.",
           "The local unit matrix reaches the API Zig test entrypoint but cannot complete it until the host provides the frozen Zig 0.15.2 toolchain."
         ]
       }
@@ -1688,7 +1688,7 @@
           "docs/testing/hardening.md",
           "tests/hardening/run-hardening.ps1"
         ],
-        "summary": "Add a Windows 11 x64 hardening evidence runner and runbook that orchestrate frozen contract scans, managed runtime failure tests, isolated runtime staging, compose image-pin validation, redacted artifact scans, timing baselines, and owner-routed defect reporting without production edits.",
+        "summary": "Add a Windows 11 x64 hardening evidence runner and runbook that orchestrate frozen contract scans, managed runtime failure tests, isolated runtime staging, redacted artifact scans, timing baselines, and owner-routed defect reporting without production edits.",
         "acceptanceEvidence": [
           {
             "criterion": "Parser and diff hygiene",
@@ -1698,7 +1698,7 @@
           {
             "criterion": "Full hardening matrix",
             "command": "pwsh -NoProfile -File tests/hardening/run-hardening.ps1 -Command all",
-            "result": "PASS: frozen contract scan, owner-routed PostgreSQL defect scan, managed runtime/staging failure matrix, isolated runtime package staging, compose missing-pin validation, managed-smoke timing baseline, and redacted artifact scan completed; final report root was C:\\Users\\jcane\\AppData\\Local\\Temp\\voyage-vii-hardening\\a3bce9d7893b44129de478bc5f9e733a"
+            "result": "PASS: frozen contract scan, owner-routed PostgreSQL defect scan, managed runtime/staging failure matrix, isolated runtime package staging, managed-smoke timing baseline, and redacted artifact scan completed; final report root was C:\\Users\\jcane\\AppData\\Local\\Temp\\voyage-vii-hardening\\a3bce9d7893b44129de478bc5f9e733a"
           },
           {
             "criterion": "Retained artifact redaction",
@@ -1715,7 +1715,7 @@
         "findings": [],
         "residualRisks": [
           "The scan records 71 stale PostgreSQL contract/runtime findings that are routed back to API-001, RUNTIME-001, and the PLAN-002 SQLite posture amendment rather than fixed in HARDEN-001 owned paths.",
-          "Real compose smoke remains gated on an approved exact API image pin.",
+          "Docker/Compose is no longer an active project workflow.",
           "Full packaged-app idle memory and log-rotation evidence remains gated by PACKAGE-004 and PACKAGE-001."
         ]
       }
@@ -1974,9 +1974,9 @@
             "result": "PASS: actionlint passed locally; all action references are full 40-character SHAs; permissions are read-only; no secrets block or secrets.* usage exists; every runner is windows-2025; ordinary jobs are 30 minutes; the package job is 90 minutes; all artifacts retain for seven days; no Terraform, AWS, deployment, publishing, signing, or notarization scope was found."
           },
           {
-            "criterion": "Job-to-script map and gated Compose behavior",
-            "command": "Script-entry search across .github/workflows/ci.yml plus docker compose --file compose.yaml config --quiet with synthetic exact VOYAGE_VII_API_IMAGE",
-            "result": "PASS: CI calls reviewed repository scripts for unit, Compose, managed smoke, hardening, TigerBeetle client preparation, and Windows ZIP smoke; Compose config resolves with an exact 0.1.0 tag+digest pin shape and live Compose smoke remains gated on an approved repository variable."
+            "criterion": "Job-to-script map and Docker/Compose removal",
+            "command": "Script-entry search across .github/workflows/ci.yml",
+            "result": "PASS: CI calls reviewed repository scripts for unit, managed smoke, hardening, TigerBeetle client preparation, and Windows ZIP smoke; no Compose gate or Docker image variable remains."
           },
           {
             "criterion": "Registry, helper parser, and diff hygiene",
@@ -1993,7 +1993,7 @@
         "findings": [],
         "residualRisks": [
           "The independent reviewer did not execute the full Windows GitHub Actions matrix or package job locally.",
-          "Live Compose smoke remains gated on repository variable VOYAGE_VII_API_IMAGE containing an approved exact 0.1.0 digest API image pin."
+          "Docker/Compose is no longer an active CI gate."
         ]
       }
     },
@@ -2024,7 +2024,7 @@
           {
             "criterion": "Windows command verification table",
             "command": "DOC-002 operator command suite recorded under C:\\Users\\jcane\\AppData\\Local\\Temp\\voyage-vii-doc-002-2a21f0f30a1c454b945045d7e8f4ea70",
-            "result": "PASS with documented discrepancies: doctor, bootstrap, Compose config, managed smoke, managed failure, package-smoke staging, hardening, package-smoke fixtures, runtime-staging fixtures, and extracted package smoke passed; unit, Compose stop, and offline package build recorded exact host/tooling discrepancies instead of being presented as successful."
+            "result": "PASS with documented discrepancies: doctor, bootstrap, managed smoke, managed failure, package-smoke staging, hardening, package-smoke fixtures, runtime-staging fixtures, and extracted package smoke passed; unit and offline package build recorded exact host/tooling discrepancies instead of being presented as successful."
           },
           {
             "criterion": "Link, terminology, and scope checks",
@@ -2051,19 +2051,120 @@
       }
     },
     {
+      "id": "IMAGE-001",
+      "title": "Superseded Compose API image",
+      "wave": 6,
+      "status": "integrated",
+      "inference": "low",
+      "worker": "codex_image_001_impl",
+      "reviewer": "Herschel",
+      "dependsOn": ["API-005", "TEST-001", "CI-001"],
+      "ownedPaths": ["compose.yaml", "infra/compose/**", "scripts/compose/**", "services/api/Dockerfile", "tools/container/**", ".github/workflows/ci.yml", "scripts/bootstrap/**", "scripts/test/**", "tools/bootstrap/**", "tools/doctor/**", "tools/test-harness/**", "tests/hardening/**", "docs/development/**", "docs/operations/**", "docs/testing/**", "docs/delivery/tasks/IMAGE-001.md"],
+      "excludedPaths": ["Terraform", "AWS", "cloud deployment", "desktop packaging", "repository secrets", "fixed tokens", "signing", "notarization", "unsupported native desktop claims"],
+      "guide": "docs/delivery/tasks/IMAGE-001.md",
+      "submission": {
+        "base": "39762eb21593a9b2ef3b61d41de2ef4482b13865",
+        "revision": "39762eb21593a9b2ef3b61d41de2ef4482b13865:docker-removal-worktree",
+        "changedPaths": [
+          ".github/workflows/ci.yml",
+          "compose.yaml",
+          "docs/development/README.md",
+          "docs/development/command-verification.md",
+          "docs/operations/README.md",
+          "docs/testing/hardening.md",
+          "docs/delivery/tasks/IMAGE-001.md",
+          "infra/compose/README.md",
+          "scripts/bootstrap/bootstrap.ps1",
+          "scripts/compose/down-volumes.ps1",
+          "scripts/compose/stop.ps1",
+          "scripts/compose/up.ps1",
+          "scripts/test/test.ps1",
+          "services/api/Dockerfile",
+          "services/api/src/main.zig",
+          "tests/cross-stack/README.md",
+          "tests/hardening/run-hardening.ps1",
+          "tools/bootstrap/voyage-bootstrap.ps1",
+          "tools/container/.gitignore",
+          "tools/container/build-api-image.ps1",
+          "tools/doctor/voyage-doctor.ps1",
+          "tools/test-harness/voyage-test.ps1"
+        ],
+        "summary": "Supersede the Docker/Compose API image path by removing active Compose files, Dockerfiles, image builders, Compose scripts, bootstrap/doctor/test command surfaces, and the CI Compose gate.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Docker/Compose file removal",
+            "command": "Review deleted Compose, Dockerfile, container builder, and helper script paths",
+            "result": "PASS: compose.yaml, infra/compose README, scripts/compose helpers, services/api/Dockerfile, and tools/container builder files are removed from active project source"
+          },
+          {
+            "criterion": "Command surface removal",
+            "command": "Review bootstrap, doctor, test harness, hardening, and CI entrypoints",
+            "result": "PASS: compose profile, Docker doctor readiness, ApiImage parameter, compose-smoke command, hardening compose validation, and CI Compose job are removed"
+          },
+          {
+            "criterion": "Runbook and task-record alignment",
+            "command": "Review development, operations, testing, final-audit, COMPOSE-001, IMAGE-001, TEST-001, CI-001, and AUDIT-001 docs",
+            "result": "PASS: active docs no longer instruct developers or CI to run Docker/Compose; superseded task packets are marked historical"
+          },
+          {
+            "criterion": "Validation hygiene",
+            "command": "PowerShell parser checks; Test-Json -Path docs/delivery/tasks.json -SchemaFile docs/delivery/task-registry.schema.json; git diff --check",
+            "result": "PASS: parser checks, registry schema, and diff hygiene passed"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Herschel",
+        "reviewedRevision": "39762eb21593a9b2ef3b61d41de2ef4482b13865:docker-removal-worktree",
+        "findings": [],
+        "residualRisks": [
+          "Docker/Compose is intentionally absent until a future approved use case exists.",
+          "The working-tree registry entry records local evidence before a coordinator commit assigns a final integration commit hash."
+        ]
+      }
+    },
+    {
       "id": "AUDIT-001",
       "title": "Perform the independent final integration audit",
       "wave": 6,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
-      "dependsOn": ["GUIDES-001", "RESET-001", "DOC-001", "PLAN-001", "FEAS-001", "FEAS-002", "FEAS-003", "API-001", "SEAM-001", "API-002", "API-003", "PLAN-002", "FEAS-004", "API-005", "DBDOC-001", "API-004", "RUNTIME-001", "RUNTIME-002", "RUNTIME-003", "RUNTIME-004", "COMPOSE-001", "DESKTOP-001", "DESKTOP-002", "DESKTOP-003", "DESKTOP-004", "TOOL-001", "TEST-001", "HARDEN-001", "PACKAGE-004", "PACKAGE-001", "PACKAGE-005", "CLEANUP-001", "CI-001", "DOC-002"],
+      "worker": "codex_audit_001_impl",
+      "reviewer": "Herschel",
+      "dependsOn": ["GUIDES-001", "RESET-001", "DOC-001", "PLAN-001", "FEAS-001", "FEAS-002", "FEAS-003", "API-001", "SEAM-001", "API-002", "API-003", "PLAN-002", "FEAS-004", "API-005", "DBDOC-001", "API-004", "RUNTIME-001", "RUNTIME-002", "RUNTIME-003", "RUNTIME-004", "COMPOSE-001", "DESKTOP-001", "DESKTOP-002", "DESKTOP-003", "DESKTOP-004", "TOOL-001", "TEST-001", "HARDEN-001", "PACKAGE-004", "PACKAGE-001", "PACKAGE-005", "CLEANUP-001", "CI-001", "DOC-002", "IMAGE-001"],
       "ownedPaths": ["docs/delivery/final-audit.md"],
       "excludedPaths": ["production edits", "Git history"],
       "guide": "docs/delivery/tasks/AUDIT-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "39762eb21593a9b2ef3b61d41de2ef4482b13865",
+        "revision": "39762eb21593a9b2ef3b61d41de2ef4482b13865:audit-001-docker-removal-worktree",
+        "changedPaths": [
+          "docs/delivery/final-audit.md"
+        ],
+        "summary": "Close AUDIT-001 after the Docker/Compose acceptance blocker was superseded by removing Docker/Compose from the active project workflow.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Final audit finding closure",
+            "command": "Review docs/delivery/final-audit.md",
+            "result": "PASS: AUDIT-001-F1 and AUDIT-001-F2 are closed; final audit verdict is PASS with no remaining open P0-P2 audit findings"
+          },
+          {
+            "criterion": "Docker/Compose blocker removal",
+            "command": "Review active command, CI, and runbook surfaces",
+            "result": "PASS: no active Compose smoke gate or API image requirement remains"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Herschel",
+        "reviewedRevision": "39762eb21593a9b2ef3b61d41de2ef4482b13865:audit-001-docker-removal-worktree",
+        "findings": [],
+        "residualRisks": [
+          "The working-tree audit closure still needs a coordinator commit to produce the final immutable integration revision."
+        ]
+      }
     }
   ]
 }

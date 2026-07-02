@@ -100,7 +100,7 @@ After each wave, the coordinator:
 
 - api.zig, the official SQLite C API integration, and the TigerBeetle C ABI
   work natively on Windows 11 x64.
-- Compose starts the external API with SQLite storage and TigerBeetle.
+- Native managed workflows start the API with SQLite storage and TigerBeetle.
 - Desktop managed mode initializes, retains, probes, retries, and shuts down both databases.
 - App and supervisor tokens remain within their intended trust boundaries.
 - No child process survives application shutdown.

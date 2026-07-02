@@ -41,9 +41,8 @@ backup feature must coordinate with WAL checkpointing and database file
 consistency rather than copying arbitrary live files.
 
 External development mode no longer requires a PostgreSQL server. It may use an
-explicit SQLite database path inside the API container or process, plus the
-external TigerBeetle address. Development Compose keeps TigerBeetle internal
-and non-published; SQLite has no database port.
+explicit SQLite database path plus the external TigerBeetle address. Docker and
+Compose are not active project workflows.
 
 ## Rejected alternatives
 
@@ -58,8 +57,8 @@ and non-published; SQLite has no database port.
 
 ## Consequences
 
-PostgreSQL-specific implementation, lifecycle, packaging, Compose, CLI,
-manifest, DBML, and error contracts are superseded for future work. Integrated
+PostgreSQL-specific implementation, lifecycle, packaging, CLI, manifest, DBML,
+and error contracts are superseded for future work. Integrated
 PostgreSQL feasibility and adapter commits remain historical evidence, but new
 tasks must not build on PostgreSQL unless a later ADR reintroduces it.
 

@@ -15,7 +15,6 @@ and descendant-process cleanup.
 Available commands are:
 
 - `unit`
-- `compose-smoke`
 - `managed-smoke`
 - `managed-failure`
 - `package-smoke`

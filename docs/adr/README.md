@@ -57,14 +57,12 @@ The tradeoff priorities and every accepted decision in
 | Support explicit managed and external API modes | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
 | Keep separate, API-generated ephemeral app and supervisor tokens | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
 | Keep managed and packaged traffic on loopback | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
-| Permit only the bounded development-container network exception | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
+| Remove Docker/Compose from the active workflow until a real use case exists | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
 | Use no cookies, telemetry, or metrics | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
 | Keep DevTools debug-only | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use strict CSP and exact-origin CORS | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
 | Use redacted structured rotating logs | [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md) |
-| Run SQLite in-process and TigerBeetle externally for development Compose | [ADR-0004](0004-managed-and-external-runtime-modes.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Pin images by tag and digest and use bounded container privileges | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
-| Limit TigerBeetle `seccomp=unconfined` to local development | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
+| Run SQLite in-process and managed TigerBeetle for development | [ADR-0004](0004-managed-and-external-runtime-modes.md), [ADR-0012](0012-sqlite-general-purpose-database.md) |
 | Use a static SolidJS module registry and schema-checked typed client | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use the frozen accessible, status-focused visual design | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use a resizable `1100×720` first window with remembered geometry | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |

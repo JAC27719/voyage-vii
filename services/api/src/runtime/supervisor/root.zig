@@ -2,6 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const status = @import("../../status/root.zig");
 const sqlite_adapter = @import("../../sqlite/root.zig");
+const api_tigerbeetle = @import("../../tigerbeetle/root.zig");
 const tigerbeetle = @import("../tigerbeetle/root.zig");
 const platform = @import("../platform/root.zig");
 
@@ -19,15 +20,22 @@ pub const Config = struct {
     data_root: []const u8,
 };
 
+pub const ExternalConfig = struct {
+    sqlite_path: []const u8,
+    tigerbeetle_address: []const u8,
+};
+
 pub const ManagedRuntime = struct {
     allocator: std.mem.Allocator,
     config: Config,
+    external_config: ?ExternalConfig = null,
     mutex: std.Thread.Mutex = .{},
     snapshot_value: status.Snapshot = status.Snapshot.init(),
     started_ms: i64,
     root_lock: ?platform.RootLock = null,
     sqlite_database: ?sqlite_adapter.Database = null,
     sqlite_database_path: ?[]u8 = null,
+    tigerbeetle_client: ?*api_tigerbeetle.Client = null,
     tigerbeetle_containment: ?platform.ProcessContainment = null,
     tigerbeetle_process: ?platform.ContainedProcess = null,
     tigerbeetle_address: ?[]u8 = null,
@@ -47,20 +55,17 @@ pub const ManagedRuntime = struct {
         self.startup_thread = try std.Thread.spawn(.{}, startupThread, .{self});
     }
 
-    pub fn markExternalStarting(self: *ManagedRuntime) void {
-        self.mutex.lock();
-        defer self.mutex.unlock();
-        self.snapshot_value.overall_state = .degraded;
-        self.snapshot_value.sqlite.state = .unhealthy;
-        self.snapshot_value.sqlite.diagnostic = .{
-            .code = .service_unavailable,
-            .message = status.messageFor(.service_unavailable),
+    pub fn startExternalAsync(self: *ManagedRuntime, external: ExternalConfig) !void {
+        self.external_config = .{
+            .sqlite_path = try self.allocator.dupe(u8, external.sqlite_path),
+            .tigerbeetle_address = try self.allocator.dupe(u8, external.tigerbeetle_address),
         };
-        self.snapshot_value.tigerbeetle.state = .unhealthy;
-        self.snapshot_value.tigerbeetle.diagnostic = .{
-            .code = .service_unavailable,
-            .message = status.messageFor(.service_unavailable),
-        };
+        errdefer {
+            self.allocator.free(self.external_config.?.sqlite_path);
+            self.allocator.free(self.external_config.?.tigerbeetle_address);
+            self.external_config = null;
+        }
+        self.startup_thread = try std.Thread.spawn(.{}, startupThread, .{self});
     }
 
     pub fn snapshot(self: *ManagedRuntime) status.Snapshot {
@@ -115,6 +120,7 @@ pub const ManagedRuntime = struct {
             self.sqlite_database_path = null;
         }
 
+        self.closeTigerBeetleClient();
         if (self.tigerbeetle_containment) |containment| {
             if (self.tigerbeetle_process) |process| {
                 _ = tigerbeetle.shutdownContained(containment, process) catch {};
@@ -133,6 +139,11 @@ pub const ManagedRuntime = struct {
             lock.release();
             self.root_lock = null;
         }
+        if (self.external_config) |external| {
+            self.allocator.free(external.sqlite_path);
+            self.allocator.free(external.tigerbeetle_address);
+            self.external_config = null;
+        }
 
         self.mutex.lock();
         self.snapshot_value.sqlite.state = .stopped;
@@ -147,7 +158,11 @@ pub const ManagedRuntime = struct {
     }
 
     fn startupThread(self: *ManagedRuntime) void {
-        self.startManaged() catch |err| {
+        const result = if (self.external_config == null)
+            self.startManaged()
+        else
+            self.startExternal();
+        result catch |err| {
             if (!self.isShutdownStarted()) self.markStartupFailure(err);
         };
     }
@@ -156,6 +171,20 @@ pub const ManagedRuntime = struct {
         try std.fs.cwd().makePath(self.config.data_root);
         self.root_lock = try platform.acquireRootLock(self.config.data_root);
         try self.validateManagedAssets();
+
+        self.startComponentWithRetries(.sqlite);
+        self.startComponentWithRetries(.tigerbeetle);
+
+        const elapsed_ms = std.time.milliTimestamp() - self.started_ms;
+        if (elapsed_ms > initial_readiness_timeout_ms) return error.ReadinessDeadlineExceeded;
+        self.refreshOverall();
+        try self.recordIdleMemory();
+    }
+
+    fn startExternal(self: *ManagedRuntime) !void {
+        try std.fs.cwd().makePath(self.config.data_root);
+        self.root_lock = try platform.acquireRootLock(self.config.data_root);
+        try self.ensureExternalSqliteParent();
 
         self.startComponentWithRetries(.sqlite);
         self.startComponentWithRetries(.tigerbeetle);
@@ -210,10 +239,14 @@ pub const ManagedRuntime = struct {
     }
 
     fn openSqlite(self: *ManagedRuntime) !sqlite_adapter.Database {
-        const sqlite_dir = try std.fs.path.join(self.allocator, &.{ self.config.data_root, sqlite_dir_name });
-        defer self.allocator.free(sqlite_dir);
-        try std.fs.cwd().makePath(sqlite_dir);
-        const database_path = try std.fs.path.join(self.allocator, &.{ sqlite_dir, sqlite_database_file_name });
+        const database_path = if (self.external_config) |external|
+            try self.allocator.dupe(u8, external.sqlite_path)
+        else blk: {
+            const sqlite_dir = try std.fs.path.join(self.allocator, &.{ self.config.data_root, sqlite_dir_name });
+            defer self.allocator.free(sqlite_dir);
+            try std.fs.cwd().makePath(sqlite_dir);
+            break :blk try std.fs.path.join(self.allocator, &.{ sqlite_dir, sqlite_database_file_name });
+        };
         errdefer self.allocator.free(database_path);
         var database = try sqlite_adapter.Database.open(self.allocator, .{
             .data_root = self.config.data_root,
@@ -227,13 +260,25 @@ pub const ManagedRuntime = struct {
     }
 
     fn retryTigerBeetle(self: *ManagedRuntime) !void {
-        self.stopTigerBeetle();
+        if (self.external_config != null) {
+            self.closeTigerBeetleClient();
+        } else {
+            self.stopTigerBeetle();
+        }
         self.markStarting(.tigerbeetle, true, true);
         try self.startTigerBeetle();
         self.markHealthy(.tigerbeetle);
     }
 
     fn startTigerBeetle(self: *ManagedRuntime) !void {
+        if (self.external_config) |external| {
+            var client = try api_tigerbeetle.Client.init(self.allocator, .{ .address = external.tigerbeetle_address });
+            errdefer client.deinit() catch self.allocator.destroy(client);
+            _ = try client.healthProbe();
+            self.tigerbeetle_client = client;
+            return;
+        }
+
         const binary_path = try std.fs.path.join(self.allocator, &.{ self.config.runtime_root, "tigerbeetle", "tigerbeetle.exe" });
         defer self.allocator.free(binary_path);
         try tigerbeetle.validateRuntimeBinary(binary_path);
@@ -297,6 +342,13 @@ pub const ManagedRuntime = struct {
             self.tigerbeetle_address = null;
         }
         self.tigerbeetle_cluster_id = null;
+    }
+
+    fn closeTigerBeetleClient(self: *ManagedRuntime) void {
+        if (self.tigerbeetle_client) |client| {
+            client.deinit() catch {};
+            self.tigerbeetle_client = null;
+        }
     }
 
     fn validateManagedAssets(self: *ManagedRuntime) !void {
@@ -397,6 +449,12 @@ pub const ManagedRuntime = struct {
         const bytes = currentProcessMemoryBytes();
         if (bytes > idle_memory_budget_bytes) return error.IdleMemoryBudgetExceeded;
     }
+
+    fn ensureExternalSqliteParent(self: *ManagedRuntime) !void {
+        const external = self.external_config orelse return;
+        const parent = std.fs.path.dirname(external.sqlite_path) orelse return error.InvalidDatabasePath;
+        try std.fs.cwd().makePath(parent);
+    }
 };
 
 pub const RuntimeActions = struct {
@@ -496,6 +554,147 @@ pub fn selfTest() !void {
     try std.testing.expectEqual(@as(?u32, 1_000), retryDelayMs(.tigerbeetle, 0));
     try std.testing.expectEqual(status.ErrorCode.sqlite_busy, sanitizedError(.sqlite, error.SqliteBusy).code);
     try std.testing.expectEqual(status.ErrorCode.native_shutdown_timeout, sanitizedError(.tigerbeetle, error.NativeShutdownTimeout).code);
+}
+
+test "IMAGE-001 external runtime opens SQLite path without managed assets" {
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.makePath("data");
+    const tmp_real = try tmp.dir.realpathAlloc(std.testing.allocator, ".");
+    defer std.testing.allocator.free(tmp_real);
+    const data_root = try std.fs.path.join(std.testing.allocator, &.{ tmp_real, "data" });
+    defer std.testing.allocator.free(data_root);
+    const sqlite_path = try std.fs.path.join(std.testing.allocator, &.{ data_root, "sqlite", "voyage-vii.sqlite3" });
+    defer std.testing.allocator.free(sqlite_path);
+
+    var runtime = ManagedRuntime.init(std.testing.allocator, .{
+        .runtime_root = data_root,
+        .data_root = data_root,
+    });
+    runtime.external_config = .{
+        .sqlite_path = sqlite_path,
+        .tigerbeetle_address = "127.0.0.1:3000",
+    };
+    defer {
+        runtime.external_config = null;
+        runtime.deinit();
+    }
+
+    try runtime.ensureExternalSqliteParent();
+    runtime.sqlite_database = try runtime.openSqlite();
+    try runtime.sqlite_database.?.applyMigrations(std.testing.allocator);
+    try runtime.sqlite_database.?.healthProbe();
+    runtime.markHealthy(.sqlite);
+    const snapshot = runtime.snapshot();
+    try std.testing.expectEqual(status.ComponentState.healthy, snapshot.sqlite.state);
+    try std.testing.expectEqual(status.ComponentState.starting, snapshot.tigerbeetle.state);
+}
+
+test "IMAGE-001 external runtime reaches ready without managed process handles" {
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.makePath("data");
+    const tmp_real = try tmp.dir.realpathAlloc(std.testing.allocator, ".");
+    defer std.testing.allocator.free(tmp_real);
+    const data_root = try std.fs.path.join(std.testing.allocator, &.{ tmp_real, "data" });
+    defer std.testing.allocator.free(data_root);
+    const sqlite_path = try std.fs.path.join(std.testing.allocator, &.{ data_root, "sqlite", "voyage-vii.sqlite3" });
+    defer std.testing.allocator.free(sqlite_path);
+
+    var runtime = ManagedRuntime.init(std.testing.allocator, .{
+        .runtime_root = data_root,
+        .data_root = data_root,
+    });
+    runtime.external_config = .{
+        .sqlite_path = try std.testing.allocator.dupe(u8, sqlite_path),
+        .tigerbeetle_address = try std.testing.allocator.dupe(u8, "127.0.0.1:3000"),
+    };
+    defer runtime.deinit();
+
+    try runtime.ensureExternalSqliteParent();
+    runtime.sqlite_database = try runtime.openSqlite();
+    runtime.markHealthy(.sqlite);
+    runtime.markHealthy(.tigerbeetle);
+
+    const snapshot = runtime.snapshot();
+    try std.testing.expect(snapshot.isReady());
+    try std.testing.expect(runtime.tigerbeetle_containment == null);
+    try std.testing.expect(runtime.tigerbeetle_process == null);
+    try std.testing.expect(runtime.tigerbeetle_address == null);
+    try std.testing.expect(runtime.tigerbeetle_cluster_id == null);
+}
+
+test "IMAGE-001 external TigerBeetle retry degrades without managed spawn" {
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.makePath("data");
+    const tmp_real = try tmp.dir.realpathAlloc(std.testing.allocator, ".");
+    defer std.testing.allocator.free(tmp_real);
+    const data_root = try std.fs.path.join(std.testing.allocator, &.{ tmp_real, "data" });
+    defer std.testing.allocator.free(data_root);
+    const sqlite_path = try std.fs.path.join(std.testing.allocator, &.{ data_root, "sqlite", "voyage-vii.sqlite3" });
+    defer std.testing.allocator.free(sqlite_path);
+
+    var runtime = ManagedRuntime.init(std.testing.allocator, .{
+        .runtime_root = data_root,
+        .data_root = data_root,
+    });
+    runtime.external_config = .{
+        .sqlite_path = try std.testing.allocator.dupe(u8, sqlite_path),
+        .tigerbeetle_address = try std.testing.allocator.dupe(u8, "127.0.0.1 invalid"),
+    };
+    defer runtime.deinit();
+
+    runtime.markHealthy(.sqlite);
+    runtime.runRetry(.tigerbeetle);
+
+    const snapshot = runtime.snapshot();
+    try std.testing.expectEqual(status.OverallState.degraded, snapshot.overall_state);
+    try std.testing.expectEqual(status.ComponentState.unhealthy, snapshot.tigerbeetle.state);
+    try std.testing.expectEqual(@as(u32, 1), snapshot.tigerbeetle.attempt_count);
+    try std.testing.expect(!snapshot.tigerbeetle.retry_active);
+    try std.testing.expect(snapshot.tigerbeetle.diagnostic != null);
+    try std.testing.expect(runtime.tigerbeetle_client == null);
+    try std.testing.expect(runtime.tigerbeetle_containment == null);
+    try std.testing.expect(runtime.tigerbeetle_process == null);
+    try std.testing.expect(runtime.tigerbeetle_address == null);
+}
+
+test "IMAGE-001 external shutdown clears status and owned config" {
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.makePath("data");
+    const tmp_real = try tmp.dir.realpathAlloc(std.testing.allocator, ".");
+    defer std.testing.allocator.free(tmp_real);
+    const data_root = try std.fs.path.join(std.testing.allocator, &.{ tmp_real, "data" });
+    defer std.testing.allocator.free(data_root);
+    const sqlite_path = try std.fs.path.join(std.testing.allocator, &.{ data_root, "sqlite", "voyage-vii.sqlite3" });
+    defer std.testing.allocator.free(sqlite_path);
+
+    var runtime = ManagedRuntime.init(std.testing.allocator, .{
+        .runtime_root = data_root,
+        .data_root = data_root,
+    });
+    runtime.external_config = .{
+        .sqlite_path = try std.testing.allocator.dupe(u8, sqlite_path),
+        .tigerbeetle_address = try std.testing.allocator.dupe(u8, "127.0.0.1:3000"),
+    };
+
+    try runtime.ensureExternalSqliteParent();
+    runtime.sqlite_database = try runtime.openSqlite();
+    runtime.markHealthy(.sqlite);
+    runtime.markHealthy(.tigerbeetle);
+    runtime.shutdown();
+
+    const snapshot = runtime.snapshot();
+    try std.testing.expectEqual(status.ComponentState.stopped, snapshot.sqlite.state);
+    try std.testing.expectEqual(status.ComponentState.stopped, snapshot.tigerbeetle.state);
+    try std.testing.expect(runtime.external_config == null);
+    try std.testing.expect(runtime.sqlite_database == null);
+    try std.testing.expect(runtime.sqlite_database_path == null);
+    try std.testing.expect(runtime.tigerbeetle_client == null);
+    try std.testing.expect(runtime.tigerbeetle_containment == null);
+    try std.testing.expect(runtime.tigerbeetle_process == null);
 }
 
 test "RUNTIME-004 supervisor constants and sanitized states are stable" {

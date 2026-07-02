@@ -4,7 +4,6 @@
 param(
   [ValidateSet("contract-scan", "runtime-matrix", "package-matrix", "artifact-scan", "performance-baseline", "all")]
   [string]$Command = "all",
-  [string]$ApiImage,
   [switch]$KeepReportRoot
 )
 
@@ -282,20 +281,6 @@ function Invoke-PerformanceBaseline([string]$Root, [System.Collections.Generic.L
   Add-Result $Results "performance-baseline" "measured" "Managed smoke elapsed $([math]::Round($watch.Elapsed.TotalSeconds, 1))s; process working-set delta ${deltaMb} MiB; logs at $($step.stdout)."
 }
 
-function Invoke-ComposeValidation([string]$Root, [System.Collections.Generic.List[object]]$Results) {
-  $missing = Invoke-LoggedStep "compose-missing-pin" $Root "pwsh" @("-NoProfile", "-File", (Resolve-RepoPath "scripts/test/test.ps1"), "-Command", "compose-smoke") (Get-RepoRoot) $StepTimeoutSeconds -AllowFailure
-  $stderr = Get-Content -Raw -LiteralPath $missing.stderr
-  if ($stderr -notmatch "compose-smoke requires -ApiImage") {
-    throw "Compose missing-pin validation did not emit the expected exact pin error."
-  }
-  if ($ApiImage) {
-    $valid = Invoke-LoggedStep "compose-valid-pin" $Root "pwsh" @("-NoProfile", "-File", (Resolve-RepoPath "scripts/test/test.ps1"), "-Command", "compose-smoke", "-ApiImage", $ApiImage) (Get-RepoRoot) $StepTimeoutSeconds -AllowFailure
-    Add-Result $Results "compose-validation" "measured" "Missing-pin validation passed; valid-pin compose attempt exitCode=$($valid.exitCode), timedOut=$($valid.timedOut)."
-  } else {
-    Add-Result $Results "compose-validation" "blocked" "Missing-pin validation passed; real compose smoke requires an approved exact API image pin."
-  }
-}
-
 function Write-Reports([string]$Root, [System.Collections.Generic.List[object]]$Results) {
   $safeResults = @($Results | ForEach-Object {
     [pscustomobject]@{
@@ -339,7 +324,6 @@ try {
       Invoke-OwnerRoutedDefectScan $root $results
       Invoke-RuntimeMatrix $root $results
       Invoke-PackageMatrix $root $results
-      Invoke-ComposeValidation $root $results
       Invoke-PerformanceBaseline $root $results
       Remove-IsolatedBuildCache $root
       Invoke-ArtifactScan $root $results

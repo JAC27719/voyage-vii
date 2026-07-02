@@ -17,9 +17,9 @@ Independently trace the complete integrated system against the frozen plan and r
 2. Record the audited commit and verify the task registry.
 3. Map every frozen requirement to code, tests, documentation, or artifact evidence.
 4. Inspect the complete diff for v1 remnants, scope creep, tracked binaries, credentials, and unreviewed paths.
-5. Re-run Compose, fresh/retained managed mode, security checks, and the final
-   Windows ZIP smoke test with the approved PACKAGE-004 harness and exact
-   integrated artifact/runtime hashes.
+5. Re-run fresh/retained managed mode, security checks, and the final Windows
+   ZIP smoke test with the approved PACKAGE-004 harness and exact integrated
+   artifact/runtime hashes.
 6. Send each finding to the task's original worker and reviewer.
 7. Do not patch production code in the audit task.
 8. Re-run the audit against the corrected final revision.

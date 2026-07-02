@@ -2,7 +2,7 @@
 
 [CmdletBinding()]
 param(
-  [ValidateSet("compose", "desktop", "packaging", "all")]
+  [ValidateSet("desktop", "packaging", "all")]
   [string]$Profile = "all",
   [switch]$Offline
 )
@@ -108,30 +108,11 @@ function Assert-WebView2 {
   throw "Missing Microsoft Edge WebView2 Runtime. Install it for Windows desktop support."
 }
 
-function Test-ApiImagePin([string]$Image) {
-  return $Image -match '^[^:@\s]+(?:/[^:@\s]+)*:0\.1\.0@sha256:[0-9a-f]{64}$'
-}
-
 function Initialize-ProjectCaches {
   $root = Get-RepoRoot
   $cacheRoot = Assert-UnderRoot (Resolve-RepoPath "tools/bootstrap/.cache") $root
   $null = New-Item -ItemType Directory -Force -Path $cacheRoot
   return $cacheRoot
-}
-
-function Invoke-ComposeProfile {
-  Write-Host "profile: compose"
-  Get-CommandPath "docker" -Required | Out-Null
-  Invoke-Logged "docker" @("compose", "version") (Get-RepoRoot)
-  $apiImage = [Environment]::GetEnvironmentVariable("VOYAGE_VII_API_IMAGE", "Process")
-  if ([string]::IsNullOrWhiteSpace($apiImage)) {
-    Write-Host "VOYAGE_VII_API_IMAGE is not set. Compose smoke needs an exact image pin like registry.example/voyage-vii-api:0.1.0@sha256:<64 lowercase hex>."
-  } elseif (-not (Test-ApiImagePin $apiImage)) {
-    throw "VOYAGE_VII_API_IMAGE must be an exact 0.1.0 digest pin: name:0.1.0@sha256:<64 lowercase hex>."
-  } else {
-    Invoke-Logged "docker" @("compose", "--file", "compose.yaml", "config", "--quiet") (Get-RepoRoot)
-  }
-  Write-Host "compose bootstrap is readiness-only; set VOYAGE_VII_API_IMAGE to an exact pinned API image before using scripts/compose/up.ps1."
 }
 
 function Invoke-DesktopProfile {
@@ -174,14 +155,13 @@ function Invoke-PackagingProfile {
 Assert-Windows11X64
 
 $profiles = if ($Profile -eq "all") {
-  @("compose", "desktop", "packaging")
+  @("desktop", "packaging")
 } else {
   @($Profile)
 }
 
 foreach ($item in $profiles) {
   switch ($item) {
-    "compose" { Invoke-ComposeProfile }
     "desktop" { Invoke-DesktopProfile }
     "packaging" { Invoke-PackagingProfile }
   }

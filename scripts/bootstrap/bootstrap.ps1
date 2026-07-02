@@ -2,7 +2,7 @@
 
 [CmdletBinding()]
 param(
-  [ValidateSet("compose", "desktop", "packaging", "all")]
+  [ValidateSet("desktop", "packaging", "all")]
   [string]$Profile = "all",
   [switch]$Offline
 )

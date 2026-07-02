@@ -16,12 +16,9 @@ C:\Users\jcane\AppData\Local\Temp\voyage-vii-doc-002-2a21f0f30a1c454b945045d7e8f
 | --- | --- | --- |
 | `pwsh -NoProfile -File tools/doctor/voyage-doctor.ps1` | pass | `doctor.stdout.log`, `doctor.stderr.log`, `doctor.exit.txt` |
 | `pwsh -NoProfile -File tools/doctor/voyage-doctor.ps1 -Json` | pass | `doctor-json.stdout.log`, `doctor-json.stderr.log`, `doctor-json.exit.txt` |
-| `pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile compose` | pass | `bootstrap-compose.stdout.log`, `bootstrap-compose.stderr.log`, `bootstrap-compose.exit.txt` |
 | `pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile desktop` | pass | `bootstrap-desktop.stdout.log`, `bootstrap-desktop.stderr.log`, `bootstrap-desktop.exit.txt` |
 | `pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile packaging -Offline` | pass | `bootstrap-packaging.stdout.log`, `bootstrap-packaging.stderr.log`, `bootstrap-packaging.exit.txt` |
 | `pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile all -Offline` | pass | `bootstrap-all.stdout.log`, `bootstrap-all.stderr.log`, `bootstrap-all.exit.txt` |
-| `$env:VOYAGE_VII_API_IMAGE = "voyage-vii-api:0.1.0@sha256:0000000000000000000000000000000000000000000000000000000000000000"; docker compose --file compose.yaml config --quiet` | pass | `compose-config-synthetic.stdout.log`, `compose-config-synthetic.stderr.log`, `compose-config-synthetic.exit.txt` |
-| `$env:VOYAGE_VII_API_IMAGE = "voyage-vii-api:0.1.0@sha256:0000000000000000000000000000000000000000000000000000000000000000"; pwsh -NoProfile -File scripts/compose/stop.ps1` | discrepancy | `compose-stop-with-pin.stderr.log` shows Docker Desktop Linux engine pipe access denied on this host; command shape and image interpolation are correct, but Docker engine access was unavailable to this operator session. |
 | `pwsh -NoProfile -File scripts/test/test.ps1 -Command unit` | discrepancy | `test-unit.stderr.log`; preserved harness root `C:\Users\jcane\AppData\Local\Temp\voyage-vii-tests\unit-cf34a4eaba6c4c179b0819cbe74192ca`; desktop lint failed because ESLint `10.6.0` called `util.styleText`, unavailable in the active Node `20.10.0` runtime. |
 | `pwsh -NoProfile -File scripts/test/test.ps1 -Command managed-smoke` | pass | `test-managed-smoke.stdout.log`, `test-managed-smoke.stderr.log`, `test-managed-smoke.exit.txt` |
 | `pwsh -NoProfile -File scripts/test/test.ps1 -Command managed-failure` | pass | `test-managed-failure.stdout.log`, `test-managed-failure.stderr.log`, `test-managed-failure.exit.txt` |

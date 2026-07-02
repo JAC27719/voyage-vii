@@ -4,10 +4,9 @@ Voyage VII is local-first. Application data and credentials remain local; in
 managed operation, state is kept in the local writable application root. The
 first v2 slice has no cloud deployment, telemetry, or metrics.
 
-Managed and packaged application traffic is restricted to loopback. The
-external development-container exception keeps database traffic on an
-unpublished internal Compose network and publishes the API only on the host's
-loopback interface. Exact-origin CORS and bearer authentication still apply.
+Managed and packaged application traffic is restricted to loopback. Docker and
+Compose are not active project workflows. Exact-origin CORS and bearer
+authentication still apply.
 
 Logs and copied diagnostics are sanitized. They must not contain names,
 amounts, credentials, tokens, authorization headers, handshake content, SQL
