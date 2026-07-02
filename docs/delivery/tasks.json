@@ -1724,22 +1724,65 @@
       "id": "PACKAGE-004",
       "title": "Implement Windows distributable smoke harness",
       "wave": 5,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
       "worker": "codex",
-      "reviewer": null,
+      "reviewer": "Noether",
       "dependsOn": ["DESKTOP-002", "DESKTOP-003", "DESKTOP-004", "HARDEN-001"],
       "ownedPaths": ["tools/package-smoke/**", "apps/desktop/src-tauri/src/smoke/**", "apps/desktop/src-tauri/src/main.rs", "apps/desktop/src-tauri/tests/all.rs", "tests/package-smoke/**"],
       "excludedPaths": ["normal user data", "repository build outputs as runtime substitutes"],
       "guide": "docs/delivery/tasks/PACKAGE-004.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "a74c48e2ac084ee154b9502b8413070147127b46",
+        "revision": "a74c48e2ac084ee154b9502b8413070147127b46:0abbbb9940c5f145aa03740c84c610a0028123ae",
+        "changedPaths": [
+          "apps/desktop/src-tauri/src/main.rs",
+          "apps/desktop/src-tauri/src/smoke/mod.rs",
+          "tests/package-smoke/run-tests.ps1",
+          "tools/package-smoke/voyage-package-smoke.ps1"
+        ],
+        "summary": "Add a Windows package smoke mode and extracted-package adapter that validate the packaged runtime manifest, hashes, TigerBeetle PE architecture, handshake contract, readiness/status, graceful shutdown, retained data-root startup, redacted diagnostics, and fixture-level adapter safety.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Desktop smoke mode and runtime contract tests",
+            "command": "rustup run 1.96.0 cargo test --locked smoke",
+            "result": "PASS: 9 smoke/redaction tests cover argument parsing, temp-root rejection, manifest/hash/license/path validation, TigerBeetle Windows x64 PE validation, bounded handshake/token validation, strict status contract validation, HTTP parsing, and desktop error redaction"
+          },
+          {
+            "criterion": "Full desktop Rust test suite",
+            "command": "rustup run 1.96.0 cargo test --locked --all-targets",
+            "result": "PASS: 23 unit tests and 1 integration test"
+          },
+          {
+            "criterion": "Package smoke adapter fixtures",
+            "command": "pwsh -NoProfile -File tests/package-smoke/run-tests.ps1",
+            "result": "PASS: missing desktop executable, missing runtime API executable, and invalid executable fixture failures are detected with sanitized adapter behavior"
+          },
+          {
+            "criterion": "Rust lint, format, and diff hygiene",
+            "command": "rustup run 1.96.0 cargo fmt --check; rustup run 1.96.0 cargo clippy --all-targets --all-features -- -D warnings; git diff --cached --check",
+            "result": "PASS"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Noether",
+        "reviewedRevision": "a74c48e2ac084ee154b9502b8413070147127b46:0abbbb9940c5f145aa03740c84c610a0028123ae",
+        "integrationCommit": "0abbbb9940c5f145aa03740c84c610a0028123ae",
+        "findings": [],
+        "residualRisks": [
+          "The smoke harness uses the same spawn-then-AssignProcessToJobObject containment posture as the current desktop runtime; a fully race-free malicious instant-grandchild fixture would require custom suspended or STARTUPINFOEX process creation outside PACKAGE-004's current implementation scope.",
+          "Status validation is contract-focused rather than full JSON-schema validation; unknown extra fields are tolerated.",
+          "Real ZIP/native artifact execution remains gated by PACKAGE-001."
+        ]
+      }
     },
     {
       "id": "PACKAGE-001",
       "title": "Build the Windows x64 portable ZIP",
       "wave": 5,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
