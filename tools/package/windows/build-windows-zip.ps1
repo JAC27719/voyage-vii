@@ -244,6 +244,11 @@ function Invoke-PackageSmoke([string]$ZipPath, [string]$ExtractRoot) {
   return $line[0].Substring($SmokePrefix.Length) | ConvertFrom-Json
 }
 
+function New-RustupCargoRunner([string]$Path) {
+  Set-Content -LiteralPath $Path -Value "@echo off`r`nrustup run 1.96.0 cargo %*`r`n" -Encoding ascii
+  return $Path
+}
+
 $repoRoot = Get-RepoRoot
 $version = (Get-Content -Raw -LiteralPath (Join-Path $repoRoot "VERSION")).Trim()
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION must be semver-like." }
@@ -284,6 +289,7 @@ foreach ($path in @($output, $build, $reports)) {
   Assert-UnderRoot $path $repoRoot | Out-Null
   New-Item -ItemType Directory -Force -Path $path | Out-Null
 }
+$cargoRunner = New-RustupCargoRunner (Join-Path $build "cargo-rustup-1.96.cmd")
 
 $artifactName = "$ArtifactPrefix`_$($version)_windows-x86_64.zip"
 $zipPath = Join-Path $output $artifactName
@@ -333,7 +339,7 @@ Invoke-Step "build desktop frontend" {
 }
 
 Invoke-Step "build desktop executable" {
-  Invoke-CommandChecked "rustup" @("run", "1.96.0", "cargo", "build", "--release", "--locked", "--target", $Target) $desktopTauriRoot | Out-Null
+  Invoke-CommandChecked "bun" @("run", "tauri", "build", "--runner", $cargoRunner, "--target", $Target, "--no-bundle", "--ci") $desktopRoot | Out-Null
 }
 
 Invoke-Step "stage verified runtime" {
