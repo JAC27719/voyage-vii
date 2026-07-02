@@ -143,7 +143,9 @@ export function StartupView(props: StartupViewProps = {}) {
         <div class="startup-heading">
           <p>Voyage VII</p>
           <h1 id="startup-title">Starting local runtime</h1>
-          <span>Preparing the desktop bridge, API, SQLite, and TigerBeetle.</span>
+          <span>
+            Preparing the desktop bridge, API, SQLite, and TigerBeetle.
+          </span>
         </div>
 
         <div class="startup-progress" aria-label="Startup progress">
@@ -261,7 +263,9 @@ function runtimeDetail(snapshot: RuntimeSnapshot): string {
   }
 }
 
-function runtimeMessageState(snapshot: RuntimeSnapshot): StartupMessage["state"] {
+function runtimeMessageState(
+  snapshot: RuntimeSnapshot,
+): StartupMessage["state"] {
   if (snapshot.state === "connected") {
     return "done";
   }
