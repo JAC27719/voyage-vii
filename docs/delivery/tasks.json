@@ -1813,7 +1813,7 @@
           {
             "criterion": "Windows ZIP build and PACKAGE-004 smoke",
             "command": "pwsh -NoProfile -File tools/package/windows/build-windows-zip.ps1 -Offline",
-            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 2a967fbe078d53340a51ad0e9a8e121aeb8d8d875ed6cea5eb362cbcc3aac02b; PE inventory was Windows x64, desktop subsystem was Windows GUI, forbidden package files were absent, extraction from a path containing spaces and non-ASCII succeeded, fresh smoke completed in 17657 ms, retained smoke completed in 17532 ms, and no Voyage/TigerBeetle processes remained."
+            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 e8e7fae8daebc746fce0228dcef8e0f2951d989afd37b92f4a9b2f88f3b194c0; PE inventory was Windows x64, desktop subsystem was Windows GUI, forbidden package files were absent, extraction from a path containing spaces and non-ASCII succeeded, fresh smoke completed in 17644 ms, retained smoke completed in 17598 ms, and no Voyage/TigerBeetle processes remained."
           },
           {
             "criterion": "Registry, script, and diff hygiene",
