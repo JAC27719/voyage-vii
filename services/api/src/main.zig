@@ -433,8 +433,8 @@ fn writeHttpResponse(stream: std.net.Stream, response: http.Response) !void {
     const head = if (cors)
         try std.fmt.bufPrint(
             &header,
-            "HTTP/1.1 {d} {s}\r\nContent-Type: application/json\r\nContent-Length: {d}\r\nConnection: close\r\nX-Request-Id: {s}\r\nAccess-Control-Allow-Origin: {s}\r\nAccess-Control-Allow-Methods: {s}\r\n\r\n",
-            .{ response.status_code, reason, response.body.len, response.request_id, response.allow_origin.?, response.allow_methods orelse "GET, POST, OPTIONS" },
+            "HTTP/1.1 {d} {s}\r\nContent-Type: application/json\r\nContent-Length: {d}\r\nConnection: close\r\nX-Request-Id: {s}\r\nAccess-Control-Allow-Origin: {s}\r\nAccess-Control-Allow-Methods: {s}\r\nAccess-Control-Allow-Headers: {s}\r\n\r\n",
+            .{ response.status_code, reason, response.body.len, response.request_id, response.allow_origin.?, response.allow_methods orelse "GET, POST, OPTIONS", response.allow_headers orelse "Authorization, Accept, Content-Type, X-Request-Id" },
         )
     else
         try std.fmt.bufPrint(

@@ -5,7 +5,12 @@ import type { RuntimeChangedEvent, RuntimeSnapshot } from "./types";
 
 export const fallbackSnapshot: RuntimeSnapshot = {
   generation: 0,
-  state: "launching",
+  state: "failed",
+  error: {
+    code: "desktop_bridge_unavailable",
+    message:
+      "Desktop runtime bridge is unavailable. Open Voyage VII in the desktop app to start the managed API.",
+  },
 };
 
 export async function getRuntimeSnapshot(): Promise<RuntimeSnapshot> {

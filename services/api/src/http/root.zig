@@ -44,6 +44,7 @@ pub const Response = struct {
     request_id: []u8,
     allow_origin: ?[]u8 = null,
     allow_methods: ?[]const u8 = null,
+    allow_headers: ?[]const u8 = null,
 
     pub fn deinit(self: Response, allocator: std.mem.Allocator) void {
         allocator.free(self.body);
@@ -339,6 +340,7 @@ fn responseWithOwnedBody(
         .request_id = request_id,
         .allow_origin = if (origin) |value| try allocator.dupe(u8, value) else null,
         .allow_methods = "GET, POST, OPTIONS",
+        .allow_headers = "Authorization, Accept, Content-Type, X-Request-Id",
     };
 }
 
@@ -467,6 +469,8 @@ test "API-004 CORS preflight body limit route and request id behavior" {
     try std.testing.expectEqual(@as(u16, 204), preflight.status_code);
     try std.testing.expectEqualStrings("", preflight.body);
     try std.testing.expectEqualStrings("http://localhost:1420", preflight.allow_origin.?);
+    try std.testing.expect(std.mem.indexOf(u8, preflight.allow_headers.?, "Authorization") != null);
+    try std.testing.expect(std.mem.indexOf(u8, preflight.allow_headers.?, "X-Request-Id") != null);
 
     var unknown_preflight = try handle(std.testing.allocator, config, &snapshot, .{
         .method = .OPTIONS,

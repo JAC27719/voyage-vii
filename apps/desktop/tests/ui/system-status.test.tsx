@@ -15,7 +15,15 @@ let runtimeListeners: Array<(event: RuntimeChangedEvent) => void>;
 let unlisten: ReturnType<typeof vi.fn>;
 
 vi.mock("../../src/runtime-bridge", () => ({
-  fallbackSnapshot: { generation: 0, state: "launching" },
+  fallbackSnapshot: {
+    generation: 0,
+    state: "failed",
+    error: {
+      code: "desktop_bridge_unavailable",
+      message:
+        "Desktop runtime bridge is unavailable. Open Voyage VII in the desktop app to start the managed API.",
+    },
+  },
   getRuntimeSnapshot: vi.fn(async () => snapshot),
   listenRuntimeChanged: vi.fn(
     async (handler: (event: RuntimeChangedEvent) => void) => {
@@ -113,6 +121,27 @@ describe("SystemStatusView", () => {
         expect.not.stringContaining("app-token"),
       );
     });
+  });
+
+  it("explains when opened outside the desktop runtime bridge", async () => {
+    snapshot = {
+      generation: 0,
+      state: "failed",
+      error: {
+        code: "desktop_bridge_unavailable",
+        message:
+          "Desktop runtime bridge is unavailable. Open Voyage VII in the desktop app to start the managed API.",
+      },
+    };
+
+    render(() => <SystemStatusView />);
+
+    expect(
+      await screen.findByText(
+        "Desktop runtime bridge is unavailable. Open Voyage VII in the desktop app to start the managed API.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Failed")).toBeInTheDocument();
   });
 
   it("has no automated accessibility violations in the healthy state", async () => {

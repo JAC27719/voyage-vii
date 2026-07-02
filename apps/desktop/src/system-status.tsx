@@ -159,7 +159,7 @@ export function SystemStatusView() {
   const copyDiagnostics = async () => {
     try {
       await navigator.clipboard.writeText(
-        buildDiagnostics(snapshot(), status()),
+        buildDiagnostics(snapshot(), status(), requestError()),
       );
       setCopyState("copied");
       setNotice("Diagnostics copied.");
@@ -380,11 +380,20 @@ function asFailure(error: unknown): ApiFailure {
   if (isFailure(error)) {
     return error;
   }
+  if (error instanceof Error) {
+    return {
+      status: 0,
+      requestId: null,
+      code: "status_fetch_failed",
+      message: `Runtime handshake succeeded, but authenticated status could not be fetched: ${error.message}`,
+    };
+  }
   return {
     status: 0,
     requestId: null,
-    code: "service_unavailable",
-    message: "The API is unavailable.",
+    code: "status_fetch_failed",
+    message:
+      "Runtime handshake succeeded, but authenticated status could not be fetched.",
   };
 }
 

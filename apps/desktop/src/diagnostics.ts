@@ -1,4 +1,4 @@
-import type { RuntimeSnapshot, SystemStatus } from "./types";
+import type { ApiFailure, RuntimeSnapshot, SystemStatus } from "./types";
 
 const SECRET_PATTERNS = [
   /Bearer\s+[A-Za-z0-9._~+/=-]+/gi,
@@ -9,6 +9,7 @@ const SECRET_PATTERNS = [
 export function buildDiagnostics(
   snapshot: RuntimeSnapshot,
   status: SystemStatus | null,
+  requestError: ApiFailure | null = null,
 ): string {
   const lines = [
     "Voyage VII diagnostics",
@@ -19,6 +20,16 @@ export function buildDiagnostics(
   if (snapshot.error) {
     lines.push(
       `runtime.error=${snapshot.error.code}: ${snapshot.error.message}`,
+    );
+  }
+
+  if (snapshot.connection) {
+    lines.push(`apiUrl=${safeApiUrl(snapshot.connection.apiUrl)}`);
+  }
+
+  if (requestError) {
+    lines.push(
+      `request.error=${requestError.code}; status=${requestError.status}; requestId=${requestError.requestId ?? "none"}; message=${requestError.message}`,
     );
   }
 
@@ -38,6 +49,15 @@ export function buildDiagnostics(
   }
 
   return sanitizeDiagnostics(lines.join("\n"));
+}
+
+function safeApiUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return "invalid";
+  }
 }
 
 export function sanitizeDiagnostics(value: string): string {
