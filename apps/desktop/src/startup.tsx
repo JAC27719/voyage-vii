@@ -37,6 +37,8 @@ type StartupViewProps = {
 };
 
 export function StartupView(props: StartupViewProps = {}) {
+  const onComplete = props.onComplete;
+  const navigate = props.navigate;
   const [snapshot, setSnapshot] =
     createSignal<RuntimeSnapshot>(fallbackSnapshot);
   const [status, setStatus] = createSignal<SystemStatus | null>(null);
@@ -105,7 +107,11 @@ export function StartupView(props: StartupViewProps = {}) {
       () => setMinimumVisibleElapsed(true),
       MINIMUM_STARTUP_VISIBLE_MS,
     );
+    // Timer callback intentionally reads current runtime state on each tick.
+    // eslint-disable-next-line solid/reactivity
     timer = window.setInterval(() => void tick(), STARTUP_POLL_MS);
+    // Runtime events intentionally trigger an immediate state refresh.
+    // eslint-disable-next-line solid/reactivity
     void listenRuntimeChanged(() => {
       void tick();
     }).then((unlisten) => {
@@ -119,10 +125,10 @@ export function StartupView(props: StartupViewProps = {}) {
 
   createEffect(() => {
     if (startupComplete(snapshot(), status()) && minimumVisibleElapsed()) {
-      if (props.onComplete) {
-        props.onComplete();
-      } else if (props.navigate) {
-        props.navigate("/system/status", { replace: true });
+      if (onComplete) {
+        onComplete();
+      } else if (navigate) {
+        navigate("/system/status", { replace: true });
       } else {
         window.history.replaceState({}, "", "/system/status");
       }

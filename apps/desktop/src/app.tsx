@@ -33,7 +33,10 @@ export function App() {
 }
 
 function ModuleShell(props: { module: ModuleDefinition }) {
-  const Module = props.module.component;
+  // Module definitions come from the static registry, not reactive route state.
+  // eslint-disable-next-line solid/reactivity
+  const module = props.module;
+  const Module = module.component;
 
   return (
     <div class="app-shell">
