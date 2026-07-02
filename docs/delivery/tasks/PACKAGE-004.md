@@ -5,7 +5,7 @@
 
 ## Frozen inputs
 
-Use the DESKTOP-001 predeclared smoke seam, product/manifest contracts in `CONTRACTS.md`, deadlines in `TIMEOUTS.md`, and paths/names/provenance in `PACKAGING.md`. Replace only owned smoke stub paths. Stop if a manifest, lockfile, shared configuration, main entrypoint, or static test registration must change.
+Use the DESKTOP-001 predeclared smoke seam, product/manifest contracts in `CONTRACTS.md`, deadlines in `TIMEOUTS.md`, and paths/names/provenance in `PACKAGING.md`. Replace only owned smoke stub paths and the coordinator-authorized desktop entrypoint dispatch needed for `--smoke-test`. Stop if a manifest, lockfile, shared configuration, runtime-supervisor module, or non-smoke static test registration must change.
 
 ## Objective
 
