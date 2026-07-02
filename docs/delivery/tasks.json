@@ -1724,7 +1724,7 @@
       "id": "PACKAGE-004",
       "title": "Implement Windows distributable smoke harness",
       "wave": 5,
-      "status": "ready",
+      "status": "blocked",
       "inference": "low",
       "worker": null,
       "reviewer": null,
