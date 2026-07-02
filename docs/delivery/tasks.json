@@ -1549,16 +1549,64 @@
       "id": "TOOL-001",
       "title": "Create project-local bootstrap and doctor tooling",
       "wave": 4,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Zeno",
       "dependsOn": ["DESKTOP-004", "COMPOSE-001"],
       "ownedPaths": ["tools/bootstrap/**", "tools/doctor/**", "scripts/bootstrap/**"],
       "excludedPaths": ["system package installation", "CI workflows"],
       "guide": "docs/delivery/tasks/TOOL-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "d5d35b5b",
+        "revision": "d5d35b5b:3bc90dd1ec5705751f0b09c70216f9e9ce924b8994c331355ebb7f8f981d5b96",
+        "changedPaths": [
+          "scripts/bootstrap/bootstrap.ps1",
+          "scripts/bootstrap/doctor.ps1",
+          "tools/bootstrap/.gitignore",
+          "tools/bootstrap/voyage-bootstrap.ps1",
+          "tools/doctor/voyage-doctor.ps1"
+        ],
+        "summary": "Added Windows 11 x64 project-local bootstrap and doctor entrypoints for compose, desktop, packaging, and all profiles with pinned-version diagnostics, exact Compose image pin validation, runtime staging cache reuse, ignored bootstrap cache output, and project-local writable path reporting.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "PowerShell syntax and diff hygiene",
+            "command": "PowerShell parser pass over scripts/bootstrap/*.ps1 and tools/{bootstrap,doctor}/*.ps1; git diff --check",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Doctor report and prerequisite diagnostics",
+            "command": "pwsh -NoProfile -File scripts/bootstrap/doctor.ps1 -Json; pwsh -NoProfile -File scripts/bootstrap/doctor.ps1",
+            "result": "PASS: reported Windows x64 support, Bun 1.3.14 ok, Rust/Cargo/Zig mismatches, Docker engine access denied, WebView2 present, native tool availability, and writable project-local paths"
+          },
+          {
+            "criterion": "Compose profile and image pin validation",
+            "command": "pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile compose; invalid and synthetic exact VOYAGE_VII_API_IMAGE pin scenarios",
+            "result": "PASS: missing pin prints exact requirement, invalid pin fails, synthetic exact 0.1.0 digest pin runs docker compose config validation"
+          },
+          {
+            "criterion": "Packaging offline warm-cache reuse and mutation inventory",
+            "command": "pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile packaging -Offline; git status --short --ignored tools/bootstrap tools/runtime-staging apps/desktop/src-tauri/resources",
+            "result": "PASS: existing runtime staging cache reused; runtime output, runtime-staging cache/reports, and bootstrap cache are ignored"
+          },
+          {
+            "criterion": "Desktop/all prerequisite failure behavior",
+            "command": "pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile desktop -Offline; pwsh -NoProfile -File scripts/bootstrap/bootstrap.ps1 -Profile all -Offline",
+            "result": "PASS: both stop on local Rust 1.75.0 versus frozen Rust 1.96.0 before installing dependencies"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Zeno",
+        "reviewedRevision": "d5d35b5b:3bc90dd1ec5705751f0b09c70216f9e9ce924b8994c331355ebb7f8f981d5b96",
+        "integrationCommit": "ffd32ccf",
+        "findings": [],
+        "residualRisks": [
+          "Clean successful desktop and all bootstrap runs remain gated by installing the frozen Rust/Cargo 1.96.0 toolchain in the local environment.",
+          "Docker engine access was denied in this local environment, so compose service startup was not exercised by TOOL-001."
+        ]
+      }
     },
     {
       "id": "TEST-001",
