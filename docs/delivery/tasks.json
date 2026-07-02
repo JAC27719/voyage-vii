@@ -1558,7 +1558,7 @@
       "excludedPaths": ["system package installation", "CI workflows"],
       "guide": "docs/delivery/tasks/TOOL-001.md",
       "submission": {
-        "base": "d5d35b5b",
+        "base": "d5d35b5b27aec49701e10277559e554af632d957",
         "revision": "d5d35b5b:3bc90dd1ec5705751f0b09c70216f9e9ce924b8994c331355ebb7f8f981d5b96",
         "changedPaths": [
           "scripts/bootstrap/bootstrap.ps1",
@@ -1612,22 +1612,68 @@
       "id": "TEST-001",
       "title": "Create reusable cross-stack test orchestration",
       "wave": 4,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Linnaeus",
       "dependsOn": ["RUNTIME-004", "COMPOSE-001", "DESKTOP-002", "DESKTOP-003"],
       "ownedPaths": ["tools/test-harness/**", "tests/cross-stack/**", "scripts/test/**"],
       "excludedPaths": ["production behavior", "CI workflows"],
       "guide": "docs/delivery/tasks/TEST-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "3223df33dc8b1f54c994948348378c28eff4abb5",
+        "revision": "3223df33dc8b1f54c994948348378c28eff4abb5:e4329093a842f78903e014ae3d16991adc252095501e021f44a9aef29fc81808",
+        "changedPaths": [
+          "scripts/test/test.ps1",
+          "tests/cross-stack/README.md",
+          "tools/test-harness/voyage-test.ps1"
+        ],
+        "summary": "Add reusable Windows 11 x64 cross-stack test orchestration for unit, Compose, managed runtime, managed failure, package smoke, and all commands with isolated temp roots, bounded timeouts, sanitized logs, command traces, process inventories, descendant-process checks, sentinel-guarded cleanup, exact API image pin validation, and product-entrypoint reuse.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "PowerShell parser and diff hygiene",
+            "command": "PowerShell parser pass over tools/test-harness/voyage-test.ps1 and scripts/test/test.ps1; git diff --cached --check -- tools/test-harness scripts/test tests/cross-stack",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Failure fixtures and product-path reuse",
+            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command managed-failure",
+            "result": "PASS: desktop runtime failure tests, runtime-staging safety tests, timeout, cleanup escape prevention, stale lock, occupied resource, unwritable root, corrupt asset, malformed handshake redaction, SQLite path redaction, command traces, and descendant-process cleanup passed"
+          },
+          {
+            "criterion": "Package smoke isolation",
+            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command package-smoke",
+            "result": "PASS: offline runtime staging used the test root for runtime output and reports without dirtying repository runtime/report paths"
+          },
+          {
+            "criterion": "Managed runtime smoke",
+            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command managed-smoke",
+            "result": "PASS: Rust 1.96.0 runtime tests passed through the reusable harness"
+          },
+          {
+            "criterion": "Compose and unit command surface",
+            "command": "pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke; pwsh -NoProfile -File scripts/test/test.ps1 -Command compose-smoke -ApiImage voyage-vii-api:0.1.0@sha256:<synthetic 64 hex>; pwsh -NoProfile -File scripts/test/test.ps1 -Command unit",
+            "result": "PASS with environment limitations: missing compose image pin is rejected with the exact required format; synthetic compose pin reaches the product compose entrypoint and cleanup; unit reaches desktop, Rust, runtime-staging, and API Zig test entrypoints, with the API Zig step blocked locally by host Zig 0.14 syntax incompatibility versus the frozen Zig 0.15.2 requirement"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Linnaeus",
+        "reviewedRevision": "3223df33dc8b1f54c994948348378c28eff4abb5:e4329093a842f78903e014ae3d16991adc252095501e021f44a9aef29fc81808",
+        "integrationCommit": "caff8dbe",
+        "findings": [],
+        "residualRisks": [
+          "A real compose-smoke run remains gated on an approved exact API image pin.",
+          "The local unit matrix reaches the API Zig test entrypoint but cannot complete it until the host provides the frozen Zig 0.15.2 toolchain."
+        ]
+      }
     },
     {
       "id": "HARDEN-001",
       "title": "Run runtime and security hardening",
       "wave": 4,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
