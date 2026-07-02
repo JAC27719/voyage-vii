@@ -1896,22 +1896,61 @@
       "id": "CLEANUP-001",
       "title": "Audit repository hygiene before CI",
       "wave": 5,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Carver",
       "dependsOn": ["PACKAGE-005"],
       "ownedPaths": [".gitignore", "docs/delivery/tasks/CLEANUP-001.md", "docs/delivery/tasks.json", "docs/planning/v2/IMPLEMENTATION-PLAN.md", "docs/repository-hygiene/**"],
       "excludedPaths": ["unrelated user files", "required source or fixture files", "CI workflows"],
       "guide": "docs/delivery/tasks/CLEANUP-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "85818d69bdaeb910483f1776ab46afdfe8ec170b",
+        "revision": "85818d69bdaeb910483f1776ab46afdfe8ec170b:2382b52b3c1293d741a8e5613d690f039a1f15f5",
+        "changedPaths": [
+          ".gitignore",
+          "docs/repository-hygiene/pre-ci-cleanup.md"
+        ],
+        "summary": "Ignore local desktop dependency/build outputs and document the pre-CI repository hygiene audit while preserving unrelated local user files and generated caches on disk.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Status before and after cleanup",
+            "command": "git status --short --untracked-files=normal",
+            "result": "PASS: normal status no longer lists generated desktop or package output; only .gitignore, docs/repository-hygiene, and unrelated untracked docs/PRD.md appeared before staging."
+          },
+          {
+            "criterion": "Ignore-rule validation",
+            "command": "git check-ignore apps/desktop/node_modules apps/desktop/dist apps/desktop/src-tauri/target apps/desktop/src-tauri/gen tools/package/windows/artifacts tools/package/windows/build tools/package/windows/reports apps/desktop/src-tauri/resources/runtime",
+            "result": "PASS: all checked local dependency, build, package, and staged-runtime output paths are ignored."
+          },
+          {
+            "criterion": "Tracked generated-artifact audit",
+            "command": "git ls-files | Select-String -Pattern '(^|/)(node_modules|dist|target|gen)(/|$)|tools/package/windows/(artifacts|build|reports)/|\\.zip$'",
+            "result": "PASS: no tracked generated desktop dependency/build output, package output, or ZIP artifacts matched."
+          },
+          {
+            "criterion": "Diff hygiene",
+            "command": "git diff --check; git diff --cached --check",
+            "result": "PASS: cleanup diff hygiene passed with only expected CRLF conversion warnings before staging."
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Carver",
+        "reviewedRevision": "85818d69bdaeb910483f1776ab46afdfe8ec170b:2382b52b3c1293d741a8e5613d690f039a1f15f5",
+        "integrationCommit": "2382b52b3c1293d741a8e5613d690f039a1f15f5",
+        "findings": [],
+        "residualRisks": [
+          "The unrelated local docs/PRD.md file remains untracked and untouched."
+        ]
+      }
     },
     {
       "id": "CI-001",
       "title": "Create non-deployment GitHub Actions",
       "wave": 6,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
