@@ -2001,22 +2001,60 @@
       "id": "DOC-002",
       "title": "Write verified development and operations runbooks",
       "wave": 6,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Maxwell",
       "dependsOn": ["CI-001", "DBDOC-001", "DOC-001"],
       "ownedPaths": ["README.md", "docs/development/**", "docs/operations/**", "docs/packaging/README.md"],
       "excludedPaths": ["application code", "unverified commands"],
       "guide": "docs/delivery/tasks/DOC-002.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "2b0d4e3fb855de2ad87a4115a57b3c158d1719d9",
+        "revision": "2b0d4e3fb855de2ad87a4115a57b3c158d1719d9:a72554e8e1cd4e538accdb3e5ab9654cca8fad54cbae312f2ff11a361b039240",
+        "changedPaths": [
+          "README.md",
+          "docs/development/README.md",
+          "docs/development/command-verification.md",
+          "docs/operations/README.md",
+          "docs/packaging/README.md"
+        ],
+        "summary": "Add Windows-only development, operations, and packaging runbooks with command-verification evidence, explicit environment discrepancies, absent-feature boundaries, and ADR/module-registration guidance.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Windows command verification table",
+            "command": "DOC-002 operator command suite recorded under C:\\Users\\jcane\\AppData\\Local\\Temp\\voyage-vii-doc-002-2a21f0f30a1c454b945045d7e8f4ea70",
+            "result": "PASS with documented discrepancies: doctor, bootstrap, Compose config, managed smoke, managed failure, package-smoke staging, hardening, package-smoke fixtures, runtime-staging fixtures, and extracted package smoke passed; unit, Compose stop, and offline package build recorded exact host/tooling discrepancies instead of being presented as successful."
+          },
+          {
+            "criterion": "Link, terminology, and scope checks",
+            "command": "Local Markdown link check plus rg searches for pending placeholders, unsupported-platform claims, and absent-feature terminology across README.md, docs/development, docs/operations, and docs/packaging/README.md",
+            "result": "PASS: local links resolve, no pending verification placeholders remain, Windows 11 x64 is the only supported target, macOS/Linux are deferred only, and absent reset/repair/upgrade/automatic-backup/installer/auto-update/signing/notarization scope is explicit."
+          },
+          {
+            "criterion": "Diff hygiene",
+            "command": "git diff --cached --check",
+            "result": "PASS"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Maxwell",
+        "reviewedRevision": "2b0d4e3fb855de2ad87a4115a57b3c158d1719d9:a72554e8e1cd4e538accdb3e5ab9654cca8fad54cbae312f2ff11a361b039240",
+        "integrationCommit": "582a1d71345a98b52491e4eb307f9fd87c51d54d",
+        "findings": [],
+        "residualRisks": [
+          "The independent reviewer inspected recorded evidence and key logs but did not re-run the full Windows command suite.",
+          "The documented discrepancy commands remain environment-sensitive and should stay visible until their underlying host/tooling causes are resolved."
+        ]
+      }
     },
     {
       "id": "AUDIT-001",
       "title": "Perform the independent final integration audit",
       "wave": 6,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
