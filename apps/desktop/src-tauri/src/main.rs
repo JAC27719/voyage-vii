@@ -38,6 +38,18 @@ fn open_logs() -> Result<(), String> {
 }
 
 fn main() {
+    match smoke::run_from_args(std::env::args_os().skip(1)) {
+        Ok(Some(line)) => {
+            println!("{line}");
+            return;
+        }
+        Ok(None) => {}
+        Err(err) => {
+            eprintln!("VOYAGE_VII_SMOKE_ERROR {}", smoke_error(&err.to_string()));
+            std::process::exit(1);
+        }
+    }
+
     let runtime = runtime::RuntimeHandle::new();
     let builder = tauri::Builder::default()
         .manage(runtime)
@@ -69,6 +81,26 @@ fn main() {
         .expect("failed to run Voyage VII");
 }
 
+fn smoke_error(message: &str) -> String {
+    if message.contains("Authorization: Bearer")
+        || message.contains("appToken")
+        || message.contains("supervisorToken")
+        || contains_windows_absolute_path(message)
+    {
+        return "[redacted]".to_string();
+    }
+    message.to_string()
+}
+
+fn contains_windows_absolute_path(message: &str) -> bool {
+    let bytes = message.as_bytes();
+    bytes.windows(3).any(|window| {
+        window[0].is_ascii_alphabetic()
+            && window[1] == b':'
+            && (window[2] == b'\\' || window[2] == b'/')
+    })
+}
+
 fn snapshot_from_runtime(runtime: &runtime::RuntimeHandle) -> RuntimeSnapshot {
     runtime.snapshot()
 }
@@ -82,5 +114,15 @@ mod tests {
         let runtime = super::runtime::RuntimeHandle::new();
         let snapshot = super::snapshot_from_runtime(&runtime);
         assert_eq!(snapshot.generation, 0);
+    }
+
+    #[test]
+    fn smoke_errors_are_redacted() {
+        assert_eq!(super::smoke_error("C:\\Users\\me\\secret"), "[redacted]");
+        assert_eq!(
+            super::smoke_error("failed under D:\\temp\\voyage"),
+            "[redacted]"
+        );
+        assert_eq!(super::smoke_error("plain error"), "plain error");
     }
 }
