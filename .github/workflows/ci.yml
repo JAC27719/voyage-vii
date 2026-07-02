@@ -130,8 +130,23 @@ jobs:
       - name: Stage verified runtime
         run: pwsh -NoProfile -File tools/runtime-staging/stage-runtime.ps1
 
-      - name: Run reviewed unit harness
-        run: pwsh -NoProfile -File scripts/test/test.ps1 -Command unit
+      - name: Run desktop static checks
+        working-directory: apps/desktop
+        run: |
+          bun run typecheck
+          bun run lint
+          bun run format-check
+
+      - name: Run desktop Rust tests
+        working-directory: apps/desktop/src-tauri
+        run: rustup run $env:RUST_VERSION cargo test --locked
+
+      - name: Run runtime staging tests
+        run: pwsh -NoProfile -File tests/runtime-staging/run-tests.ps1
+
+      - name: Run API Zig tests
+        working-directory: services/api
+        run: zig build test
 
       - name: Upload failure diagnostics
         if: failure()
