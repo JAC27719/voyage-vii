@@ -17,6 +17,33 @@ function jsonResponse(
 }
 
 describe("SystemApiClient", () => {
+  it("binds the default fetch receiver for WebView", async () => {
+    const fetcher = vi.fn(function (this: unknown) {
+      if (this !== window) {
+        throw new TypeError("Illegal invocation");
+      }
+      return Promise.resolve(
+        jsonResponse(
+          {
+            schemaVersion: 1,
+            requestId: "req-status",
+            overallState: "ready",
+            components: [],
+          },
+          { status: 200, requestId: "req-status" },
+        ),
+      );
+    });
+    vi.stubGlobal("fetch", fetcher);
+
+    const client = new SystemApiClient("http://127.0.0.1:7800", "app-token");
+
+    await expect(client.status()).resolves.toMatchObject({
+      requestId: "req-status",
+      overallState: "ready",
+    });
+  });
+
   it("adds bearer auth, captures status JSON, and keeps request IDs available on errors", async () => {
     const fetcher = vi
       .fn()

@@ -14,7 +14,11 @@ export class SystemApiClient {
   readonly #appToken: string;
   readonly #fetch: FetchLike;
 
-  constructor(apiUrl: string, appToken: string, fetcher: FetchLike = fetch) {
+  constructor(
+    apiUrl: string,
+    appToken: string,
+    fetcher: FetchLike = window.fetch.bind(window),
+  ) {
     this.#apiUrl = apiUrl.replace(/\/$/, "");
     this.#appToken = appToken;
     this.#fetch = fetcher;
