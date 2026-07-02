@@ -97,6 +97,7 @@ describe("StartupView", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.clearAllMocks();
   });
@@ -114,9 +115,11 @@ describe("StartupView", () => {
   });
 
   it("routes to diagnostics after every managed component is healthy", async () => {
+    vi.useFakeTimers();
     snapshot = connected;
-    render(() => <StartupView />);
+    render(() => <StartupView navigate={navigate} />);
 
+    await vi.advanceTimersByTimeAsync(1_300);
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith("/system/status", {
         replace: true,

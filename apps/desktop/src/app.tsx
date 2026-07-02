@@ -1,24 +1,34 @@
 import { Navigate, Route, Router } from "@solidjs/router";
-import { For } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 
 import { modules } from "./module-registry";
 import type { ModuleDefinition } from "./module-registry";
 import { StartupView } from "./startup";
 
 export function App() {
+  const [ready, setReady] = createSignal(false);
+
   return (
-    <Router>
-      <Route path="/" component={() => <Navigate href="/startup" />} />
-      <Route path="/startup" component={StartupView} />
-      <For each={modules}>
-        {(module) => (
-          <Route
-            path={module.path}
-            component={() => <ModuleShell module={module} />}
-          />
-        )}
-      </For>
-    </Router>
+    <Show
+      when={ready()}
+      fallback={<StartupView onComplete={() => setReady(true)} />}
+    >
+      <Router>
+        <Route path="/" component={() => <Navigate href="/system/status" />} />
+        <Route
+          path="/startup"
+          component={() => <Navigate href="/system/status" />}
+        />
+        <For each={modules}>
+          {(module) => (
+            <Route
+              path={module.path}
+              component={() => <ModuleShell module={module} />}
+            />
+          )}
+        </For>
+      </Router>
+    </Show>
   );
 }
 

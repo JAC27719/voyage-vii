@@ -1,4 +1,3 @@
-import { useNavigate } from "@solidjs/router";
 import {
   For,
   Show,
@@ -23,6 +22,7 @@ import type {
 } from "./types";
 
 const STARTUP_POLL_MS = 1_000;
+const MINIMUM_STARTUP_VISIBLE_MS = 1_200;
 
 type StartupMessage = {
   key: string;
@@ -31,16 +31,22 @@ type StartupMessage = {
   state: "waiting" | "active" | "done" | "error";
 };
 
-export function StartupView() {
-  const navigate = useNavigate();
+type StartupViewProps = {
+  navigate?: (path: string, options: { replace: boolean }) => void;
+  onComplete?: () => void;
+};
+
+export function StartupView(props: StartupViewProps = {}) {
   const [snapshot, setSnapshot] =
     createSignal<RuntimeSnapshot>(fallbackSnapshot);
   const [status, setStatus] = createSignal<SystemStatus | null>(null);
   const [requestError, setRequestError] = createSignal<ApiFailure | null>(null);
   const [statusInFlight, setStatusInFlight] = createSignal(false);
+  const [minimumVisibleElapsed, setMinimumVisibleElapsed] = createSignal(false);
 
   let client: SystemApiClient | null = null;
   let timer: number | undefined;
+  let minimumTimer: number | undefined;
   let disposed = false;
   let unlistenRuntime: (() => void) | undefined;
 
@@ -95,6 +101,10 @@ export function StartupView() {
 
   onMount(() => {
     void tick();
+    minimumTimer = window.setTimeout(
+      () => setMinimumVisibleElapsed(true),
+      MINIMUM_STARTUP_VISIBLE_MS,
+    );
     timer = window.setInterval(() => void tick(), STARTUP_POLL_MS);
     void listenRuntimeChanged(() => {
       void tick();
@@ -108,13 +118,20 @@ export function StartupView() {
   });
 
   createEffect(() => {
-    if (startupComplete(snapshot(), status())) {
-      navigate("/system/status", { replace: true });
+    if (startupComplete(snapshot(), status()) && minimumVisibleElapsed()) {
+      if (props.onComplete) {
+        props.onComplete();
+      } else if (props.navigate) {
+        props.navigate("/system/status", { replace: true });
+      } else {
+        window.history.replaceState({}, "", "/system/status");
+      }
     }
   });
 
   onCleanup(() => {
     disposed = true;
+    window.clearTimeout(minimumTimer);
     window.clearInterval(timer);
     unlistenRuntime?.();
   });
