@@ -22,7 +22,7 @@
         "minWidth": 860,
         "minHeight": 560,
         "resizable": true,
-        "visible": false
+        "visible": true
       }
     ]
   },

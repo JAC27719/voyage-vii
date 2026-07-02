@@ -64,15 +64,15 @@ fn main() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![get_runtime_snapshot, open_logs])
         .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                window.show()?;
+                window.set_focus()?;
+            }
             runtime::self_test().map_err(|err| err.to_string())?;
             smoke::self_test().map_err(|err| err.to_string())?;
             app.state::<runtime::RuntimeHandle>()
                 .start(app.handle().clone())
                 .map_err(|err| err.to_string())?;
-            if let Some(window) = app.get_webview_window("main") {
-                window.show()?;
-                window.set_focus()?;
-            }
             Ok(())
         });
 
