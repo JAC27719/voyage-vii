@@ -1838,22 +1838,65 @@
       "id": "PACKAGE-005",
       "title": "Repair packaged desktop runtime launch",
       "wave": 5,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
       "worker": "codex",
       "reviewer": "Carver",
       "dependsOn": ["PACKAGE-001"],
-      "ownedPaths": ["apps/desktop/src-tauri/src/runtime/mod.rs", "docs/delivery/tasks/PACKAGE-005.md", "docs/delivery/tasks.json", "docs/planning/v2/IMPLEMENTATION-PLAN.md"],
+      "ownedPaths": ["apps/desktop/src-tauri/src/runtime/mod.rs", "docs/delivery/tasks/CI-001.md", "docs/delivery/tasks/CLEANUP-001.md", "docs/delivery/tasks/PACKAGE-005.md", "docs/delivery/tasks.json", "docs/planning/v2/IMPLEMENTATION-PLAN.md"],
       "excludedPaths": ["runtime contract redesign", "installer formats", "CI workflows"],
       "guide": "docs/delivery/tasks/PACKAGE-005.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "dc19bbde077ad5ec9e480b9b1473cc1674087611",
+        "revision": "dc19bbde077ad5ec9e480b9b1473cc1674087611:2007c033199f5e5e27e3bab0e8e3f8da535bd1dd",
+        "changedPaths": [
+          "apps/desktop/src-tauri/src/runtime/mod.rs",
+          "docs/delivery/tasks.json",
+          "docs/delivery/tasks/CI-001.md",
+          "docs/delivery/tasks/CLEANUP-001.md",
+          "docs/delivery/tasks/PACKAGE-005.md",
+          "docs/planning/v2/IMPLEMENTATION-PLAN.md"
+        ],
+        "summary": "Fix packaged desktop runtime discovery to prefer the portable ZIP resources/runtime layout before falling back to Tauri resources, add focused runtime-root selection tests, and insert the PACKAGE-005/CLEANUP-001 gates before CI.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Focused desktop runtime checks",
+            "command": "rustup run 1.96.0 cargo fmt --check; rustup run 1.96.0 cargo test --locked runtime",
+            "result": "PASS: format check passed; 19 focused runtime/smoke tests passed, including portable layout, fallback, invalid candidate, handshake, restart, shutdown, redaction, and process-tree tests."
+          },
+          {
+            "criterion": "Windows ZIP rebuild and smoke",
+            "command": "pwsh -NoProfile -File tools/package/windows/build-windows-zip.ps1 -Offline",
+            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 1dcdce39adca3237058d53010e9ecd8929c458d097b1077337e33617cde90300 and completed the package smoke harness."
+          },
+          {
+            "criterion": "Manual packaged launch",
+            "command": "Launch tools/package/windows/build/package-root/Voyage VII.exe, wait for voyage-vii-api, close app, and inspect remaining processes",
+            "result": "PASS: voyage-vii-api started with PID 52824; app close was requested successfully; no Voyage VII, voyage-vii-api, or TigerBeetle processes remained."
+          },
+          {
+            "criterion": "Registry and diff hygiene",
+            "command": "Test-Json -Path docs/delivery/tasks.json -SchemaFile docs/delivery/task-registry.schema.json; git diff --check; git diff --cached --check",
+            "result": "PASS: registry validates and diff hygiene passed with only expected CRLF conversion warnings before staging."
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Carver",
+        "reviewedRevision": "dc19bbde077ad5ec9e480b9b1473cc1674087611:2007c033199f5e5e27e3bab0e8e3f8da535bd1dd",
+        "integrationCommit": "2007c033199f5e5e27e3bab0e8e3f8da535bd1dd",
+        "findings": [],
+        "residualRisks": [
+          "Repository generated-output hygiene remains explicitly gated by CLEANUP-001 before CI starts."
+        ]
+      }
     },
     {
       "id": "CLEANUP-001",
       "title": "Audit repository hygiene before CI",
       "wave": 5,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
