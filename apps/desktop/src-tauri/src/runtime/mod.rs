@@ -7,7 +7,7 @@ use std::{
     fmt,
     io::{BufRead, BufReader, Read, Write},
     net::TcpStream,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Child, Command, ExitStatus, Stdio},
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -227,8 +227,7 @@ impl Drop for RuntimeHandle {
 
 impl SupervisorConfig {
     fn packaged(app: &tauri::AppHandle) -> anyhow::Result<Self> {
-        let resource_dir = app.path().resource_dir()?;
-        let runtime_root = resource_dir.join("runtime");
+        let runtime_root = packaged_runtime_root(app)?;
         let data_root = app.path().app_data_dir()?;
         Ok(Self::new(
             Launcher {
@@ -259,6 +258,47 @@ impl SupervisorConfig {
             restart_window: RESTART_WINDOW,
         }
     }
+}
+
+fn packaged_runtime_root(app: &tauri::AppHandle) -> anyhow::Result<PathBuf> {
+    let app_dir = env::current_exe()
+        .ok()
+        .and_then(|current_exe| current_exe.parent().map(Path::to_path_buf));
+    if let Ok(runtime_root) = select_packaged_runtime_root(app_dir.as_deref(), None) {
+        return Ok(runtime_root);
+    }
+
+    let resource_dir = app.path().resource_dir()?;
+    select_packaged_runtime_root(None, Some(&resource_dir))
+}
+
+fn select_packaged_runtime_root(
+    app_dir: Option<&Path>,
+    resource_dir: Option<&Path>,
+) -> anyhow::Result<PathBuf> {
+    if let Some(runtime_root) = app_dir
+        .map(portable_runtime_root)
+        .filter(|candidate| is_packaged_runtime_root(candidate))
+    {
+        return Ok(runtime_root);
+    }
+
+    if let Some(runtime_root) = resource_dir
+        .map(|root| root.join("runtime"))
+        .filter(|candidate| is_packaged_runtime_root(candidate))
+    {
+        return Ok(runtime_root);
+    }
+
+    anyhow::bail!("packaged runtime was not found beside the app executable or in Tauri resources")
+}
+
+fn portable_runtime_root(app_dir: &Path) -> PathBuf {
+    app_dir.join("resources").join("runtime")
+}
+
+fn is_packaged_runtime_root(root: &Path) -> bool {
+    root.join("manifest.json").is_file() && root.join("api").join("voyage-vii-api.exe").is_file()
 }
 
 trait EventSink: Send + 'static {
@@ -1181,6 +1221,69 @@ mod tests {
     #[test]
     fn fake_fixture_is_owned_and_present() {
         assert!(Path::new(&fixture_path()).exists());
+    }
+
+    #[test]
+    fn portable_runtime_root_matches_windows_zip_layout() {
+        let app_dir = Path::new(r"C:\Voyage VII");
+        assert_eq!(
+            portable_runtime_root(app_dir),
+            PathBuf::from(r"C:\Voyage VII\resources\runtime")
+        );
+    }
+
+    #[test]
+    fn packaged_runtime_root_requires_manifest_and_api_executable() {
+        let temp = TempDir::new().expect("temp dir");
+        let root = temp.path().join("resources").join("runtime");
+        assert!(!is_packaged_runtime_root(&root));
+
+        fs::create_dir_all(root.join("api")).expect("api dir");
+        fs::write(root.join("manifest.json"), "{}").expect("manifest");
+        assert!(!is_packaged_runtime_root(&root));
+
+        fs::write(root.join("api").join("voyage-vii-api.exe"), "").expect("api exe");
+        assert!(is_packaged_runtime_root(&root));
+    }
+
+    #[test]
+    fn packaged_runtime_selection_prefers_portable_runtime() {
+        let temp = TempDir::new().expect("temp dir");
+        let app_dir = temp.path().join("app");
+        let portable = portable_runtime_root(&app_dir);
+        let tauri = temp.path().join("tauri").join("runtime");
+        create_packaged_runtime_root(&portable);
+        create_packaged_runtime_root(&tauri);
+
+        let selected =
+            select_packaged_runtime_root(Some(&app_dir), Some(&temp.path().join("tauri")))
+                .expect("runtime root");
+        assert_eq!(selected, portable);
+    }
+
+    #[test]
+    fn packaged_runtime_selection_falls_back_to_tauri_resources() {
+        let temp = TempDir::new().expect("temp dir");
+        let app_dir = temp.path().join("app");
+        let resource_dir = temp.path().join("tauri");
+        let tauri = resource_dir.join("runtime");
+        create_packaged_runtime_root(&tauri);
+
+        let selected = select_packaged_runtime_root(Some(&app_dir), Some(&resource_dir))
+            .expect("runtime root");
+        assert_eq!(selected, tauri);
+    }
+
+    #[test]
+    fn packaged_runtime_selection_fails_when_no_candidate_is_valid() {
+        let temp = TempDir::new().expect("temp dir");
+        assert!(select_packaged_runtime_root(Some(temp.path()), None).is_err());
+    }
+
+    fn create_packaged_runtime_root(root: &Path) {
+        fs::create_dir_all(root.join("api")).expect("api dir");
+        fs::write(root.join("manifest.json"), "{}").expect("manifest");
+        fs::write(root.join("api").join("voyage-vii-api.exe"), "").expect("api exe");
     }
 
     #[test]

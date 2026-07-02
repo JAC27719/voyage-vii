@@ -61,22 +61,28 @@ After `DESKTOP-001`, supervisor, UI, and staging work may proceed concurrently i
 2. `TEST-001`: reusable cross-stack verification.
 3. `HARDEN-001`: failure matrix and security/redaction hardening.
 
-### Wave 5 — Portable artifacts
+### Wave 5 — Portable artifacts and pre-CI stabilization
 
 1. `PACKAGE-004`: implement the predeclared Windows distributable smoke harness
    behind an adapter seam that can host future platform launchers.
 2. `PACKAGE-001`: Windows x64 ZIP and native smoke execution.
+3. `PACKAGE-005`: packaged desktop launch repair for the normal user-facing
+   runtime path.
+4. `CLEANUP-001`: repository hygiene, ignore-policy, and tracked-artifact audit
+   before CI automation.
 
 After the smoke harness is approved, `PACKAGE-001` exercises the exact Windows
 ZIP and records the final artifact/runtime hashes. `AUDIT-001` repeats that
 Windows package test against the final integrated artifact. macOS Intel/Apple
 Silicon and Linux packaging intent is preserved under
 [`future/`](future/) for a future ADR/task wave.
+CI does not start until the packaged desktop launches through the normal app
+path and the repository cleanup gate is approved.
 
 ### Wave 6 — Delivery
 
 1. `CI-001`: non-deployment Windows GitHub Actions and dependency automation
-   after `PACKAGE-001`.
+   after `CLEANUP-001`.
 2. `DOC-002`: verified development and operations runbooks after CI, DBML documentation, and repository governance.
 3. `AUDIT-001`: independent end-to-end audit.
 
