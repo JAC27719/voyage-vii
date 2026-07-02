@@ -1782,16 +1782,57 @@
       "id": "PACKAGE-001",
       "title": "Build the Windows x64 portable ZIP",
       "wave": 5,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
       "worker": "codex",
-      "reviewer": null,
+      "reviewer": "Wegener",
       "dependsOn": ["PACKAGE-004"],
       "ownedPaths": ["tools/package/windows/**", "docs/packaging/windows.md", "services/api/src/main.zig", "services/api/src/sqlite/root.zig", "services/api/src/runtime/supervisor/root.zig", "services/api/src/runtime/tigerbeetle/root.zig"],
       "excludedPaths": ["tracked artifacts", "installer formats"],
       "guide": "docs/delivery/tasks/PACKAGE-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "fe32052d955d48812f495048d47b1d720074680b",
+        "revision": "fe32052d955d48812f495048d47b1d720074680b:f09e1fb6970961fcae8392be47140dd883e56ace",
+        "changedPaths": [
+          "docs/delivery/tasks.json",
+          "docs/packaging/windows.md",
+          "services/api/src/main.zig",
+          "services/api/src/runtime/supervisor/root.zig",
+          "services/api/src/runtime/tigerbeetle/root.zig",
+          "services/api/src/sqlite/root.zig",
+          "tools/package/windows/.gitignore",
+          "tools/package/windows/build-windows-zip.ps1"
+        ],
+        "summary": "Add the Windows x64 portable ZIP build script and runbook, assemble the desktop/API/runtime layout, validate PE inventory and forbidden files, enforce clean tracked package inputs and approved TigerBeetle C client hashes, fix packaged API readiness by resolving SQLite migrations beside the API executable, and harden managed TigerBeetle startup for the PACKAGE-004 smoke gate.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "API unit and lifecycle checks",
+            "command": "zig fmt --check services/api/src/main.zig services/api/src/sqlite/root.zig services/api/src/runtime/supervisor/root.zig services/api/src/runtime/tigerbeetle/root.zig; zig build test -Dsqlite-amalgamation=apps/desktop/src-tauri/resources/runtime/sqlite -Dtb-client-lib=<approved FEAS-002 tb_client.lib> -Dtb-client-include=<approved FEAS-002 src/clients/c>",
+            "result": "PASS: formatting passed and the focused API test suite passed with the approved SQLite amalgamation and TigerBeetle C client inputs."
+          },
+          {
+            "criterion": "Windows ZIP build and PACKAGE-004 smoke",
+            "command": "pwsh -NoProfile -File tools/package/windows/build-windows-zip.ps1 -Offline",
+            "result": "PASS: produced tools/package/windows/artifacts/voyage-vii_0.1.0_windows-x86_64.zip with SHA-256 2a967fbe078d53340a51ad0e9a8e121aeb8d8d875ed6cea5eb362cbcc3aac02b; PE inventory was Windows x64, desktop subsystem was Windows GUI, forbidden package files were absent, extraction from a path containing spaces and non-ASCII succeeded, fresh smoke completed in 17657 ms, retained smoke completed in 17532 ms, and no Voyage/TigerBeetle processes remained."
+          },
+          {
+            "criterion": "Registry, script, and diff hygiene",
+            "command": "Test-Json -Path docs/delivery/tasks.json -SchemaFile docs/delivery/task-registry.schema.json; PowerShell parser pass over tools/package/windows/build-windows-zip.ps1; git diff --check",
+            "result": "PASS: registry schema validation passed, the package script parsed, and diff hygiene passed with only expected CRLF conversion warnings."
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Wegener",
+        "reviewedRevision": "fe32052d955d48812f495048d47b1d720074680b:f09e1fb6970961fcae8392be47140dd883e56ace",
+        "integrationCommit": "f09e1fb6970961fcae8392be47140dd883e56ace",
+        "findings": [],
+        "residualRisks": [
+          "Generated desktop dependency/build output remains untracked local state and is intentionally excluded from the package commit.",
+          "The final package artifact is generated under ignored tools/package/windows/artifacts rather than committed to Git."
+        ]
+      }
     },
     {
       "id": "CI-001",
