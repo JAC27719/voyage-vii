@@ -1,0 +1,3 @@
+/.cache/
+!/voyage-bootstrap.ps1
+!.gitignore

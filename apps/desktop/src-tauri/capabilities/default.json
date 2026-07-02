@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Voyage VII desktop command surface",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "allow-get-runtime-snapshot",
+    "allow-open-logs"
+  ]
+}

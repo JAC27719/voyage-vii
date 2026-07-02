@@ -1,0 +1,7 @@
+cache/
+deps/
+downloads/
+evidence/*.log
+runtime/
+toolchain/
+zig-out/

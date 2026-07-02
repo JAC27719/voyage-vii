@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyage-vii.local/contracts/writable-manifest.schema.json",
+  "type": "object",
+  "required": ["schemaVersion", "productVersion", "target", "createdAt", "components"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "productVersion": { "const": "0.1.0" },
+    "target": { "const": "x86_64-pc-windows-msvc" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "components": {
+      "type": "object",
+      "required": ["postgresql", "tigerbeetle"],
+      "additionalProperties": false,
+      "properties": {
+        "postgresql": { "const": "18.4" },
+        "tigerbeetle": { "const": "0.17.7" }
+      }
+    }
+  }
+}

@@ -29,6 +29,16 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Zig and local spike outputs
+**/.zig-cache/
+**/zig-out/
+
+# JavaScript and desktop build outputs
+**/node_modules/
+apps/desktop/dist/
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/target/
+
 # IDE and OS
 .tools/
 .idea/

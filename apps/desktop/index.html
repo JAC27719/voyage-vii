@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voyage VII</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: #f6f8fb;
+        color: #07152c;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      .boot-screen {
+        display: grid;
+        min-height: 100vh;
+        place-items: center;
+        padding: 32px;
+        background:
+          linear-gradient(
+            180deg,
+            rgb(246 248 251 / 0.92),
+            rgb(239 244 247 / 0.98)
+          ),
+          #f6f8fb;
+        color: #07152c;
+      }
+
+      .boot-panel {
+        display: grid;
+        width: min(760px, 100%);
+        gap: 24px;
+      }
+
+      .boot-mark {
+        display: grid;
+        width: 56px;
+        height: 56px;
+        place-items: center;
+        border: 1px solid #aebacf;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #07152c;
+        font-weight: 800;
+      }
+
+      .boot-heading {
+        display: grid;
+        gap: 8px;
+      }
+
+      .boot-heading p,
+      .boot-heading h1 {
+        margin: 0;
+      }
+
+      .boot-heading p {
+        color: #4b5d7a;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .boot-heading h1 {
+        font-size: 32px;
+        line-height: 1.15;
+      }
+
+      .boot-heading span,
+      .boot-stream p {
+        color: #40516d;
+      }
+
+      .boot-progress {
+        display: grid;
+        gap: 10px;
+      }
+
+      .boot-progress div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        color: #40516d;
+        font-size: 14px;
+      }
+
+      .boot-progress strong {
+        color: #07152c;
+      }
+
+      .boot-bar {
+        height: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #dbe4ee;
+      }
+
+      .boot-bar span {
+        display: block;
+        width: 45%;
+        height: 100%;
+        border-radius: inherit;
+        background: #157a6e;
+        animation: boot-progress 1.4s ease-in-out infinite;
+      }
+
+      .boot-stream {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .boot-stream li {
+        display: grid;
+        gap: 3px;
+        padding-left: 20px;
+        border-left: 3px solid #c7d2e1;
+      }
+
+      .boot-stream li:first-child {
+        border-color: #b7791f;
+      }
+
+      .boot-stream span {
+        color: #07152c;
+        font-weight: 700;
+      }
+
+      .boot-stream p {
+        margin: 0;
+      }
+
+      @keyframes boot-progress {
+        0% {
+          transform: translateX(-110%);
+        }
+
+        50% {
+          transform: translateX(70%);
+        }
+
+        100% {
+          transform: translateX(235%);
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="root">
+      <main class="boot-screen" aria-live="polite">
+        <div class="boot-panel">
+          <div class="boot-mark">VII</div>
+          <div class="boot-heading">
+            <p>Voyage VII</p>
+            <h1>Starting local runtime</h1>
+            <span
+              >Preparing the desktop bridge, API, SQLite, and TigerBeetle.</span
+            >
+          </div>
+          <div class="boot-progress" aria-label="Startup progress">
+            <div>
+              <span>Startup progress</span>
+              <strong>Starting</strong>
+            </div>
+            <div class="boot-bar" aria-hidden="true"><span></span></div>
+          </div>
+          <ol class="boot-stream" aria-label="Startup messages">
+            <li>
+              <span>Desktop window</span>
+              <p>Loading the local startup screen.</p>
+            </li>
+            <li>
+              <span>Runtime supervisor</span>
+              <p>Waiting for the desktop bridge.</p>
+            </li>
+            <li>
+              <span>Managed API</span>
+              <p>SQLite and TigerBeetle will report status next.</p>
+            </li>
+          </ol>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

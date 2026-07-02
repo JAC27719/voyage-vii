@@ -1,0 +1,40 @@
+FROM ubuntu:24.04 AS build
+
+ARG POSTGRESQL_SHA256=81a81ec695fb0c7901407defaa1d2f7973617154cf27ba74e3a7ab8e64436094
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bison \
+        build-essential \
+        ca-certificates \
+        flex \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY downloads/postgresql-18.4.tar.bz2 /tmp/postgresql-18.4.tar.bz2
+
+RUN echo "${POSTGRESQL_SHA256}  /tmp/postgresql-18.4.tar.bz2" | sha256sum -c - \
+    && tar -xjf /tmp/postgresql-18.4.tar.bz2 -C /tmp \
+    && cd /tmp/postgresql-18.4 \
+    && ./configure \
+        --prefix=/opt/postgresql \
+        --without-icu \
+        --without-readline \
+        --without-zlib \
+    && make -j"$(nproc)" world-bin \
+    && make install-world-bin
+
+FROM ubuntu:24.04
+
+RUN groupadd --system postgres \
+    && useradd --system --gid postgres --home-dir /var/lib/postgresql postgres \
+    && mkdir -p /var/lib/postgresql/data \
+    && chown -R postgres:postgres /var/lib/postgresql
+
+COPY --from=build /opt/postgresql /opt/postgresql
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh
+
+ENV PATH="/opt/postgresql/bin:${PATH}"
+USER postgres
+EXPOSE 5432
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

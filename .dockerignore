@@ -1,9 +1,0 @@
-.git
-.github
-.terraform
-**/bin
-**/obj
-TestResults
-data
-*.tfstate*
-.env

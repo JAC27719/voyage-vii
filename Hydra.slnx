@@ -1,9 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Hydra.Api/Hydra.Api.csproj" />
-    <Project Path="src/Hydra.Seeder/Hydra.Seeder.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Hydra.Api.Tests/Hydra.Api.Tests.csproj" />
-  </Folder>
-</Solution>
