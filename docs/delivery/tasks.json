@@ -1950,22 +1950,58 @@
       "id": "CI-001",
       "title": "Create non-deployment GitHub Actions",
       "wave": 6,
-      "status": "ready",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex",
+      "reviewer": "Lagrange",
       "dependsOn": ["CLEANUP-001"],
       "ownedPaths": [".github/workflows/**", ".github/dependabot.yml"],
       "excludedPaths": ["deployment", "Terraform", "AWS", "secrets"],
       "guide": "docs/delivery/tasks/CI-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "b1417b6dbc49d5b380185ee4feceb9f11b1bee66",
+        "revision": "b1417b6dbc49d5b380185ee4feceb9f11b1bee66:c5240a541487c664be08fb297efff14ed432a2a0a21f2910e8410e3d1832d9c2",
+        "changedPaths": [
+          ".github/dependabot.yml",
+          ".github/workflows/build-tigerbeetle-client.ps1",
+          ".github/workflows/ci.yml"
+        ],
+        "summary": "Add Windows-only non-deployment GitHub Actions, Dependabot, and a reviewed TigerBeetle C client preparation helper for CI verification and short-lived package smoke artifacts.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Workflow syntax and policy validation",
+            "command": "actionlint .github/workflows/ci.yml; local workflow policy audits for full-SHA actions, read-only permissions, no secrets usage, Windows-only runners, job timeouts, seven-day retention, and no deployment/cloud/signing scope",
+            "result": "PASS: actionlint passed locally; all action references are full 40-character SHAs; permissions are read-only; no secrets block or secrets.* usage exists; every runner is windows-2025; ordinary jobs are 30 minutes; the package job is 90 minutes; all artifacts retain for seven days; no Terraform, AWS, deployment, publishing, signing, or notarization scope was found."
+          },
+          {
+            "criterion": "Job-to-script map and gated Compose behavior",
+            "command": "Script-entry search across .github/workflows/ci.yml plus docker compose --file compose.yaml config --quiet with synthetic exact VOYAGE_VII_API_IMAGE",
+            "result": "PASS: CI calls reviewed repository scripts for unit, Compose, managed smoke, hardening, TigerBeetle client preparation, and Windows ZIP smoke; Compose config resolves with an exact 0.1.0 tag+digest pin shape and live Compose smoke remains gated on an approved repository variable."
+          },
+          {
+            "criterion": "Registry, helper parser, and diff hygiene",
+            "command": "Test-Json -Path docs/delivery/tasks.json -SchemaFile docs/delivery/task-registry.schema.json; PowerShell parser pass over .github/workflows/build-tigerbeetle-client.ps1; git diff --cached --check",
+            "result": "PASS: registry schema validated before integration, the CI helper parsed successfully, and staged diff hygiene passed with only expected CRLF conversion warnings before staging."
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Lagrange",
+        "reviewedRevision": "b1417b6dbc49d5b380185ee4feceb9f11b1bee66:c5240a541487c664be08fb297efff14ed432a2a0a21f2910e8410e3d1832d9c2",
+        "integrationCommit": "11d5cbf1205b7e71b869ab280ac306bda89a3246",
+        "findings": [],
+        "residualRisks": [
+          "The independent reviewer did not execute the full Windows GitHub Actions matrix or package job locally.",
+          "Live Compose smoke remains gated on repository variable VOYAGE_VII_API_IMAGE containing an approved exact 0.1.0 digest API image pin."
+        ]
+      }
     },
     {
       "id": "DOC-002",
       "title": "Write verified development and operations runbooks",
       "wave": 6,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
