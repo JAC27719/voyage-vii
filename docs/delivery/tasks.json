@@ -1673,22 +1673,58 @@
       "id": "HARDEN-001",
       "title": "Run runtime and security hardening",
       "wave": 4,
-      "status": "in_progress",
+      "status": "integrated",
       "inference": "low",
       "worker": "codex",
-      "reviewer": null,
+      "reviewer": "Ampere",
       "dependsOn": ["TEST-001", "TOOL-001"],
       "ownedPaths": ["tests/hardening/**", "docs/testing/hardening.md"],
       "excludedPaths": ["unapproved production redesign", "CI workflows"],
       "guide": "docs/delivery/tasks/HARDEN-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "6a7d90671c48dcbff8639b7d4e21b36a6043d4b9",
+        "revision": "6a7d90671c48dcbff8639b7d4e21b36a6043d4b9:0e9b11538e219c029288b6b4ac3f2dad109f2bd48f1a204c91e4ef0ac31164ba",
+        "changedPaths": [
+          "docs/testing/hardening.md",
+          "tests/hardening/run-hardening.ps1"
+        ],
+        "summary": "Add a Windows 11 x64 hardening evidence runner and runbook that orchestrate frozen contract scans, managed runtime failure tests, isolated runtime staging, compose image-pin validation, redacted artifact scans, timing baselines, and owner-routed defect reporting without production edits.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Parser and diff hygiene",
+            "command": "PowerShell parser pass over tests/hardening/run-hardening.ps1; git diff --cached --check -- tests/hardening docs/testing/hardening.md",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Full hardening matrix",
+            "command": "pwsh -NoProfile -File tests/hardening/run-hardening.ps1 -Command all",
+            "result": "PASS: frozen contract scan, owner-routed PostgreSQL defect scan, managed runtime/staging failure matrix, isolated runtime package staging, compose missing-pin validation, managed-smoke timing baseline, and redacted artifact scan completed; final report root was C:\\Users\\jcane\\AppData\\Local\\Temp\\voyage-vii-hardening\\a3bce9d7893b44129de478bc5f9e733a"
+          },
+          {
+            "criterion": "Retained artifact redaction",
+            "command": "pwsh -NoProfile -File tests/hardening/run-hardening.ps1 -Command contract-scan -KeepReportRoot; Select-String over retained hardening-summary.* for C:\\Users\\, Authorization: Bearer, fake tokens, appToken, and supervisorToken",
+            "result": "PASS: retained JSON and Markdown summaries redacted private paths and contained no token/header patterns"
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Ampere",
+        "reviewedRevision": "6a7d90671c48dcbff8639b7d4e21b36a6043d4b9:0e9b11538e219c029288b6b4ac3f2dad109f2bd48f1a204c91e4ef0ac31164ba",
+        "integrationCommit": "fa8ac409",
+        "findings": [],
+        "residualRisks": [
+          "The scan records 71 stale PostgreSQL contract/runtime findings that are routed back to API-001, RUNTIME-001, and the PLAN-002 SQLite posture amendment rather than fixed in HARDEN-001 owned paths.",
+          "Real compose smoke remains gated on an approved exact API image pin.",
+          "Full packaged-app idle memory and log-rotation evidence remains gated by PACKAGE-004 and PACKAGE-001."
+        ]
+      }
     },
     {
       "id": "PACKAGE-004",
       "title": "Implement Windows distributable smoke harness",
       "wave": 5,
-      "status": "blocked",
+      "status": "ready",
       "inference": "low",
       "worker": null,
       "reviewer": null,
