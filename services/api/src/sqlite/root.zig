@@ -307,7 +307,19 @@ fn readMigrationSql(allocator: std.mem.Allocator, migration: Migration) ![:0]u8 
         };
         return bytes;
     }
-    return error.FileNotFound;
+    const exe_path = try std.fs.selfExePathAlloc(allocator);
+    defer allocator.free(exe_path);
+    const exe_dir = std.fs.path.dirname(exe_path) orelse return error.FileNotFound;
+    const packaged_path = try std.fs.path.join(allocator, &.{ exe_dir, "migrations", migration.path });
+    defer allocator.free(packaged_path);
+    return std.fs.cwd().readFileAllocOptions(
+        allocator,
+        packaged_path,
+        64 * 1024,
+        null,
+        .of(u8),
+        0,
+    );
 }
 
 fn validateSha256(hash: []const u8) !void {

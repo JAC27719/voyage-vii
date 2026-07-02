@@ -321,7 +321,11 @@ fn serve(allocator: std.mem.Allocator, config: ServeConfig) !void {
             std.debug.print("api_accept=failed error={s}\n", .{@errorName(err)});
             continue;
         };
-        const should_shutdown = try handleHttpConnection(allocator, connection.stream, http_config, &runtime);
+        const should_shutdown = handleHttpConnection(allocator, connection.stream, http_config, &runtime) catch |err| {
+            std.debug.print("api_connection=failed error={s}\n", .{@errorName(err)});
+            connection.stream.close();
+            continue;
+        };
         connection.stream.close();
         if (should_shutdown) {
             runtime.shutdown();
@@ -349,8 +353,8 @@ fn handleHttpConnection(
     config: http.Config,
     runtime: *runtime_supervisor.ManagedRuntime,
 ) !bool {
-    var buffer: [128 * 1024]u8 = undefined;
-    const read_len = try stream.read(&buffer);
+    var buffer: [72 * 1024]u8 = undefined;
+    const read_len = try std.posix.recv(stream.handle, &buffer, 0);
     if (read_len == 0) return false;
 
     const request = parseHttpRequest(buffer[0..read_len]) catch {

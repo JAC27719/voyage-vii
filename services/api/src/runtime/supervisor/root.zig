@@ -100,7 +100,7 @@ pub const ManagedRuntime = struct {
             return;
         }
         self.shutdown_started = true;
-        self.snapshot_value.markStopping();
+        _ = self.snapshot_value.markStopping();
         self.mutex.unlock();
 
         self.joinStartupThread();
@@ -242,7 +242,8 @@ pub const ManagedRuntime = struct {
         try std.fs.cwd().makePath(tigerbeetle_root);
 
         var reservation = try tigerbeetle.reserveDynamicAddress(self.allocator);
-        defer reservation.reservation.release();
+        var reservation_released = false;
+        defer if (!reservation_released) reservation.reservation.release();
         defer self.allocator.free(reservation.address);
         const port = reservation.reservation.port;
 
@@ -258,12 +259,16 @@ pub const ManagedRuntime = struct {
 
         const containment = try platform.initKillOnCloseContainment();
         errdefer platform.closeContainment(containment);
+        reservation.reservation.release();
+        reservation_released = true;
         const process = try platform.spawnContained(containment, self.allocator, plan.start_command.argv);
         errdefer _ = platform.killContained(process) catch {};
 
         const address = try self.allocator.dupe(u8, plan.address);
         errdefer self.allocator.free(address);
 
+        try tigerbeetle.waitForListening(address, tigerbeetle.request_timeout_ms);
+        tigerbeetle.sleepMs(3_000);
         switch (tigerbeetle.probeStatus(address, plan.cluster_id)) {
             .healthy => {},
             .unavailable => return error.TigerBeetleUnavailable,

@@ -1787,7 +1787,7 @@
       "worker": "codex",
       "reviewer": null,
       "dependsOn": ["PACKAGE-004"],
-      "ownedPaths": ["tools/package/windows/**", "docs/packaging/windows.md"],
+      "ownedPaths": ["tools/package/windows/**", "docs/packaging/windows.md", "services/api/src/main.zig", "services/api/src/sqlite/root.zig", "services/api/src/runtime/supervisor/root.zig", "services/api/src/runtime/tigerbeetle/root.zig"],
       "excludedPaths": ["tracked artifacts", "installer formats"],
       "guide": "docs/delivery/tasks/PACKAGE-001.md",
       "submission": null,

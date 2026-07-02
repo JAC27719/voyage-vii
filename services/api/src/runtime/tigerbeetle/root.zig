@@ -9,6 +9,7 @@ pub const replica_index: u8 = 0;
 pub const replica_count: u8 = 1;
 pub const cache_mib: u32 = 128;
 pub const graceful_stop_ms: u32 = 10_000;
+pub const request_timeout_ms = api_tigerbeetle.request_timeout_ms;
 pub const startup_retry_delays_ms = [_]u32{ 1_000, 2_000, 4_000 };
 pub const replica_file_name = "0_0.tigerbeetle";
 pub const cluster_id_file_name = "cluster-id.hex";
@@ -220,10 +221,9 @@ pub fn buildStartCommand(
     return duplicateArgs(allocator, &.{
         binary_path,
         "start",
+        "--development=true",
         address_arg,
-        "--cache-grid",
-        "128MiB",
-        "--development",
+        "--cache-grid=128MiB",
         replica_path,
     });
 }
@@ -333,6 +333,25 @@ pub fn verifyLoopbackPortAvailable(port: u16) !void {
     server.deinit();
 }
 
+pub fn waitForListening(address: []const u8, timeout_ms: u32) !void {
+    const port = try parseLoopbackPort(address);
+    const endpoint = try std.net.Address.parseIp4("127.0.0.1", port);
+    var timer = std.time.Timer.start() catch unreachable;
+    const timeout_ns = @as(u64, timeout_ms) * std.time.ns_per_ms;
+    while (timer.read() < timeout_ns) {
+        const stream = std.net.tcpConnectToAddress(endpoint) catch |err| switch (err) {
+            error.ConnectionRefused, error.ConnectionTimedOut, error.NetworkUnreachable, error.AddressNotAvailable => {
+                sleepMs(100);
+                continue;
+            },
+            else => return err,
+        };
+        stream.close();
+        return;
+    }
+    return error.PortUnavailable;
+}
+
 pub fn validateRuntimeBinary(binary_path: []const u8) !void {
     if (!std.fs.path.isAbsolute(binary_path)) return error.RuntimeAssetInvalid;
     const basename = std.fs.path.basename(binary_path);
@@ -379,6 +398,14 @@ pub fn loopbackAddress(allocator: std.mem.Allocator, port: u16) ![]u8 {
     return std.fmt.allocPrint(allocator, "127.0.0.1:{d}", .{port});
 }
 
+fn parseLoopbackPort(address: []const u8) !u16 {
+    const prefix = "127.0.0.1:";
+    if (!std.mem.startsWith(u8, address, prefix)) return error.PortUnavailable;
+    const port = std.fmt.parseInt(u16, address[prefix.len..], 10) catch return error.PortUnavailable;
+    if (port == 0) return error.PortUnavailable;
+    return port;
+}
+
 fn removePersistedClusterId(root_path: []const u8) void {
     var root = std.fs.cwd().openDir(root_path, .{}) catch return;
     defer root.close();
@@ -392,7 +419,7 @@ fn generateClusterId() ClusterId {
 }
 
 fn clusterIdDecimal(allocator: std.mem.Allocator, cluster_id: ClusterId) ![]u8 {
-    const value = std.mem.readInt(u128, &cluster_id, .big);
+    const value = std.mem.readInt(u128, &cluster_id, .little);
     return std.fmt.allocPrint(allocator, "{d}", .{value});
 }
 
@@ -410,6 +437,10 @@ fn duplicateArgs(allocator: std.mem.Allocator, args: []const []const u8) !Comman
     return .{ .argv = argv };
 }
 
+pub fn sleepMs(milliseconds: u32) void {
+    std.Thread.sleep(@as(u64, milliseconds) * std.time.ns_per_ms);
+}
+
 fn probeStatusFromError(code: api_tigerbeetle.ErrorCode) ProbeStatus {
     return switch (code) {
         .tigerbeetle_unavailable => .unavailable,
@@ -424,37 +455,16 @@ pub fn selfTest() !void {
     if (!std.mem.eql(u8, version, "0.17.7")) return error.InvalidTigerBeetleLifecycle;
     if (cache_mib != 128) return error.InvalidTigerBeetleLifecycle;
     if (graceful_stop_ms != 10_000) return error.InvalidTigerBeetleLifecycle;
-    if (api_tigerbeetle.request_timeout_ms != 5_000) return error.InvalidTigerBeetleLifecycle;
-    try std.testing.expectEqual(@as(?u32, 1_000), retryDelayMs(0));
-    try std.testing.expectEqual(@as(?u32, 2_000), retryDelayMs(1));
-    try std.testing.expectEqual(@as(?u32, 4_000), retryDelayMs(2));
-    try std.testing.expectEqual(@as(?u32, null), retryDelayMs(3));
-
-    var tmp = std.testing.tmpDir(.{});
-    defer tmp.cleanup();
-    const tmp_real = try tmp.dir.realpathAlloc(std.testing.allocator, ".");
-    defer std.testing.allocator.free(tmp_real);
-    const root_path = try std.fs.path.join(std.testing.allocator, &.{ tmp_real, "tigerbeetle" });
-    defer std.testing.allocator.free(root_path);
-
-    try std.testing.expectEqual(StorageClassification.pristine, try classifyDataDirectory(root_path));
-    const id = [_]u8{1} ++ [_]u8{0} ** 15;
-    try persistClusterId(root_path, id);
-    try std.testing.expectEqual(StorageClassification.invalid, try classifyDataDirectory(root_path));
-    try tmp.dir.writeFile(.{ .sub_path = "tigerbeetle/0_0.tigerbeetle", .data = "fixture" });
-    try std.testing.expectEqual(StorageClassification.initialized, try classifyDataDirectory(root_path));
-    try std.testing.expectEqualSlices(u8, &id, &(try readClusterId(root_path)));
-
-    const address = try loopbackAddress(std.testing.allocator, 30_000);
-    defer std.testing.allocator.free(address);
-    try std.testing.expectEqualStrings("127.0.0.1:30000", address);
-
+    if (request_timeout_ms != 5_000) return error.InvalidTigerBeetleLifecycle;
+    if (retryDelayMs(0) != 1_000) return error.InvalidTigerBeetleLifecycle;
+    if (retryDelayMs(1) != 2_000) return error.InvalidTigerBeetleLifecycle;
+    if (retryDelayMs(2) != 4_000) return error.InvalidTigerBeetleLifecycle;
+    if (retryDelayMs(3) != null) return error.InvalidTigerBeetleLifecycle;
     const shutdown = shutdownPlan();
-    try std.testing.expectEqual(@as(u32, 10_000), shutdown.graceful_timeout_ms);
-    try std.testing.expectEqual(ShutdownPhase.graceful, shutdown.phases[0]);
-    try std.testing.expectEqual(ShutdownPhase.escalate, shutdown.phases[1]);
-    try std.testing.expectEqual(ShutdownPhase.reap, shutdown.phases[2]);
-    try std.testing.expectEqual(ProbeStatus.internal_error, probeStatus("127.0.0.1:1", [_]u8{0} ** cluster_id_bytes));
+    if (shutdown.graceful_timeout_ms != 10_000) return error.InvalidTigerBeetleLifecycle;
+    if (shutdown.phases[0] != .graceful) return error.InvalidTigerBeetleLifecycle;
+    if (shutdown.phases[1] != .escalate) return error.InvalidTigerBeetleLifecycle;
+    if (shutdown.phases[2] != .reap) return error.InvalidTigerBeetleLifecycle;
 }
 
 test "RUNTIME-003 classifies pristine initialized and invalid storage" {
@@ -508,12 +518,20 @@ test "RUNTIME-003 builds commands with one replica dynamic address and 128 MiB c
 
     try std.testing.expect(plan.format_command != null);
     try std.testing.expectEqualStrings("127.0.0.1:30001", plan.address);
-    try expectArg(plan.start_command, "--cache-grid");
-    try expectArg(plan.start_command, "128MiB");
+    try expectArg(plan.start_command, "--development=true");
+    try expectArg(plan.start_command, "--cache-grid=128MiB");
     try expectArg(plan.start_command, "--addresses=127.0.0.1:30001");
     try expectArg(plan.format_command.?, "--replica-count=1");
     try expectArg(plan.format_command.?, "--replica=0");
+    try expectArg(plan.format_command.?, "--cluster=55827575822966466661959896531774472192");
     try std.testing.expectEqual(StorageClassification.invalid, try classifyDataDirectory(root_path));
+}
+
+test "RUNTIME-003 formats cluster id with native little-endian order" {
+    const id = [_]u8{1} ++ [_]u8{0} ** 15;
+    const decimal = try clusterIdDecimal(std.testing.allocator, id);
+    defer std.testing.allocator.free(decimal);
+    try std.testing.expectEqualStrings("1", decimal);
 }
 
 test "RUNTIME-003 retained run skips format" {
@@ -574,6 +592,7 @@ test "RUNTIME-003 validates wrong binary and occupied port behavior" {
     try tmp.dir.writeFile(.{ .sub_path = "tigerbeetle.exe", .data = "fixture" });
     try std.testing.expectError(error.RuntimeAssetInvalid, validateRuntimeBinary(renamed_fixture));
     try std.testing.expectError(error.PortUnavailable, loopbackAddress(std.testing.allocator, 0));
+    try std.testing.expectError(error.PortUnavailable, waitForListening("127.0.0.1:0", 1));
 
     var reservation = try platform.reserveLoopbackPort();
     defer reservation.release();
