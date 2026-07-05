@@ -1,3 +1,4 @@
+mod platform;
 mod runtime;
 mod smoke;
 
@@ -68,6 +69,7 @@ fn main() {
                 window.show()?;
                 window.set_focus()?;
             }
+            platform::self_test().map_err(|err| err.to_string())?;
             runtime::self_test().map_err(|err| err.to_string())?;
             smoke::self_test().map_err(|err| err.to_string())?;
             app.state::<runtime::RuntimeHandle>()
@@ -111,6 +113,7 @@ mod tests {
     fn static_seams_are_registered() {
         super::runtime::self_test().expect("runtime seam");
         super::smoke::self_test().expect("smoke seam");
+        super::platform::self_test().expect("platform seam");
         let runtime = super::runtime::RuntimeHandle::new();
         let snapshot = super::snapshot_from_runtime(&runtime);
         assert_eq!(snapshot.generation, 0);
