@@ -2170,16 +2170,55 @@
       "id": "PLATFORM-001",
       "title": "Add static platform gateway and finance registry seam",
       "wave": 6,
-      "status": "blocked",
+      "status": "integrated",
       "inference": "low",
-      "worker": null,
-      "reviewer": null,
+      "worker": "codex_platform_001_impl",
+      "reviewer": "Rawls",
       "dependsOn": ["AUDIT-001"],
       "ownedPaths": ["apps/desktop/src-tauri/src/platform/**", "apps/desktop/src-tauri/src/main.rs"],
       "excludedPaths": ["Cargo manifests and lockfiles", "frontend files", "finance Zig adapter", "SQLite migrations", "implemented DBML", "packaging layout", "task registry updates outside coordinator metadata"],
       "guide": "docs/delivery/tasks/PLATFORM-001.md",
-      "submission": null,
-      "review": null
+      "submission": {
+        "base": "475506c77d4055213c12a3d8e825fb0784877cb6",
+        "revision": "475506c77d4055213c12a3d8e825fb0784877cb6:eed2a7a92d73bd6b0b9a2ad15fad054673a3296d6d1e179c2528675887ca19a4",
+        "changedPaths": [
+          "apps/desktop/src-tauri/src/main.rs",
+          "apps/desktop/src-tauri/src/platform/mod.rs"
+        ],
+        "summary": "Add a static Rust/Tauri platform registry seam that reserves UI, CLI, MCP, and internal caller surfaces, registers finance as the only module, validates registry boundaries, and preserves existing runtime startup behavior.",
+        "acceptanceEvidence": [
+          {
+            "criterion": "Formatting",
+            "command": "rustup run 1.96.0 cargo fmt --check",
+            "result": "PASS"
+          },
+          {
+            "criterion": "Platform registry validation tests",
+            "command": "rustup run 1.96.0 cargo test --locked platform",
+            "result": "PASS: 14 platform-filtered tests cover the finance registration, caller surfaces, capability vocabulary, operation schema ids, SQLite namespace ownership, finance-only TigerBeetle, adapter source-root containment, and sensitive registry value rejection."
+          },
+          {
+            "criterion": "Runtime compatibility tests",
+            "command": "rustup run 1.96.0 cargo test --locked runtime",
+            "result": "PASS: 21 runtime-filtered tests still pass."
+          },
+          {
+            "criterion": "Owned path and diff hygiene",
+            "command": "git diff --cached --check",
+            "result": "PASS: staged path set was limited to apps/desktop/src-tauri/src/main.rs and apps/desktop/src-tauri/src/platform/mod.rs."
+          }
+        ]
+      },
+      "review": {
+        "verdict": "APPROVED",
+        "reviewer": "Rawls",
+        "reviewedRevision": "475506c77d4055213c12a3d8e825fb0784877cb6:eed2a7a92d73bd6b0b9a2ad15fad054673a3296d6d1e179c2528675887ca19a4",
+        "integrationCommit": "e042fc3e61e6b9bbb46e742e470c947624b7b38b",
+        "findings": [],
+        "residualRisks": [
+          "Unrelated module documentation work remained outside the reviewed staged revision."
+        ]
+      }
     }
   ]
 }
