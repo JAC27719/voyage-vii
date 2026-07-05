@@ -20,6 +20,10 @@ accepted record is not rewritten to conceal its former decision.
 | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) | Repository delivery and first-slice scope |
 | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) | Windows scope and bounded native lifecycle recovery |
 | [ADR-0012](0012-sqlite-general-purpose-database.md) | SQLite general-purpose database |
+| [ADR-0013](0013-platform-runtime-and-module-gateway.md) | Platform runtime and module gateway |
+| [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) | Gateway clients, grants, and audit metadata |
+| [ADR-0015](0015-module-contracts-and-capability-manifests.md) | Module contracts and capability manifests |
+| [ADR-0016](0016-import-export-and-simulation-boundaries.md) | Import, export, and simulation boundaries |
 
 ## Architecture coverage
 
@@ -28,15 +32,16 @@ Every decision area in
 
 | Architecture area | ADR |
 | --- | --- |
-| Product boundary | [ADR-0001](0001-local-first-process-boundaries.md) |
+| Product boundary | [ADR-0001](0001-local-first-process-boundaries.md), superseded in part by [ADR-0013](0013-platform-runtime-and-module-gateway.md) |
 | Identity and targets | [ADR-0008](0008-portable-native-distribution.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
-| Pinned foundations | [ADR-0003](0003-zig-rest-and-native-database-clients.md), [ADR-0007](0007-dependency-pins-and-native-provenance.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) and [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| API process contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
-| REST contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
-| Desktop contract | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
-| Managed data | [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md) |
-| Database schema documentation | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Packaged runtime | [ADR-0008](0008-portable-native-distribution.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) and [ADR-0012](0012-sqlite-general-purpose-database.md) |
+| Pinned foundations | [ADR-0003](0003-zig-rest-and-native-database-clients.md), [ADR-0007](0007-dependency-pins-and-native-provenance.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md), [ADR-0012](0012-sqlite-general-purpose-database.md), and [ADR-0015](0015-module-contracts-and-capability-manifests.md) |
+| API process contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) and [ADR-0013](0013-platform-runtime-and-module-gateway.md) |
+| REST contract | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), superseded in part by [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) |
+| Desktop contract | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md), [ADR-0013](0013-platform-runtime-and-module-gateway.md), and [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) |
+| Managed data | [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md), superseded in part by [ADR-0013](0013-platform-runtime-and-module-gateway.md), [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md), [ADR-0015](0015-module-contracts-and-capability-manifests.md), and [ADR-0016](0016-import-export-and-simulation-boundaries.md) |
+| Database schema documentation | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md), [ADR-0015](0015-module-contracts-and-capability-manifests.md), and [ADR-0016](0016-import-export-and-simulation-boundaries.md) |
+| Module contracts | [ADR-0013](0013-platform-runtime-and-module-gateway.md), [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md), [ADR-0015](0015-module-contracts-and-capability-manifests.md), [ADR-0016](0016-import-export-and-simulation-boundaries.md) |
+| Packaged runtime | [ADR-0008](0008-portable-native-distribution.md), superseded in part by [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md), [ADR-0012](0012-sqlite-general-purpose-database.md), and [ADR-0016](0016-import-export-and-simulation-boundaries.md) |
 | Development-container network exception | [ADR-0004](0004-managed-and-external-runtime-modes.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
 
 ## Frozen-decision mapping
@@ -52,18 +57,18 @@ The tradeoff priorities and every accepted decision in
 | Keep the repository private and unlicensed for now | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) |
 | Use one staged pull request, logical commits, and a merge commit | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) |
 | Rename the repository only after merge | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) |
-| Use Zig/api.zig, SQLite C API, and the TigerBeetle C ABI | [ADR-0003](0003-zig-rest-and-native-database-clients.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Make the Zig API the database supervisor and Tauri the API supervisor | [ADR-0001](0001-local-first-process-boundaries.md) |
-| Support explicit managed and external API modes | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
-| Keep separate, API-generated ephemeral app and supervisor tokens | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
+| Use Zig/api.zig, SQLite C API, and the TigerBeetle C ABI | [ADR-0003](0003-zig-rest-and-native-database-clients.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) and [ADR-0015](0015-module-contracts-and-capability-manifests.md) |
+| Make the Zig API the database supervisor and Tauri the API supervisor | [ADR-0001](0001-local-first-process-boundaries.md), superseded in part by [ADR-0013](0013-platform-runtime-and-module-gateway.md) |
+| Support explicit managed and external API modes | [ADR-0004](0004-managed-and-external-runtime-modes.md), superseded in part by [ADR-0013](0013-platform-runtime-and-module-gateway.md) |
+| Keep separate, API-generated ephemeral app and supervisor tokens | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), superseded in part by [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) |
 | Keep managed and packaged traffic on loopback | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
 | Remove Docker/Compose from the active workflow until a real use case exists | [ADR-0004](0004-managed-and-external-runtime-modes.md) |
-| Use no cookies, telemetry, or metrics | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
+| Use no cookies, telemetry, or metrics | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md), extended by [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) |
 | Keep DevTools debug-only | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use strict CSP and exact-origin CORS | [ADR-0005](0005-authentication-handshake-and-http-boundaries.md) |
 | Use redacted structured rotating logs | [ADR-0006](0006-writable-roots-locking-and-local-lifecycle.md) |
 | Run SQLite in-process and managed TigerBeetle for development | [ADR-0004](0004-managed-and-external-runtime-modes.md), [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Use a static SolidJS module registry and schema-checked typed client | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
+| Use a static SolidJS module registry and schema-checked typed client | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md), superseded in part by [ADR-0013](0013-platform-runtime-and-module-gateway.md) and [ADR-0014](0014-gateway-clients-grants-and-audit-metadata.md) |
 | Use the frozen accessible, status-focused visual design | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Use a resizable `1100×720` first window with remembered geometry | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
 | Provide retry, retry-all, logs, and sanitized diagnostics | [ADR-0009](0009-static-ui-modules-and-desktop-bridge.md) |
@@ -72,10 +77,10 @@ The tradeoff priorities and every accepted decision in
 | Pin Actions by full SHA with read-only permissions and no secrets | [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
 | Use Dependabot without automerge | [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
 | Version Markdown documentation and supersede ADRs rather than rewrite them | [ADR-0010](0010-repository-delivery-and-first-slice-scope.md) |
-| Freeze dependencies, interfaces, limits, and packaging in named records | [ADR-0007](0007-dependency-pins-and-native-provenance.md) |
-| Track implemented SQLite schema and relations in DBML | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Keep SQL authoritative and update DBML in the same reviewed task | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
-| Separate proposed schemas and document TigerBeetle as non-relational | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md) |
+| Freeze dependencies, interfaces, limits, and packaging in named records | [ADR-0007](0007-dependency-pins-and-native-provenance.md), extended by [ADR-0015](0015-module-contracts-and-capability-manifests.md) |
+| Track implemented SQLite schema and relations in DBML | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) and [ADR-0015](0015-module-contracts-and-capability-manifests.md) |
+| Keep SQL authoritative and update DBML in the same reviewed task | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) and [ADR-0015](0015-module-contracts-and-capability-manifests.md) |
+| Separate proposed schemas and document TigerBeetle as non-relational | [ADR-0002](0002-postgresql-and-tigerbeetle-ownership.md), extended by [ADR-0015](0015-module-contracts-and-capability-manifests.md) and [ADR-0016](0016-import-export-and-simulation-boundaries.md) |
 | Keep portable interfaces while Windows 11 x64 is the sole current target | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md) |
 | Use process-boundary api.zig shutdown, in-process SQLite closure, and exit-7 TigerBeetle containment | [ADR-0011](0011-windows-scope-and-native-lifecycle-recovery.md), superseded in part by [ADR-0012](0012-sqlite-general-purpose-database.md) |
 

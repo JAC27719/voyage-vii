@@ -12,7 +12,8 @@ Read with:
 
 - [Voyage VII Product Requirements](../../product/spec/PRD.md);
 - [Voyage VII Modules](../../modules/README.md);
-- [Platform and Module ADR Supersession Plan](platform-module-adr-supersession-plan.md).
+- [Platform and Module ADR Supersession Plan](platform-module-adr-supersession-plan.md);
+- [Platform Module Registry Proposal](platform-module-registry-proposal.md).
 
 ## Slice outcome
 
@@ -141,15 +142,15 @@ payloads.
 
 ## First task candidates
 
-1. Add an ADR for platform runtime and module gateway authority.
-2. Add a non-executable module registry design note or proposed manifest.
-3. Add a storage boundary design note for shared SQLite schemas and specialty
+1. Complete and integrate ADR-0013 through ADR-0016.
+2. Complete and integrate the non-executable [module registry design note](platform-module-registry-proposal.md) or proposed manifest.
+3. Run `PLATFORM-001` to add Rust platform gateway interfaces and static
+   finance module registration without changing finance behavior.
+4. Add a storage boundary design note for shared SQLite schemas and specialty
    engine restrictions.
-4. Add platform gateway interfaces in Rust without changing finance behavior.
 5. Route the existing UI runtime/status reads through the gateway seam.
-6. Add finance module registration metadata.
-7. Add metadata-only audit scaffolding for gateway calls.
-8. Add CLI and MCP reserved interface notes after the gateway seam is stable.
+6. Add metadata-only audit scaffolding for gateway calls.
+7. Add CLI and MCP reserved interface notes after the gateway seam is stable.
 
 Each task should own a narrow path set and preserve existing app startup until
 the gateway has parity with the current desktop bridge.

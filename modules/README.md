@@ -14,6 +14,9 @@ installation is future-compatible but not promised by this document.
 The holistic product direction is defined in
 [Voyage VII Product Requirements](../product/spec/PRD.md).
 
+The first static registry shape is sketched in the non-executable
+[Platform Module Registry Proposal](../docs/planning/platform-module-registry-proposal.md).
+
 ## Required shape
 
 Each module should use this structure:

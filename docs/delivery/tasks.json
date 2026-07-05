@@ -2165,6 +2165,21 @@
           "The working-tree audit closure still needs a coordinator commit to produce the final immutable integration revision."
         ]
       }
+    },
+    {
+      "id": "PLATFORM-001",
+      "title": "Add static platform gateway and finance registry seam",
+      "wave": 6,
+      "status": "blocked",
+      "inference": "low",
+      "worker": null,
+      "reviewer": null,
+      "dependsOn": ["AUDIT-001"],
+      "ownedPaths": ["apps/desktop/src-tauri/src/platform/**", "apps/desktop/src-tauri/src/main.rs"],
+      "excludedPaths": ["Cargo manifests and lockfiles", "frontend files", "finance Zig adapter", "SQLite migrations", "implemented DBML", "packaging layout", "task registry updates outside coordinator metadata"],
+      "guide": "docs/delivery/tasks/PLATFORM-001.md",
+      "submission": null,
+      "review": null
     }
   ]
 }
