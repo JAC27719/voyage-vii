@@ -1,14 +1,15 @@
 # SQLite Implemented Schema Review
 
-Reviewed API-005 migration state: `services/api/migrations/001_schema_migrations.sql`
+Reviewed API-005 migration state:
+`modules/finance/adapters/zig-api/migrations/001_schema_migrations.sql`
 
 Implemented DBML under review: `docs/database/sqlite.dbml`
 
 Validation method:
 
 ```text
-cd services/api
-../../spikes/api-pg/toolchain/zig-x86_64-windows-0.15.2/zig.exe build test -Dsqlite-amalgamation=../../spikes/sqlite/source/sqlite-amalgamation-3530300
+cd modules/finance/adapters/zig-api
+../../../../spikes/api-pg/toolchain/zig-x86_64-windows-0.15.2/zig.exe build test -Dsqlite-amalgamation=../../../../spikes/sqlite/source/sqlite-amalgamation-3530300
 ```
 
 That aggregate test runs the coordinator-approved std-only SQLite DBML

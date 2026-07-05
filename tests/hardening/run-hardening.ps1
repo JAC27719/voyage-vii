@@ -174,7 +174,7 @@ function Invoke-ContractScan([string]$Root, [System.Collections.Generic.List[obj
 }
 
 function Invoke-OwnerRoutedDefectScan([string]$Root, [System.Collections.Generic.List[object]]$Results) {
-  $paths = @("contracts", "services/api/src", "services/api/tests")
+  $paths = @("contracts", "modules/finance/adapters/zig-api/src", "modules/finance/adapters/zig-api/tests")
   $findings = @()
   foreach ($path in $paths) {
     $resolved = Resolve-RepoPath $path

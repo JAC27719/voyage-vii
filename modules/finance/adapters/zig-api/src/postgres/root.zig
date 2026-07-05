@@ -206,7 +206,7 @@ pub fn verifyMigrationChecksum(allocator: std.mem.Allocator, migration: Migratio
 
 fn readMigrationSql(allocator: std.mem.Allocator, migration: Migration) ![]u8 {
     const prefixes = [_][]const u8{
-        "services/api/migrations",
+        "modules/finance/adapters/zig-api/migrations",
         "migrations",
     };
     for (prefixes) |prefix| {
@@ -418,7 +418,7 @@ fn hasAll(haystack: []const u8, needles: []const []const u8) bool {
 fn readDbml(allocator: std.mem.Allocator) ![]u8 {
     const candidates = [_][]const u8{
         "docs/database/postgresql.dbml",
-        "../../docs/database/postgresql.dbml",
+        "../../../../docs/database/postgresql.dbml",
     };
     for (candidates) |path| {
         return std.fs.cwd().readFileAlloc(allocator, path, 16 * 1024) catch |err| switch (err) {

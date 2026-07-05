@@ -135,7 +135,7 @@ pub fn validateExecutableFlag(component: PackagedComponent) ManifestError!void {
 pub fn readProductVersion(allocator: std.mem.Allocator) ![]u8 {
     const paths = [_][]const u8{
         "VERSION",
-        "../../VERSION",
+        "../../../../VERSION",
     };
     for (paths) |path| {
         const bytes = std.fs.cwd().readFileAlloc(allocator, path, 64) catch |err| switch (err) {

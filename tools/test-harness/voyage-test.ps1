@@ -289,7 +289,7 @@ function Invoke-Unit {
     Invoke-Step "desktop-format-check" $root "bun" @("run", "format-check") (Resolve-RepoPath "apps/desktop")
     Invoke-Step "desktop-rust-tests" $root "rustup" @("run", "1.96.0", "cargo", "test", "--locked") (Resolve-RepoPath "apps/desktop/src-tauri")
     Invoke-Step "runtime-staging-tests" $root "pwsh" @("-NoProfile", "-File", (Resolve-RepoPath "tests/runtime-staging/run-tests.ps1")) (Get-RepoRoot)
-    Invoke-Step "api-zig-tests" $root "zig" @("build", "test") (Resolve-RepoPath "services/api")
+    Invoke-Step "api-zig-tests" $root "zig" @("build", "test") (Resolve-RepoPath "modules/finance/adapters/zig-api")
   }
 }
 

@@ -155,8 +155,8 @@ jobs:
         run: pwsh -NoProfile -File tests/runtime-staging/run-tests.ps1
 
       - name: Run API Zig tests
-        working-directory: services/api
-        run: zig build "-Dsqlite-amalgamation=../../apps/desktop/src-tauri/resources/runtime/sqlite" test
+        working-directory: modules/finance/adapters/zig-api
+        run: zig build "-Dsqlite-amalgamation=../../../../apps/desktop/src-tauri/resources/runtime/sqlite" test
 
       - name: Upload failure diagnostics
         if: failure()
