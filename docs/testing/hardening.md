@@ -47,10 +47,12 @@ posture change. These are not fixed in HARDEN-001 because they fall outside
 
 - `contracts/**` still contains PostgreSQL schemas and fixtures for status,
   runtime manifest, writable manifest, and error codes.
-- `services/api/src/runtime/manifest/root.zig` still models PostgreSQL as a
-  packaged and writable runtime component.
-- `services/api/src/main.zig`, `services/api/src/postgres/root.zig`, and
-  `services/api/src/runtime/postgresql/root.zig` still retain PostgreSQL seams.
+- `modules/finance/adapters/zig-api/src/runtime/manifest/root.zig` still
+  models PostgreSQL as a packaged and writable runtime component.
+- `modules/finance/adapters/zig-api/src/main.zig`,
+  `modules/finance/adapters/zig-api/src/postgres/root.zig`, and
+  `modules/finance/adapters/zig-api/src/runtime/postgresql/root.zig` still
+  retain PostgreSQL seams.
 - Ownership route: API-001 and RUNTIME-001 for API/runtime contracts and code,
   with PLAN-002 as the governing SQLite posture amendment.
 

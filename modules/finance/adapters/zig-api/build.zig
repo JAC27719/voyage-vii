@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) void {
         []const u8,
         "sqlite-amalgamation",
         "Absolute path to verified SQLite 3.53.3 amalgamation directory",
-    ) orelse "../../spikes/sqlite/source/sqlite-amalgamation-3530300";
+    ) orelse "../../../../spikes/sqlite/source/sqlite-amalgamation-3530300";
     const tb_client_lib = b.option(
         []const u8,
         "tb-client-lib",

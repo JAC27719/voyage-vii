@@ -13,6 +13,8 @@ coverage/
 data/
 *.tigerbeetle
 *.sql
+!modules/finance/adapters/zig-api/migrations/
+!modules/finance/adapters/zig-api/migrations/*.sql
 *.dump
 *.backup
 

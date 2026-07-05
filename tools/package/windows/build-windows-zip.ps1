@@ -300,8 +300,8 @@ $extractRoot = Join-Path ([System.IO.Path]::GetTempPath()) "voyage vii package s
 $runtimeOutput = Resolve-RepoPath "apps/desktop/src-tauri/resources/runtime"
 $desktopRoot = Resolve-RepoPath "apps/desktop"
 $desktopTauriRoot = Resolve-RepoPath "apps/desktop/src-tauri"
-$apiRoot = Resolve-RepoPath "services/api"
-$apiRevision = (Invoke-CommandChecked "git" @("log", "-1", "--format=%H", "--", "services/api") $repoRoot).Stdout.Trim()
+$apiRoot = Resolve-RepoPath "modules/finance/adapters/zig-api"
+$apiRevision = (Invoke-CommandChecked "git" @("log", "-1", "--format=%H", "--", "modules/finance/adapters/zig-api") $repoRoot).Stdout.Trim()
 
 Assert-CleanTrackedInputs @(
   "VERSION",
@@ -322,11 +322,11 @@ Assert-CleanTrackedInputs @(
   "runtime/sources.json",
   "tools/runtime-staging",
   "tools/package-smoke",
-  "services/api/build.zig",
-  "services/api/build.zig.zon",
-  "services/api/migrations",
-  "services/api/src",
-  "services/api/tests",
+  "modules/finance/adapters/zig-api/build.zig",
+  "modules/finance/adapters/zig-api/build.zig.zon",
+  "modules/finance/adapters/zig-api/migrations",
+  "modules/finance/adapters/zig-api/src",
+  "modules/finance/adapters/zig-api/tests",
   "tools/package/windows/build-windows-zip.ps1"
 )
 

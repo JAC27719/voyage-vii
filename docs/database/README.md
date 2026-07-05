@@ -1,10 +1,10 @@
 # Database Schema Documentation
 
-`services/api/migrations/*.sql` is the executable source of truth for the
-implemented SQLite schema. `docs/database/sqlite.dbml` is the matching
-dbdiagram.io-compatible representation and must change in the same reviewed
-task as any migration that changes tables, columns, types, constraints,
-indexes, triggers, or relations.
+`modules/finance/adapters/zig-api/migrations/*.sql` is the executable source
+of truth for the implemented SQLite schema. `docs/database/sqlite.dbml` is the
+matching dbdiagram.io-compatible representation and must change in the same
+reviewed task as any migration that changes tables, columns, types,
+constraints, indexes, triggers, or relations.
 
 API-005 introduces only the `schema_migrations` table. The synchronized review
 checks compare that migration with the DBML table, primary key, unique
