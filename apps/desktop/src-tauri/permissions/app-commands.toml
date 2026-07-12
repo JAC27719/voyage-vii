@@ -1,9 +1,0 @@
-[[permission]]
-identifier = "allow-get-runtime-snapshot"
-description = "Allows the main window to read the static runtime snapshot seam."
-commands.allow = ["get_runtime_snapshot"]
-
-[[permission]]
-identifier = "allow-open-logs"
-description = "Allows the main window to call the pathless logs seam."
-commands.allow = ["open_logs"]

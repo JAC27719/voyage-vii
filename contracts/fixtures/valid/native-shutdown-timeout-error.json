@@ -1,7 +1,0 @@
-{
-  "error": {
-    "code": "native_shutdown_timeout",
-    "message": "Native shutdown timed out.",
-    "requestId": "req-native-timeout"
-  }
-}
