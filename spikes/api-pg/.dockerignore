@@ -1,4 +1,0 @@
-*
-!Dockerfile.postgresql
-!docker-entrypoint.sh
-!downloads/postgresql-18.4.tar.bz2
